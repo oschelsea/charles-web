@@ -60,7 +60,7 @@ public class DataScopeAspect {
      *
      * @param joinPoint 切点
      * @param user      用户
-     * @param userAlias     别名
+     * @param userAlias 别名
      */
     public static void dataScopeFilter(JoinPoint joinPoint, SysUser user, String deptAlias, String userAlias) {
         StringBuilder sqlString = new StringBuilder();
@@ -72,18 +72,18 @@ public class DataScopeAspect {
                 break;
             } else if (DATA_SCOPE_CUSTOM.equals(dataScope)) {
                 sqlString.append(StringUtils.format(
-                        " OR {}.dept_id IN ( SELECT dept_id FROM sys_role_dept WHERE role_id = {} ) " , deptAlias,
+                        " OR {}.dept_id IN ( SELECT dept_id FROM sys_role_dept WHERE role_id = {} ) ", deptAlias,
                         role.getRoleId()));
             } else if (DATA_SCOPE_DEPT.equals(dataScope)) {
-                sqlString.append(StringUtils.format(" OR {}.dept_id = {} " , deptAlias, user.getDeptId()));
+                sqlString.append(StringUtils.format(" OR {}.dept_id = {} ", deptAlias, user.getDeptId()));
             } else if (DATA_SCOPE_DEPT_AND_CHILD.equals(dataScope)) {
                 sqlString.append(StringUtils.format(
 //                        " OR {}.dept_id IN ( SELECT dept_id FROM sys_dept WHERE dept_id = {} or find_in_set( {} , ancestors ) )" ,
-                        " OR {}.dept_id IN ( SELECT dept_id FROM sys_dept WHERE dept_id = {} or ancestors like {} OR ancestors like {}} OR ancestors like {} )" ,
-                        deptAlias, user.getDeptId(), ","+user.getDeptId()+",", ","+user.getDeptId(), user.getDeptId()+","));
+                        " OR {}.dept_id IN ( SELECT dept_id FROM sys_dept WHERE dept_id = {} or ancestors like {} OR ancestors like {}} OR ancestors like {} )",
+                        deptAlias, user.getDeptId(), "," + user.getDeptId() + ",", "," + user.getDeptId(), user.getDeptId() + ","));
             } else if (DATA_SCOPE_SELF.equals(dataScope)) {
                 if (StringUtils.isNotBlank(userAlias)) {
-                    sqlString.append(StringUtils.format(" OR {}.user_id = {} " , userAlias, user.getUserId()));
+                    sqlString.append(StringUtils.format(" OR {}.user_id = {} ", userAlias, user.getUserId()));
                 } else {
                     // 数据权限为仅本人且没有userAlias别名不查询任何数据
                     sqlString.append(" OR 1=0 ");
@@ -150,7 +150,9 @@ public class DataScopeAspect {
         Object params = joinPoint.getArgs()[0];
         if (StringUtils.isNotNull(params) && params instanceof BaseEntity) {
             BaseEntity baseEntity = (BaseEntity) params;
-            baseEntity.getParams().put(DATA_SCOPE, "");
+            if (baseEntity.getParams() != null) {
+                baseEntity.getParams().put(DATA_SCOPE, "");
+            }
         }
     }
 }
