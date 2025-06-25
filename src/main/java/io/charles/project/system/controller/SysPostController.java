@@ -41,7 +41,7 @@ public class SysPostController extends BaseController {
 
     @Log(title = "岗位管理", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:post:export')")
-    @GetMapping("/export")
+    @PostMapping("/export")
     public AjaxResult export(SysPost post) {
         List<SysPost> list = postService.selectPostList(post);
         ExcelUtil<SysPost> util = new ExcelUtil<SysPost>(SysPost.class);

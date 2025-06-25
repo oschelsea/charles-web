@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -451,7 +452,7 @@ public class ExcelUtil<T> {
             writeSheet();
             wb.write(out);
         } catch (Exception e) {
-            log.error("导出Excel异常{}" , e.getMessage());
+            log.error("导出Excel异常{}", e.getMessage());
         } finally {
             IOUtils.closeQuietly(wb);
             IOUtils.closeQuietly(out);
@@ -472,7 +473,7 @@ public class ExcelUtil<T> {
             wb.write(out);
             return AjaxResult.success(filename);
         } catch (Exception e) {
-            log.error("导出Excel异常{}" , e.getMessage());
+            log.error("导出Excel异常{}", e.getMessage());
             throw new UtilException("导出Excel失败，请联系网站管理员！");
         } finally {
             IOUtils.closeQuietly(wb);
@@ -552,7 +553,7 @@ public class ExcelUtil<T> {
         dataFont.setFontName("Arial");
         dataFont.setFontHeightInPoints((short) 10);
         style.setFont(dataFont);
-        styles.put("data" , style);
+        styles.put("data", style);
 
         style = wb.createCellStyle();
         style.cloneStyleFrom(styles.get("data"));
@@ -566,7 +567,7 @@ public class ExcelUtil<T> {
         headerFont.setBold(true);
         headerFont.setColor(IndexedColors.WHITE.getIndex());
         style.setFont(headerFont);
-        styles.put("header" , style);
+        styles.put("header", style);
 
         style = wb.createCellStyle();
         style.setAlignment(HorizontalAlignment.CENTER);
@@ -575,22 +576,22 @@ public class ExcelUtil<T> {
         totalFont.setFontName("Arial");
         totalFont.setFontHeightInPoints((short) 10);
         style.setFont(totalFont);
-        styles.put("total" , style);
+        styles.put("total", style);
 
         style = wb.createCellStyle();
         style.cloneStyleFrom(styles.get("data"));
         style.setAlignment(HorizontalAlignment.LEFT);
-        styles.put("data1" , style);
+        styles.put("data1", style);
 
         style = wb.createCellStyle();
         style.cloneStyleFrom(styles.get("data"));
         style.setAlignment(HorizontalAlignment.CENTER);
-        styles.put("data2" , style);
+        styles.put("data2", style);
 
         style = wb.createCellStyle();
         style.cloneStyleFrom(styles.get("data"));
         style.setAlignment(HorizontalAlignment.RIGHT);
-        styles.put("data3" , style);
+        styles.put("data3", style);
 
         return styles;
     }
@@ -659,7 +660,7 @@ public class ExcelUtil<T> {
         // 如果设置了提示信息则鼠标放上去提示.
         if (StringUtils.isNotEmpty(attr.prompt())) {
             // 这里默认设了2-101列提示.
-            setXSSFPrompt(sheet, "" , attr.prompt(), 1, 100, column, column);
+            setXSSFPrompt(sheet, "", attr.prompt(), 1, 100, column, column);
         }
         // 如果设置了combo属性则本列只能选择不能输入
         if (attr.combo().length > 0) {
@@ -689,8 +690,8 @@ public class ExcelUtil<T> {
                 String readConverterExp = attr.readConverterExp();
                 String separator = attr.separator();
                 String dictType = attr.dictType();
-                if (StringUtils.isNotEmpty(dateFormat) && StringUtils.isNotNull(value)) {
-                    cell.setCellValue(DateUtils.parseDateToStr(dateFormat, (Date) value));
+                if (StringUtils.isNotEmpty(dateFormat) && value != null) {
+                    cell.setCellValue(value instanceof Date ? DateUtils.parseDateToStr(dateFormat, (Date) value) : value.toString());
                 } else if (StringUtils.isNotEmpty(readConverterExp) && StringUtils.isNotNull(value)) {
                     cell.setCellValue(convertByExp(Convert.toStr(value), readConverterExp, separator));
                 } else if (StringUtils.isNotEmpty(dictType) && StringUtils.isNotNull(value)) {
@@ -704,7 +705,7 @@ public class ExcelUtil<T> {
                 addStatisticsData(column, Convert.toStr(value), attr);
             }
         } catch (Exception e) {
-            log.error("导出Excel失败{}" , e);
+            log.error("导出Excel失败{}", e);
         }
         return cell;
     }
