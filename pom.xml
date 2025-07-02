@@ -21,17 +21,17 @@
         <pagehelper.spring.boot.starter.version>2.1.1</pagehelper.spring.boot.starter.version>
         <fastjson.version>1.2.83</fastjson.version>
         <druid.version>1.2.23</druid.version>
-        <commons.io.version>2.16.1</commons.io.version>
-        <commons.collections.version>3.2.2</commons.collections.version>
+        <commons.io.version>2.19.0</commons.io.version>
+        <commons.collections.version>4.5.0</commons.collections.version>
         <bitwalker.version>1.21</bitwalker.version>
         <jwt.version>0.12.6</jwt.version>
         <kaptcha.version>2.3.2</kaptcha.version>
         <swagger.version>3.0.0</swagger.version>
-        <poi.version>5.3.0</poi.version>
+        <poi.version>5.4.1</poi.version>
         <oshi.version>6.2.2</oshi.version>
         <jna.version>5.8.0</jna.version>
         <velocity.version>1.7</velocity.version>
-        <spring-boot.version>3.3.5</spring-boot.version>
+        <spring-boot.version>3.5.3</spring-boot.version>
     </properties>
 
     <dependencies>
@@ -201,8 +201,8 @@
 
         <!-- collections工具类 -->
         <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
             <version>${commons.collections.version}</version>
         </dependency>
 

@@ -10,6 +10,7 @@ import io.charles.framework.web.page.TableDataInfo;
 import io.charles.project.system.domain.SysDictData;
 import io.charles.project.system.service.ISysDictDataService;
 import io.charles.project.system.service.ISysDictTypeService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,10 +43,10 @@ public class SysDictDataController extends BaseController {
     @Log(title = "字典数据", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:dict:export')")
     @PostMapping("/export")
-    public AjaxResult export(SysDictData dictData) {
+    public void export(SysDictData dictData, HttpServletResponse response) {
         List<SysDictData> list = dictDataService.selectDictDataList(dictData);
         ExcelUtil<SysDictData> util = new ExcelUtil<SysDictData>(SysDictData.class);
-        return util.exportExcel(list, "字典数据");
+        util.exportExcel(response, list, "字典数据");
     }
 
     /**

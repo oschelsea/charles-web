@@ -9,6 +9,7 @@ import io.charles.framework.web.domain.AjaxResult;
 import io.charles.framework.web.page.TableDataInfo;
 import io.charles.project.system.domain.SysConfig;
 import io.charles.project.system.service.ISysConfigService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,13 +40,13 @@ public class SysConfigController extends BaseController {
         return getDataTable(list);
     }
 
-    @Log(title = "参数管理" , businessType = BusinessType.EXPORT)
+    @Log(title = "参数管理", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:config:export')")
     @PostMapping("/export")
-    public AjaxResult export(SysConfig config) {
+    public void export(SysConfig config, HttpServletResponse response) {
         List<SysConfig> list = configService.selectConfigList(config);
         ExcelUtil<SysConfig> util = new ExcelUtil<SysConfig>(SysConfig.class);
-        return util.exportExcel(list, "参数数据");
+        util.exportExcel(response, list, "参数数据");
     }
 
     /**
@@ -69,7 +70,7 @@ public class SysConfigController extends BaseController {
      * 新增参数配置
      */
     @PreAuthorize("@ss.hasPermi('system:config:add')")
-    @Log(title = "参数管理" , businessType = BusinessType.INSERT)
+    @Log(title = "参数管理", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@Validated @RequestBody SysConfig config) {
         if (UserConstants.NOT_UNIQUE.equals(configService.checkConfigKeyUnique(config))) {
@@ -83,7 +84,7 @@ public class SysConfigController extends BaseController {
      * 修改参数配置
      */
     @PreAuthorize("@ss.hasPermi('system:config:edit')")
-    @Log(title = "参数管理" , businessType = BusinessType.UPDATE)
+    @Log(title = "参数管理", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@Validated @RequestBody SysConfig config) {
         if (UserConstants.NOT_UNIQUE.equals(configService.checkConfigKeyUnique(config))) {
@@ -97,7 +98,7 @@ public class SysConfigController extends BaseController {
      * 删除参数配置
      */
     @PreAuthorize("@ss.hasPermi('system:config:remove')")
-    @Log(title = "参数管理" , businessType = BusinessType.DELETE)
+    @Log(title = "参数管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{configIds}")
     public AjaxResult remove(@PathVariable Long[] configIds) {
         configService.deleteConfigByIds(configIds);
@@ -108,7 +109,7 @@ public class SysConfigController extends BaseController {
      * 刷新参数缓存
      */
     @PreAuthorize("@ss.hasPermi('system:config:remove')")
-    @Log(title = "参数管理" , businessType = BusinessType.CLEAN)
+    @Log(title = "参数管理", businessType = BusinessType.CLEAN)
     @DeleteMapping("/refreshCache")
     public AjaxResult refreshCache() {
         configService.resetConfigCache();

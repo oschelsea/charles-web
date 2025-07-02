@@ -13,6 +13,7 @@ import io.charles.framework.aspectj.lang.annotation.Excel;
 import io.charles.framework.aspectj.lang.annotation.Excels;
 import io.charles.framework.config.AppProperties;
 import io.charles.framework.web.domain.AjaxResult;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ooxml.POIXMLDocumentPart;
 import org.apache.poi.ss.usermodel.*;
@@ -23,8 +24,6 @@ import org.apache.poi.xssf.usermodel.*;
 import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTMarker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -411,11 +410,11 @@ public class ExcelUtil<T> {
      * @return 结果
      * @throws IOException
      */
-    public void exportExcel(HttpServletResponse response, List<T> list, String sheetName) throws IOException {
+    public void exportExcel(HttpServletResponse response, List<T> list, String sheetName) {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         this.init(list, sheetName, Excel.Type.EXPORT);
-        exportExcel(response.getOutputStream());
+        exportExcel(response);
     }
 
     /**
@@ -435,11 +434,11 @@ public class ExcelUtil<T> {
      * @param sheetName 工作表的名称
      * @return 结果
      */
-    public void importTemplateExcel(HttpServletResponse response, String sheetName) throws IOException {
+    public void importTemplateExcel(HttpServletResponse response, String sheetName) {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         this.init(null, sheetName, Excel.Type.IMPORT);
-        exportExcel(response.getOutputStream());
+        exportExcel(response);
     }
 
     /**
@@ -447,15 +446,14 @@ public class ExcelUtil<T> {
      *
      * @return 结果
      */
-    public void exportExcel(OutputStream out) {
+    public void exportExcel(HttpServletResponse response) {
         try {
             writeSheet();
-            wb.write(out);
+            wb.write(response.getOutputStream());
         } catch (Exception e) {
             log.error("导出Excel异常{}", e.getMessage());
         } finally {
             IOUtils.closeQuietly(wb);
-            IOUtils.closeQuietly(out);
         }
     }
 

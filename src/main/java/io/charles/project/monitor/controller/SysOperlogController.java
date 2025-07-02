@@ -8,6 +8,7 @@ import io.charles.framework.web.domain.AjaxResult;
 import io.charles.framework.web.page.TableDataInfo;
 import io.charles.project.monitor.domain.SysOperLog;
 import io.charles.project.monitor.service.ISysOperLogService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,10 +38,10 @@ public class SysOperlogController extends BaseController {
     @Log(title = "操作日志", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('monitor:operlog:export')")
     @PostMapping("/export")
-    public AjaxResult export(SysOperLog operLog) {
+    public void export(SysOperLog operLog, HttpServletResponse response) {
         List<SysOperLog> list = operLogService.selectOperLogList(operLog);
         ExcelUtil<SysOperLog> util = new ExcelUtil<SysOperLog>(SysOperLog.class);
-        return util.exportExcel(list, "操作日志");
+        util.exportExcel(response, list, "操作日志");
     }
 
     @Log(title = "操作日志", businessType = BusinessType.DELETE)

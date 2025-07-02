@@ -9,6 +9,7 @@ import io.charles.framework.web.domain.AjaxResult;
 import io.charles.framework.web.page.TableDataInfo;
 import io.charles.project.system.domain.SysPost;
 import io.charles.project.system.service.ISysPostService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,10 +43,10 @@ public class SysPostController extends BaseController {
     @Log(title = "岗位管理", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:post:export')")
     @PostMapping("/export")
-    public AjaxResult export(SysPost post) {
+    public void export(SysPost post, HttpServletResponse response) {
         List<SysPost> list = postService.selectPostList(post);
         ExcelUtil<SysPost> util = new ExcelUtil<SysPost>(SysPost.class);
-        return util.exportExcel(list, "岗位数据");
+        util.exportExcel(response, list, "岗位数据");
     }
 
     /**

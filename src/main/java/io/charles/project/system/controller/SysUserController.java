@@ -14,6 +14,7 @@ import io.charles.project.system.domain.SysUser;
 import io.charles.project.system.service.ISysPostService;
 import io.charles.project.system.service.ISysRoleService;
 import io.charles.project.system.service.ISysUserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,10 +53,10 @@ public class SysUserController extends BaseController {
     @Log(title = "用户管理", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:user:export')")
     @PostMapping("/export")
-    public AjaxResult export(SysUser user) {
+    public void export(SysUser user, HttpServletResponse response) {
         List<SysUser> list = userService.selectUserList(user);
         ExcelUtil<SysUser> util = new ExcelUtil<SysUser>(SysUser.class);
-        return util.exportExcel(list, "用户数据");
+        util.exportExcel(response, list, "用户数据");
     }
 
     @Log(title = "用户管理", businessType = BusinessType.IMPORT)

@@ -16,6 +16,7 @@ import io.charles.project.system.domain.SysUser;
 import io.charles.project.system.domain.SysUserRole;
 import io.charles.project.system.service.ISysRoleService;
 import io.charles.project.system.service.ISysUserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -49,10 +50,10 @@ public class SysRoleController extends BaseController {
     @Log(title = "角色管理", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:role:export')")
     @PostMapping("/export")
-    public AjaxResult export(SysRole role) {
+    public void export(SysRole role, HttpServletResponse response) {
         List<SysRole> list = roleService.selectRoleList(role);
         ExcelUtil<SysRole> util = new ExcelUtil<SysRole>(SysRole.class);
-        return util.exportExcel(list, "角色数据");
+        util.exportExcel(response, list, "角色数据");
     }
 
     /**
