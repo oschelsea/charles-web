@@ -65,7 +65,7 @@ export default {
         text-align: center;
 
         .header {
-          height: 44px;
+          height: 60px;
           line-height: 44px;
 
           .badge {
