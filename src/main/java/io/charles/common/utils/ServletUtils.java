@@ -1,13 +1,13 @@
 package io.charles.common.utils;
 
 import io.charles.common.core.text.Convert;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
@@ -125,9 +125,6 @@ public class ServletUtils {
         }
 
         String ajax = request.getParameter("__ajax");
-        if (StringUtils.inStringIgnoreCase(ajax, "json", "xml")) {
-            return true;
-        }
-        return false;
+        return StringUtils.inStringIgnoreCase(ajax, "json", "xml");
     }
 }

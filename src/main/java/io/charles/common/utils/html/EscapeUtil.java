@@ -99,7 +99,7 @@ public class EscapeUtil {
         int lastPos = 0, pos = 0;
         char ch;
         while (lastPos < content.length()) {
-            pos = content.indexOf("%" , lastPos);
+            pos = content.indexOf("%", lastPos);
             if (pos == lastPos) {
                 if (content.charAt(pos + 1) == 'u') {
                     ch = (char) Integer.parseInt(content.substring(pos + 2, pos + 6), 16);
@@ -115,7 +115,7 @@ public class EscapeUtil {
                     tmp.append(content.substring(lastPos));
                     lastPos = content.length();
                 } else {
-                    tmp.append(content.substring(lastPos, pos));
+                    tmp.append(content, lastPos, pos);
                     lastPos = pos;
                 }
             }

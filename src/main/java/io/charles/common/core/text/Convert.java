@@ -252,7 +252,7 @@ public class Convert {
      * @return 结果
      */
     public static Integer[] toIntArray(String str) {
-        return toIntArray("," , str);
+        return toIntArray(",", str);
     }
 
     /**
@@ -262,7 +262,7 @@ public class Convert {
      * @return 结果
      */
     public static Long[] toLongArray(String str) {
-        return toLongArray("," , str);
+        return toLongArray(",", str);
     }
 
     /**
@@ -312,7 +312,7 @@ public class Convert {
      * @return 结果
      */
     public static String[] toStrArray(String str) {
-        return toStrArray("," , str);
+        return toStrArray(",", str);
     }
 
     /**
@@ -765,7 +765,7 @@ public class Convert {
      * @return 全角字符串.
      */
     public static String toSBC(String input, Set<Character> notConvertSet) {
-        char c[] = input.toCharArray();
+        char[] c = input.toCharArray();
         for (int i = 0; i < c.length; i++) {
             if (null != notConvertSet && notConvertSet.contains(c[i])) {
                 // 跳过不替换的字符
@@ -800,7 +800,7 @@ public class Convert {
      * @return 替换后的字符
      */
     public static String toDBC(String text, Set<Character> notConvertSet) {
-        char c[] = text.toCharArray();
+        char[] c = text.toCharArray();
         for (int i = 0; i < c.length; i++) {
             if (null != notConvertSet && notConvertSet.contains(c[i])) {
                 // 跳过不替换的字符
@@ -825,16 +825,16 @@ public class Convert {
      * @return 中文大写数字
      */
     public static String digitUppercase(double n) {
-        String[] fraction = {"角" , "分"};
-        String[] digit = {"零" , "壹" , "贰" , "叁" , "肆" , "伍" , "陆" , "柒" , "捌" , "玖"};
-        String[][] unit = {{"元" , "万" , "亿"}, {"" , "拾" , "佰" , "仟"}};
+        String[] fraction = {"角", "分"};
+        String[] digit = {"零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"};
+        String[][] unit = {{"元", "万", "亿"}, {"", "拾", "佰", "仟"}};
 
         String head = n < 0 ? "负" : "";
         n = Math.abs(n);
 
         String s = "";
         for (int i = 0; i < fraction.length; i++) {
-            s += (digit[(int) (Math.floor(n * 10 * Math.pow(10, i)) % 10)] + fraction[i]).replaceAll("(零.)+" , "");
+            s += (digit[(int) (Math.floor(n * 10 * Math.pow(10, i)) % 10)] + fraction[i]).replaceAll("(零.)+", "");
         }
         if (s.length() < 1) {
             s = "整";
@@ -847,8 +847,8 @@ public class Convert {
                 p = digit[integerPart % 10] + unit[1][j] + p;
                 integerPart = integerPart / 10;
             }
-            s = p.replaceAll("(零.)*零$" , "").replaceAll("^$" , "零") + unit[0][i] + s;
+            s = p.replaceAll("(零.)*零$", "").replaceAll("^$", "零") + unit[0][i] + s;
         }
-        return head + s.replaceAll("(零.)*零元" , "元").replaceFirst("(零.)+" , "").replaceAll("(零.)+" , "零").replaceAll("^整$" , "零元整");
+        return head + s.replaceAll("(零.)*零元", "元").replaceFirst("(零.)+", "").replaceAll("(零.)+", "零").replaceAll("^整$", "零元整");
     }
 }

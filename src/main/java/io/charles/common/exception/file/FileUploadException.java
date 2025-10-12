@@ -13,11 +13,11 @@ public class FileUploadException extends Exception {
     private final Throwable cause;
 
     public FileUploadException() {
-        this((String) null, (Throwable) null);
+        this(null, null);
     }
 
     public FileUploadException(String msg) {
-        this(msg, (Throwable) null);
+        this(msg, null);
     }
 
     public FileUploadException(String msg, Throwable cause) {

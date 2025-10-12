@@ -86,7 +86,7 @@ public class ExcelUtil<T> {
     /**
      * 统计列表
      */
-    private Map<Integer, Double> statistics = new HashMap<Integer, Double>();
+    private final Map<Integer, Double> statistics = new HashMap<Integer, Double>();
 
     public ExcelUtil(Class<T> clazz) {
         this.clazz = clazz;
@@ -197,11 +197,10 @@ public class ExcelUtil<T> {
         if (!pictures.isEmpty()) {
             for (HSSFShape shape : sheet.getDrawingPatriarch().getChildren()) {
                 HSSFClientAnchor anchor = (HSSFClientAnchor) shape.getAnchor();
-                if (shape instanceof HSSFPicture) {
-                    HSSFPicture pic = (HSSFPicture) shape;
+                if (shape instanceof HSSFPicture pic) {
                     int pictureIndex = pic.getPictureIndex() - 1;
                     HSSFPictureData picData = pictures.get(pictureIndex);
-                    String picIndex = String.valueOf(anchor.getRow1()) + "_" + String.valueOf(anchor.getCol1());
+                    String picIndex = anchor.getRow1() + "_" + String.valueOf(anchor.getCol1());
                     sheetIndexPicMap.put(picIndex, picData);
                 }
             }
@@ -221,12 +220,10 @@ public class ExcelUtil<T> {
     public static Map<String, PictureData> getSheetPictures07(XSSFSheet sheet, XSSFWorkbook workbook) {
         Map<String, PictureData> sheetIndexPicMap = new HashMap<String, PictureData>();
         for (POIXMLDocumentPart dr : sheet.getRelations()) {
-            if (dr instanceof XSSFDrawing) {
-                XSSFDrawing drawing = (XSSFDrawing) dr;
+            if (dr instanceof XSSFDrawing drawing) {
                 List<XSSFShape> shapes = drawing.getShapes();
                 for (XSSFShape shape : shapes) {
-                    if (shape instanceof XSSFPicture) {
-                        XSSFPicture pic = (XSSFPicture) shape;
+                    if (shape instanceof XSSFPicture pic) {
                         XSSFClientAnchor anchor = pic.getPreferredSize();
                         CTMarker ctMarker = anchor.getFrom();
                         String picIndex = ctMarker.getRow() + "_" + ctMarker.getCol();
@@ -515,7 +512,7 @@ public class ExcelUtil<T> {
         for (int i = startNo; i < endNo; i++) {
             row = sheet.createRow(i + 1 - startNo);
             // 得到导出对象.
-            T vo = (T) list.get(i);
+            T vo = list.get(i);
             int column = 0;
             for (Object[] os : fields) {
                 Field field = (Field) os[0];
@@ -801,7 +798,7 @@ public class ExcelUtil<T> {
      * 编码文件名
      */
     public String encodingFilename(String filename) {
-        filename = UUID.randomUUID().toString() + "_" + filename + ".xlsx";
+        filename = UUID.randomUUID() + "_" + filename + ".xlsx";
         return filename;
     }
 

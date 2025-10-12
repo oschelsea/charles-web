@@ -24,7 +24,7 @@ public class ReflectUtils {
 
     private static final String CGLIB_CLASS_SEPARATOR = "$$";
 
-    private static Logger logger = LoggerFactory.getLogger(ReflectUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(ReflectUtils.class);
 
     /**
      * 调用Getter方法.
@@ -72,7 +72,7 @@ public class ReflectUtils {
         try {
             result = (E) field.get(obj);
         } catch (IllegalAccessException e) {
-            logger.error("不可能抛出的异常{}" , e.getMessage());
+            logger.error("不可能抛出的异常{}", e.getMessage());
         }
         return result;
     }
@@ -90,7 +90,7 @@ public class ReflectUtils {
         try {
             field.set(obj, value);
         } catch (IllegalAccessException e) {
-            logger.error("不可能抛出的异常: {}" , e.getMessage());
+            logger.error("不可能抛出的异常: {}", e.getMessage());
         }
     }
 
@@ -113,7 +113,7 @@ public class ReflectUtils {
         try {
             return (E) method.invoke(obj, args);
         } catch (Exception e) {
-            String msg = "method: " + method + ", obj: " + obj + ", args: " + args + "";
+            String msg = "method: " + method + ", obj: " + obj + ", args: " + args;
             throw convertReflectionExceptionToUnchecked(msg, e);
         }
     }
@@ -162,7 +162,7 @@ public class ReflectUtils {
             }
             return (E) method.invoke(obj, args);
         } catch (Exception e) {
-            String msg = "method: " + method + ", obj: " + obj + ", args: " + args + "";
+            String msg = "method: " + method + ", obj: " + obj + ", args: " + args;
             throw convertReflectionExceptionToUnchecked(msg, e);
         }
     }

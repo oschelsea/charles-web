@@ -10,6 +10,6 @@ public class LogUtils {
         if (msg == null) {
             msg = "";
         }
-        return "[" + msg.toString() + "]";
+        return "[" + msg + "]";
     }
 }

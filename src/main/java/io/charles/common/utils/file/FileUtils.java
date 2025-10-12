@@ -123,12 +123,9 @@ public class FileUtils {
         }
 
         // 检查允许下载的文件规则
-        if (ArrayUtils.contains(MimeTypeUtils.DEFAULT_ALLOWED_EXTENSION, FileTypeUtils.getFileType(resource))) {
-            return true;
-        }
+        return ArrayUtils.contains(MimeTypeUtils.DEFAULT_ALLOWED_EXTENSION, FileTypeUtils.getFileType(resource));
 
         // 不在允许下载的文件规则
-        return false;
     }
 
     /**
@@ -143,17 +140,17 @@ public class FileUtils {
         String filename = fileName;
         if (agent.contains("MSIE")) {
             // IE浏览器
-            filename = URLEncoder.encode(filename, "utf-8");
+            filename = URLEncoder.encode(filename, StandardCharsets.UTF_8);
             filename = filename.replace("+", " ");
         } else if (agent.contains("Firefox")) {
             // 火狐浏览器
             filename = new String(fileName.getBytes(), "ISO8859-1");
         } else if (agent.contains("Chrome")) {
             // google浏览器
-            filename = URLEncoder.encode(filename, "utf-8");
+            filename = URLEncoder.encode(filename, StandardCharsets.UTF_8);
         } else {
             // 其它浏览器
-            filename = URLEncoder.encode(filename, "utf-8");
+            filename = URLEncoder.encode(filename, StandardCharsets.UTF_8);
         }
         return filename;
     }
@@ -168,15 +165,14 @@ public class FileUtils {
     public static void setAttachmentResponseHeader(HttpServletResponse response, String realFileName) throws UnsupportedEncodingException {
         String percentEncodedFileName = percentEncode(realFileName);
 
-        StringBuilder contentDispositionValue = new StringBuilder();
-        contentDispositionValue.append("attachment; filename=")
-                .append(percentEncodedFileName)
-                .append(";")
-                .append("filename*=")
-                .append("utf-8''")
-                .append(percentEncodedFileName);
+        String contentDispositionValue = "attachment; filename=" +
+                percentEncodedFileName +
+                ";" +
+                "filename*=" +
+                "utf-8''" +
+                percentEncodedFileName;
 
-        response.setHeader("Content-disposition", contentDispositionValue.toString());
+        response.setHeader("Content-disposition", contentDispositionValue);
     }
 
     /**
@@ -186,7 +182,7 @@ public class FileUtils {
      * @return 百分号编码后的字符串
      */
     public static String percentEncode(String s) throws UnsupportedEncodingException {
-        String encode = URLEncoder.encode(s, StandardCharsets.UTF_8.toString());
+        String encode = URLEncoder.encode(s, StandardCharsets.UTF_8);
         return encode.replaceAll("\\+", "%20");
     }
 

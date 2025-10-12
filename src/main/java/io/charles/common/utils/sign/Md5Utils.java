@@ -3,6 +3,7 @@ package io.charles.common.utils.sign;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 /**
@@ -18,16 +19,16 @@ public class Md5Utils {
         try {
             algorithm = MessageDigest.getInstance("MD5");
             algorithm.reset();
-            algorithm.update(s.getBytes("UTF-8"));
+            algorithm.update(s.getBytes(StandardCharsets.UTF_8));
             byte[] messageDigest = algorithm.digest();
             return messageDigest;
         } catch (Exception e) {
-            log.error("MD5 Error..." , e);
+            log.error("MD5 Error...", e);
         }
         return null;
     }
 
-    private static final String toHex(byte hash[]) {
+    private static final String toHex(byte[] hash) {
         if (hash == null) {
             return null;
         }
@@ -45,9 +46,9 @@ public class Md5Utils {
 
     public static String hash(String s) {
         try {
-            return new String(toHex(md5(s)).getBytes("UTF-8"), "UTF-8");
+            return new String(toHex(md5(s)).getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            log.error("not supported charset...{}" , e);
+            log.error("not supported charset...{}", e);
             return s;
         }
     }

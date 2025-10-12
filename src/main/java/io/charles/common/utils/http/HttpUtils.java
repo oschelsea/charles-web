@@ -10,6 +10,7 @@ import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 
 /**
@@ -44,19 +45,19 @@ public class HttpUtils {
         BufferedReader in = null;
         try {
             String urlNameString = url + "?" + param;
-            log.info("sendGet - {}" , urlNameString);
+            log.info("sendGet - {}", urlNameString);
             URL realUrl = new URL(urlNameString);
             URLConnection connection = realUrl.openConnection();
-            connection.setRequestProperty("accept" , "*/*");
-            connection.setRequestProperty("connection" , "Keep-Alive");
-            connection.setRequestProperty("user-agent" , "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+            connection.setRequestProperty("accept", "*/*");
+            connection.setRequestProperty("connection", "Keep-Alive");
+            connection.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
             connection.connect();
             in = new BufferedReader(new InputStreamReader(connection.getInputStream(), contentType));
             String line;
             while ((line = in.readLine()) != null) {
                 result.append(line);
             }
-            log.info("recv - {}" , result);
+            log.info("recv - {}", result);
         } catch (ConnectException e) {
             log.error("调用HttpUtils.sendGet ConnectException, url=" + url + ",param=" + param, e);
         } catch (SocketTimeoutException e) {
@@ -90,25 +91,25 @@ public class HttpUtils {
         StringBuilder result = new StringBuilder();
         try {
             String urlNameString = url;
-            log.info("sendPost - {}" , urlNameString);
+            log.info("sendPost - {}", urlNameString);
             URL realUrl = new URL(urlNameString);
             URLConnection conn = realUrl.openConnection();
-            conn.setRequestProperty("accept" , "*/*");
-            conn.setRequestProperty("connection" , "Keep-Alive");
-            conn.setRequestProperty("user-agent" , "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
-            conn.setRequestProperty("Accept-Charset" , "utf-8");
-            conn.setRequestProperty("contentType" , "utf-8");
+            conn.setRequestProperty("accept", "*/*");
+            conn.setRequestProperty("connection", "Keep-Alive");
+            conn.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+            conn.setRequestProperty("Accept-Charset", "utf-8");
+            conn.setRequestProperty("contentType", "utf-8");
             conn.setDoOutput(true);
             conn.setDoInput(true);
             out = new PrintWriter(conn.getOutputStream());
             out.print(param);
             out.flush();
-            in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+            in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
             String line;
             while ((line = in.readLine()) != null) {
                 result.append(line);
             }
-            log.info("recv - {}" , result);
+            log.info("recv - {}", result);
         } catch (ConnectException e) {
             log.error("调用HttpUtils.sendPost ConnectException, url=" + url + ",param=" + param, e);
         } catch (SocketTimeoutException e) {
@@ -136,16 +137,16 @@ public class HttpUtils {
         StringBuilder result = new StringBuilder();
         String urlNameString = url + "?" + param;
         try {
-            log.info("sendSSLPost - {}" , urlNameString);
+            log.info("sendSSLPost - {}", urlNameString);
             SSLContext sc = SSLContext.getInstance("SSL");
             sc.init(null, new TrustManager[]{new TrustAnyTrustManager()}, new java.security.SecureRandom());
             URL console = new URL(urlNameString);
             HttpsURLConnection conn = (HttpsURLConnection) console.openConnection();
-            conn.setRequestProperty("accept" , "*/*");
-            conn.setRequestProperty("connection" , "Keep-Alive");
-            conn.setRequestProperty("user-agent" , "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
-            conn.setRequestProperty("Accept-Charset" , "utf-8");
-            conn.setRequestProperty("contentType" , "utf-8");
+            conn.setRequestProperty("accept", "*/*");
+            conn.setRequestProperty("connection", "Keep-Alive");
+            conn.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+            conn.setRequestProperty("Accept-Charset", "utf-8");
+            conn.setRequestProperty("contentType", "utf-8");
             conn.setDoOutput(true);
             conn.setDoInput(true);
 
@@ -157,10 +158,10 @@ public class HttpUtils {
             String ret = "";
             while ((ret = br.readLine()) != null) {
                 if (ret != null && !"".equals(ret.trim())) {
-                    result.append(new String(ret.getBytes("ISO-8859-1"), "utf-8"));
+                    result.append(new String(ret.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8));
                 }
             }
-            log.info("recv - {}" , result);
+            log.info("recv - {}", result);
             conn.disconnect();
             br.close();
         } catch (ConnectException e) {
