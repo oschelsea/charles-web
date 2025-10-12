@@ -1,5 +1,6 @@
 package io.charles.project.tool.gen.domain;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.common.utils.StringUtils;
 import io.charles.framework.web.domain.BaseEntity;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class GenTableColumn extends BaseEntity {
     /**
      * 编号
      */
+    @TableId
     private Long columnId;
 
     /**

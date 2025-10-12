@@ -1,5 +1,6 @@
 package io.charles.project.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.charles.framework.aspectj.lang.annotation.Excel;
 import io.charles.framework.aspectj.lang.annotation.Excel.ColumnType;
@@ -27,6 +28,7 @@ public class SysUser extends BaseEntity {
     /**
      * 用户ID
      */
+    @TableId
     @Excel(name = "用户序号", cellType = ColumnType.NUMERIC, prompt = "用户编号")
     private Long userId;
 

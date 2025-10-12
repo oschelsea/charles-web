@@ -1,5 +1,6 @@
 package io.charles.project.monitor.domain;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.charles.framework.aspectj.lang.annotation.Excel;
 import io.charles.framework.aspectj.lang.annotation.Excel.ColumnType;
@@ -21,6 +22,7 @@ public class SysLogininfor extends BaseEntity {
      * ID
      */
     @Excel(name = "序号", cellType = ColumnType.NUMERIC)
+    @TableId
     private Long infoId;
 
     /**

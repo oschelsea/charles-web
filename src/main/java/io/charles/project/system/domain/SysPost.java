@@ -1,5 +1,6 @@
 package io.charles.project.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.framework.aspectj.lang.annotation.Excel;
 import io.charles.framework.aspectj.lang.annotation.Excel.ColumnType;
 import io.charles.framework.web.domain.BaseEntity;
@@ -24,6 +25,7 @@ public class SysPost extends BaseEntity {
     /**
      * 岗位序号
      */
+    @TableId
     @Excel(name = "岗位序号", cellType = ColumnType.NUMERIC)
     private Long postId;
 

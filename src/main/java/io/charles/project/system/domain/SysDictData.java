@@ -1,5 +1,6 @@
 package io.charles.project.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.common.constant.UserConstants;
 import io.charles.framework.aspectj.lang.annotation.Excel;
 import io.charles.framework.aspectj.lang.annotation.Excel.ColumnType;
@@ -22,6 +23,7 @@ public class SysDictData extends BaseEntity {
     /**
      * 字典编码
      */
+    @TableId
     @Excel(name = "字典编码", cellType = ColumnType.NUMERIC)
     private Long dictCode;
 

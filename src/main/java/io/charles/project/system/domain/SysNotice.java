@@ -1,5 +1,6 @@
 package io.charles.project.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.framework.web.domain.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,6 +21,7 @@ public class SysNotice extends BaseEntity {
     /**
      * 公告ID
      */
+    @TableId
     private Long noticeId;
 
     /**

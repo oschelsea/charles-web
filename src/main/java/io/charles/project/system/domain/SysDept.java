@@ -1,5 +1,6 @@
 package io.charles.project.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.framework.web.domain.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,6 +24,7 @@ public class SysDept extends BaseEntity {
     /**
      * 部门ID
      */
+    @TableId
     private Long deptId;
 
     /**

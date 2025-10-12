@@ -1,5 +1,6 @@
 package io.charles.project.tool.gen.domain;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.common.constant.GenConstants;
 import io.charles.common.utils.StringUtils;
 import io.charles.framework.web.domain.BaseEntity;
@@ -24,6 +25,7 @@ public class GenTable extends BaseEntity {
     /**
      * 编号
      */
+    @TableId
     private Long tableId;
 
     /**

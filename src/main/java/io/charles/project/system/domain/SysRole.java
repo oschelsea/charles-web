@@ -1,5 +1,6 @@
 package io.charles.project.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.framework.aspectj.lang.annotation.Excel;
 import io.charles.framework.aspectj.lang.annotation.Excel.ColumnType;
 import io.charles.framework.web.domain.BaseEntity;
@@ -22,6 +23,7 @@ public class SysRole extends BaseEntity {
     /**
      * 角色ID
      */
+    @TableId
     @Excel(name = "角色序号", cellType = ColumnType.NUMERIC)
     private Long roleId;
 
