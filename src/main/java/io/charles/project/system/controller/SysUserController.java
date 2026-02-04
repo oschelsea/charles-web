@@ -9,8 +9,10 @@ import io.charles.framework.aspectj.lang.enums.BusinessType;
 import io.charles.framework.web.controller.BaseController;
 import io.charles.framework.web.domain.AjaxResult;
 import io.charles.framework.web.page.TableDataInfo;
+import io.charles.project.system.domain.SysDept;
 import io.charles.project.system.domain.SysRole;
 import io.charles.project.system.domain.SysUser;
+import io.charles.project.system.service.ISysDeptService;
 import io.charles.project.system.service.ISysPostService;
 import io.charles.project.system.service.ISysRoleService;
 import io.charles.project.system.service.ISysUserService;
@@ -38,6 +40,7 @@ public class SysUserController extends BaseController {
     private final ISysUserService userService;
     private final ISysRoleService roleService;
     private final ISysPostService postService;
+    private final ISysDeptService deptService;
 
     /**
      * 获取用户列表
@@ -196,5 +199,14 @@ public class SysUserController extends BaseController {
     public AjaxResult insertAuthRole(Long userId, Long[] roleIds) {
         userService.insertUserAuth(userId, roleIds);
         return success();
+    }
+
+    /**
+     * 获取部门树列表
+     */
+    @PreAuthorize("@ss.hasPermi('system:user:list')")
+    @GetMapping("/deptTree")
+    public AjaxResult deptTree(SysDept dept) {
+        return AjaxResult.success(deptService.selectDeptTreeList(dept));
     }
 }

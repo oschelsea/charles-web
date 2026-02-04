@@ -7,7 +7,9 @@ import io.charles.framework.aspectj.lang.enums.BusinessType;
 import io.charles.framework.web.controller.BaseController;
 import io.charles.framework.web.domain.AjaxResult;
 import io.charles.framework.web.page.TableDataInfo;
+import io.charles.project.system.domain.SysDept;
 import io.charles.project.system.domain.SysPost;
+import io.charles.project.system.service.ISysDeptService;
 import io.charles.project.system.service.ISysPostService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ import java.util.List;
 @RequestMapping("/system/post")
 public class SysPostController extends BaseController {
     private final ISysPostService postService;
+    private final ISysDeptService deptService;
 
     /**
      * 获取岗位列表
@@ -107,5 +110,14 @@ public class SysPostController extends BaseController {
     public AjaxResult optionselect() {
         List<SysPost> posts = postService.selectPostAll();
         return AjaxResult.success(posts);
+    }
+
+    /**
+     * 获取部门树列表
+     */
+    @PreAuthorize("@ss.hasPermi('system:post:list')")
+    @GetMapping("/deptTree")
+    public AjaxResult deptTree(SysDept dept) {
+        return AjaxResult.success(deptService.selectDeptTreeList(dept));
     }
 }
