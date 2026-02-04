@@ -3,5 +3,5 @@ import { request } from '../request';
 
 /** get routes */
 export function fetchGetRoutes() {
-  return request<Api.Route.RoutesData>({ url: '/getRouters' });
+  return request<ElegantConstRoute[]>({ url: '/getRouters' });
 }

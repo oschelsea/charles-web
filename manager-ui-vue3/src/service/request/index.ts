@@ -34,7 +34,7 @@ export const request = createFlatRequest(
         return response.data;
       }
 
-      return response.data;
+      return response.data.data instanceof Object ? response.data.data : response.data;
     },
     async onRequest(config) {
       const isToken = config.headers?.isToken === false;

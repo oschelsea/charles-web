@@ -298,7 +298,7 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
     const { data, error } = await fetchGetRoutes();
 
     if (!error) {
-      addAuthRoutes(data.data);
+      addAuthRoutes(data);
 
       handleConstantAndAuthRoutes();
 

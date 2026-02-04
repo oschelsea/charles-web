@@ -15,9 +15,5 @@ declare namespace Api {
       routes: MenuRoute[];
       home: import('@elegant-router/types').LastLevelRouteKey;
     }
-
-    interface RoutesData {
-      data: ElegantConstRoute[]
-    }
   }
 }
