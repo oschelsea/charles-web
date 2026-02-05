@@ -166,6 +166,10 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
     if (!error) {
       // update store
       Object.assign(userInfo, info);
+      const { VITE_APP_BASE_API, PROD } = import.meta.env;
+      if (!PROD && userInfo.user?.avatar && userInfo.user.avatar.startsWith('/profile/')) {
+        userInfo.user.avatar = VITE_APP_BASE_API + userInfo.user.avatar;
+      }
 
       return true;
     }

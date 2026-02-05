@@ -123,7 +123,7 @@ public class FileUploadUtils {
                 desc.getParentFile().mkdirs();
             }
         }
-        return desc;
+        return desc.getAbsoluteFile();
     }
 
     public static final String getPathFileName(String uploadDir, String fileName) throws IOException {

@@ -87,7 +87,7 @@ async function handleCrop() {
       if (!error) {
         window.$message?.success('头像更新成功！');
         imageUrl.value = URL.createObjectURL(blob);
-        authStore.userInfo.user!.avatar = imageUrl.value;
+        authStore.userInfo.user!.avatar = process.env.VUE_APP_BASE_API + imageUrl.value;
         hideDrawer();
       }
     }, 'image/png');

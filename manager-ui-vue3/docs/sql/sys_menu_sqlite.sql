@@ -54,3 +54,7 @@ INSERT INTO `sys_menu` (`menu_id`, `menu_name`, `parent_id`, `order_num`, `path`
 UPDATE `sys_menu` SET `status` = '1' WHERE `menu_id` IN ( '116', '130', '131', '132' );
 -- 工作流需要禁用的页面
 UPDATE `sys_menu` SET `status` = '1' WHERE `menu_id` IN ( '11616', '11618', '11638', '11700', '11701' );
+-- 删除不支持的菜单
+delete from sys_menu where menu_id in (110,111,112,114);
+-- 禁用外链菜单
+UPDATE `sys_menu` SET `status` = '1' WHERE `menu_id` IN ( '4', '7', '8' );
