@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  * @author charles
  */
 public class SecurityUtils {
+    private static final BCryptPasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
     /**
      * 用户ID
@@ -72,8 +73,7 @@ public class SecurityUtils {
      * @return 加密字符串
      */
     public static String encryptPassword(String password) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        return passwordEncoder.encode(password);
+        return PASSWORD_ENCODER.encode(password);
     }
 
     /**
@@ -84,8 +84,7 @@ public class SecurityUtils {
      * @return 结果
      */
     public static boolean matchesPassword(String rawPassword, String encodedPassword) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        return passwordEncoder.matches(rawPassword, encodedPassword);
+        return PASSWORD_ENCODER.matches(rawPassword, encodedPassword);
     }
 
     /**

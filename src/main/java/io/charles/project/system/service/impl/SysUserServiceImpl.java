@@ -103,7 +103,7 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     public String selectUserRoleGroup(String userName) {
         List<SysRole> list = roleMapper.selectRolesByUserName(userName);
-        StringBuffer idsStr = new StringBuffer();
+        StringBuilder idsStr = new StringBuilder();
         for (SysRole role : list) {
             idsStr.append(role.getRoleName()).append(",");
         }
@@ -122,7 +122,7 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     public String selectUserPostGroup(String userName) {
         List<SysPost> list = postMapper.selectPostsByUserName(userName);
-        StringBuffer idsStr = new StringBuffer();
+        StringBuilder idsStr = new StringBuilder();
         for (SysPost post : list) {
             idsStr.append(post.getPostName()).append(",");
         }

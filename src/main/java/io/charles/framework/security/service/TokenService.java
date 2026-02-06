@@ -13,6 +13,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class TokenService {
+    private static final Logger log = LoggerFactory.getLogger(TokenService.class);
     protected static final long MILLIS_SECOND = 1000;
     protected static final long MILLIS_MINUTE = 60 * MILLIS_SECOND;
     private static final Long MILLIS_MINUTE_TEN = 20 * 60 * 1000L;
@@ -66,6 +69,7 @@ public class TokenService {
                 LoginUser user = cacheService.getCacheObject(userKey);
                 return user;
             } catch (Exception e) {
+                log.debug("JWT token解析失败: {}", e.getMessage());
             }
         }
         return null;

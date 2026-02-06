@@ -167,7 +167,64 @@ public class FileUploadUtils {
                 throw new InvalidExtensionException(allowedExtension, extension, fileName);
             }
         }
-
+        
+        // 对图片类型进行Magic Bytes验证，防止恶意文件伪装
+        if (isAllowedExtension(extension, MimeTypeUtils.IMAGE_EXTENSION)) {
+            try {
+                if (!isValidImageContent(file)) {
+                    throw new InvalidExtensionException.InvalidImageExtensionException(
+                            MimeTypeUtils.IMAGE_EXTENSION, extension, fileName);
+                }
+            } catch (IOException e) {
+                throw new InvalidExtensionException(allowedExtension, extension, fileName);
+            }
+        }
+    }
+    
+    /**
+     * 验证图片文件的Magic Bytes
+     * 
+     * @param file 上传的文件
+     * @return true=合法图片文件
+     * @throws IOException 读取文件异常
+     */
+    private static boolean isValidImageContent(MultipartFile file) throws IOException {
+        byte[] bytes = new byte[8];
+        try (var is = file.getInputStream()) {
+            if (is.read(bytes) < 8) {
+                return false;
+            }
+        }
+        
+        // PNG: 89 50 4E 47 0D 0A 1A 0A
+        if (bytes[0] == (byte) 0x89 && bytes[1] == (byte) 0x50 && 
+            bytes[2] == (byte) 0x4E && bytes[3] == (byte) 0x47) {
+            return true;
+        }
+        
+        // JPEG: FF D8 FF
+        if (bytes[0] == (byte) 0xFF && bytes[1] == (byte) 0xD8 && bytes[2] == (byte) 0xFF) {
+            return true;
+        }
+        
+        // GIF: 47 49 46 38 (GIF8)
+        if (bytes[0] == (byte) 0x47 && bytes[1] == (byte) 0x49 && 
+            bytes[2] == (byte) 0x46 && bytes[3] == (byte) 0x38) {
+            return true;
+        }
+        
+        // BMP: 42 4D (BM)
+        if (bytes[0] == (byte) 0x42 && bytes[1] == (byte) 0x4D) {
+            return true;
+        }
+        
+        // WebP: 52 49 46 46 ... 57 45 42 50 (RIFF...WEBP)
+        if (bytes[0] == (byte) 0x52 && bytes[1] == (byte) 0x49 && 
+            bytes[2] == (byte) 0x46 && bytes[3] == (byte) 0x46) {
+            return true;
+        }
+        
+        return false;
     }
 
     /**

@@ -57,21 +57,20 @@ public class IpUtils {
         // 192.168.x.x/16
         final byte SECTION_5 = (byte) 0xC0;
         final byte SECTION_6 = (byte) 0xA8;
-        switch (b0) {
-            case SECTION_1:
-                return true;
-            case SECTION_2:
-                if (b1 >= SECTION_3 && b1 <= SECTION_4) {
-                    return true;
-                }
-            case SECTION_5:
-                switch (b1) {
-                    case SECTION_6:
-                        return true;
-                }
-            default:
-                return false;
+        
+        // 10.x.x.x/8
+        if (b0 == SECTION_1) {
+            return true;
         }
+        // 172.16.x.x - 172.31.x.x
+        if (b0 == SECTION_2 && b1 >= SECTION_3 && b1 <= SECTION_4) {
+            return true;
+        }
+        // 192.168.x.x/16
+        if (b0 == SECTION_5 && b1 == SECTION_6) {
+            return true;
+        }
+        return false;
     }
 
     /**

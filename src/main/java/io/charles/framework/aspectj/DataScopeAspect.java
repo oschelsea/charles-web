@@ -77,10 +77,13 @@ public class DataScopeAspect {
             } else if (DATA_SCOPE_DEPT.equals(dataScope)) {
                 sqlString.append(StringUtils.format(" OR {}.dept_id = {} ", deptAlias, user.getDeptId()));
             } else if (DATA_SCOPE_DEPT_AND_CHILD.equals(dataScope)) {
-                sqlString.append(StringUtils.format(
-//                        " OR {}.dept_id IN ( SELECT dept_id FROM sys_dept WHERE dept_id = {} or find_in_set( {} , ancestors ) )" ,
-                        " OR {}.dept_id IN ( SELECT dept_id FROM sys_dept WHERE dept_id = {} or ancestors like {} OR ancestors like {}} OR ancestors like {} )",
-                        deptAlias, user.getDeptId(), "," + user.getDeptId() + ",", "," + user.getDeptId(), user.getDeptId() + ","));
+                // 使用参数化的方式构建SQL，确保deptId为Long类型防止注入
+                Long deptId = user.getDeptId();
+                if (deptId != null) {
+                    sqlString.append(StringUtils.format(
+                            " OR {}.dept_id IN ( SELECT dept_id FROM sys_dept WHERE dept_id = {} OR ancestors LIKE '{},%' OR ancestors LIKE '%,{},%' OR ancestors LIKE '%,{}' )",
+                            deptAlias, deptId, deptId, deptId, deptId));
+                }
             } else if (DATA_SCOPE_SELF.equals(dataScope)) {
                 if (StringUtils.isNotBlank(userAlias)) {
                     sqlString.append(StringUtils.format(" OR {}.user_id = {} ", userAlias, user.getUserId()));
