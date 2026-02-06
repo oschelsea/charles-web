@@ -92,6 +92,18 @@
             <artifactId>sqlite-jdbc</artifactId>
         </dependency>
 
+        <!-- PostgreSQL 驱动包 -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <!-- Flyway 数据库迁移工具 -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
         <!-- pagehelper 分页插件 -->
         <dependency>
             <groupId>com.github.pagehelper</groupId>

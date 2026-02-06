@@ -40,8 +40,17 @@ export const initWebSocket = (url: string) => {
       console.warn('WebSocket 已经断开连接');
     },
     onMessage: (_, e) => {
-      if (e.data.indexOf('ping') > 0) {
-        return;
+      // 忽略心跳消息
+      try {
+        const data = JSON.parse(e.data);
+        if (data.type === 'ping' || data.type === 'pong') {
+          return;
+        }
+      } catch {
+        // 非 JSON 格式，检查是否为纯文本心跳
+        if (e.data === 'ping' || e.data === 'pong') {
+          return;
+        }
       }
       useNoticeStore().addNotice({
         message: e.data,

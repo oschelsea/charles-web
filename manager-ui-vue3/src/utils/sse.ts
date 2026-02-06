@@ -26,13 +26,19 @@ export const initSSE = (url: string) => {
     }
   });
 
+  let lastErrorTime = 0;
   watch(error, () => {
     if (!error.value || error.value?.isTrusted) {
       return;
     }
+    // 防止短时间内重复处理相同错误
+    const now = Date.now();
+    if (now - lastErrorTime < 1000) {
+      return;
+    }
+    lastErrorTime = now;
     // eslint-disable-next-line no-console
     console.error('SSE connection error:\n', error.value);
-    error.value = null;
   });
 
   watch(data, () => {

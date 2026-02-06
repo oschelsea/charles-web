@@ -97,10 +97,10 @@ const TooltipContent = defineComponent({
 const isHttpProxy = import.meta.env.DEV && import.meta.env.VITE_HTTP_PROXY === 'Y';
 const { baseURL } = getServiceBaseURL(import.meta.env, isHttpProxy);
 
-const headers: Record<string, string> = {
+const headers = computed(() => ({
   Authorization: `Bearer ${getToken()}`,
   clientid: import.meta.env.VITE_APP_CLIENT_ID!
-};
+}));
 
 function beforeUpload(options: { file: UploadFileInfo; fileList: UploadFileInfo[] }) {
   fileNum += 1;

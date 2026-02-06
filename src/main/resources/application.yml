@@ -14,6 +14,10 @@ app:
   addressEnabled: false
   # 验证码类型 math 数组计算 char 字符验证
   captchaType: math
+  # 数据库类型: sqlite 或 postgresql
+  database:
+    type: sqlite
+    name: charles
 
 # 开发环境配置
 server:
@@ -55,8 +59,9 @@ spring:
         cachecontrol:
           max-age: 24H
   datasource:
-    driver-class-name: org.sqlite.JDBC
-    url: jdbc:sqlite:data/app.db
+    # SQLite配置（默认）
+    username: ${APP_DB_USERNAME:}
+    password: ${APP_DB_PASSWORD:}
     druid:
       # 初始连接数
       initialSize: 5
@@ -73,7 +78,7 @@ spring:
       # 配置一个连接在池中最大生存的时间，单位是毫秒
       maxEvictableIdleTimeMillis: 900000
       # 配置检测连接是否有效
-      validationQuery: SELECT 1 FROM sys_config
+      validationQuery: SELECT 1
       testWhileIdle: true
       testOnBorrow: false
       testOnReturn: false

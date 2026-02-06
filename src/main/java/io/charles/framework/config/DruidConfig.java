@@ -1,80 +1,88 @@
 package io.charles.framework.config;
 
-import cn.hutool.extra.spring.SpringUtil;
+import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceBuilder;
 import com.alibaba.druid.spring.boot3.autoconfigure.properties.DruidStatProperties;
 import com.alibaba.druid.util.Utils;
+import io.charles.framework.config.properties.DruidProperties;
 import jakarta.servlet.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.sqlite.SQLiteConfig;
 
 import javax.sql.DataSource;
+import java.io.File;
 import java.io.IOException;
-import java.util.Map;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
- * druid 配置多数据源
+ * druid 配置
  *
  * @author charles
  */
 @Slf4j
 @Configuration
 public class DruidConfig {
-//    @Bean
-//    @ConfigurationProperties("spring.datasource.druid.master")
-//    public DataSource masterDataSource(DruidProperties druidProperties) {
-//        Path dbPath = Paths.get("data", "app.db").toAbsolutePath();
-//        File dir = dbPath.toFile().getParentFile();
-//        if (!dir.exists() && !dir.mkdirs()) {
-//            log.error("生成data目录失败，无法创建数据库");
-//        }
-//
-//        SQLiteConfig config = new SQLiteConfig();
-//        config.setJournalMode(SQLiteConfig.JournalMode.WAL);
-//        config.setSynchronous(SQLiteConfig.SynchronousMode.FULL);
-//        config.setBusyTimeout(60000);
-//        config.enforceForeignKeys(true);
-//
-//        DruidDataSource dataSource = DruidDataSourceBuilder.create().build();
-//        dataSource.setUrl("jdbc:sqlite:" + dbPath);
-//        dataSource.setDriverClassName("org.sqlite.JDBC");
-//        dataSource.setConnectProperties(config.toProperties());
-//
-//        return druidProperties.dataSource(dataSource);
-//    }
-//
-//    @Bean
-//    @ConfigurationProperties("spring.datasource.druid.slave")
-//    @ConditionalOnProperty(prefix = "spring.datasource.druid.slave", name = "enabled", havingValue = "true")
-//    public DataSource slaveDataSource(DruidProperties druidProperties) {
-//        DruidDataSource dataSource = DruidDataSourceBuilder.create().build();
-//        return druidProperties.dataSource(dataSource);
-//    }
-//
-//    @Bean(name = "dynamicDataSource")
-//    @Primary
-//    public DynamicDataSource dataSource(DataSource masterDataSource) {
-//        Map<Object, Object> targetDataSources = new HashMap<>();
-//        targetDataSources.put(DataSourceType.MASTER.name(), masterDataSource);
-//        setDataSource(targetDataSources, DataSourceType.SLAVE.name(), "slaveDataSource");
-//        return new DynamicDataSource(masterDataSource, targetDataSources);
-//    }
+    @Value("${app.database.type:sqlite}")
+    private String databaseType;
 
-    /**
-     * 设置数据源
-     *
-     * @param targetDataSources 备选数据源集合
-     * @param sourceName        数据源名称
-     * @param beanName          bean名称
-     */
-    public void setDataSource(Map<Object, Object> targetDataSources, String sourceName, String beanName) {
-        try {
-            DataSource dataSource = SpringUtil.getBean(beanName);
-            targetDataSources.put(sourceName, dataSource);
-        } catch (Exception e) {
+    @Value("${app.database.name:charles}")
+    private String databaseName;
+
+    @Value("${app.database.host:127.0.0.1}")
+    private String host;
+
+    @Value("${app.database.port:5432}")
+    private String port;
+
+    @Bean
+    @ConfigurationProperties("spring.datasource.druid")
+    public DataSource dataSource(DruidProperties druidProperties) {
+        DruidDataSource dataSource = new DruidDataSource();
+        druidProperties.dataSource(dataSource);
+
+        if ("sqlite".equalsIgnoreCase(databaseType)) {
+            // SQLite 并发优化配置
+            Path dbPath = Paths.get("data", databaseName + ".db").toAbsolutePath();
+            File dir = dbPath.toFile().getParentFile();
+            if (!dir.exists() && !dir.mkdirs()) {
+                log.error("生成data目录失败，无法创建数据库");
+            }
+
+            SQLiteConfig config = new SQLiteConfig();
+            config.setJournalMode(SQLiteConfig.JournalMode.WAL);
+            config.setSynchronous(SQLiteConfig.SynchronousMode.FULL);
+            config.setBusyTimeout(60000);
+            config.enforceForeignKeys(true);
+
+            dataSource.setUrl("jdbc:sqlite:" + dbPath);
+            dataSource.setDriverClassName("org.sqlite.JDBC");
+            dataSource.setConnectProperties(config.toProperties());
+
+            // sqlite单连接配置
+            dataSource.setInitialSize(1);
+            dataSource.setMinIdle(1);
+            dataSource.setMaxActive(1);
+        } else if ("postgresql".equalsIgnoreCase(databaseType)) {
+            dataSource.setUrl("jdbc:postgresql://" + host + ":" + port + "/" + databaseName);
+            dataSource.setDriverClassName("org.postgresql.Driver");
         }
+
+        return dataSource;
+    }
+
+    @Bean
+    @Primary
+    @ConfigurationProperties("spring.datasource.druid")
+    public DruidStatProperties druidStatProperties() {
+        return new DruidStatProperties();
     }
 
     /**

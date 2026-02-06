@@ -1,5 +1,5 @@
 <script setup lang="tsx">
-import { ref } from 'vue';
+import { ref, Fragment } from 'vue';
 import { NDivider, NTag } from 'naive-ui';
 import { jsonClone } from '@sa/utils';
 import { useBoolean } from '@sa/hooks';
@@ -178,10 +178,10 @@ const { columns, columnChecks, data, getData, getDataByPage, loading, mobilePagi
           return (
             <div class="flex-center gap-8px">
               {buttons.map((btn, index) => (
-                <>
+                <Fragment key={index}>
                   {index !== 0 && <NDivider vertical />}
                   {btn}
-                </>
+                </Fragment>
               ))}
             </div>
           );

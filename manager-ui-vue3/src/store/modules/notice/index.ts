@@ -19,11 +19,17 @@ export const useNoticeStore = defineStore(SetupStoreId.Notice, () => {
   };
 
   const removeNotice = (notice: NoticeItem) => {
-    state.notices.splice(state.notices.indexOf(notice), 1);
+    const index = state.notices.findIndex(n => n.time === notice.time && n.message === notice.message);
+    if (index !== -1) {
+      state.notices.splice(index, 1);
+    }
   };
 
   const readNotice = (notice: NoticeItem) => {
-    state.notices[state.notices.indexOf(notice)].read = true;
+    const index = state.notices.findIndex(n => n.time === notice.time && n.message === notice.message);
+    if (index !== -1) {
+      state.notices[index].read = true;
+    }
   };
 
   // 实现全部已读

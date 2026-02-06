@@ -111,7 +111,12 @@ function handleLoginRember() {
   try {
     remberMe.value = true;
     Object.assign(model, JSON.parse(decryptWithAes(loginRember, aesKey)));
-  } catch {}
+  } catch (e) {
+    // 解密失败时清除损坏的数据
+    console.warn('无法解析记住的登录信息:', e);
+    localStg.remove('loginRember');
+    remberMe.value = false;
+  }
 }
 
 handleLoginRember();
