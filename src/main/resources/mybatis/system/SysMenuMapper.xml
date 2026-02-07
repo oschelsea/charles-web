@@ -36,13 +36,13 @@
         <if test="menuName != null and menuName != ''">
             <!-- AND menu_name like concat('%', #{menuName}, '%') -->
             <bind name="menu_name_like" value="'%' + menuName + '%'"/>
-            AND menu_name like #{menu_name_like}
+            AND m.menu_name like #{menu_name_like}
         </if>
         <if test="visible != null and visible != ''">
-            AND visible = #{visible}
+            AND m.visible = #{visible}
         </if>
         <if test="status != null and status != ''">
-            AND status = #{status}
+            AND m.status = #{status}
         </if>
         order by m.parent_id, m.order_num
     </select>

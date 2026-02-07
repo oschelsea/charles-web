@@ -57,10 +57,10 @@
 <!--        </if>-->
         <!-- sqlite3配置 -->
         <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
-            and  create_time,  &gt;=  #{params.beginTime}
+            and  r.create_time &gt;=  #{params.beginTime}
         </if>
         <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
-            and  create_time &lt;=  #{params.endTime}
+            and  r.create_time &lt;=  #{params.endTime}
         </if>
         <!-- 数据范围过滤 -->
         ${params.dataScope}
