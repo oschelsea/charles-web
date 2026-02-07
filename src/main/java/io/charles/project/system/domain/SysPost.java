@@ -1,13 +1,12 @@
 package io.charles.project.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.framework.aspectj.lang.annotation.Excel;
 import io.charles.framework.aspectj.lang.annotation.Excel.ColumnType;
 import io.charles.framework.web.domain.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -59,7 +58,8 @@ public class SysPost extends BaseEntity {
     private String status;
 
     /**
-     * 用户是否存在此岗位标识 默认不存在
+     * 用户是否存在此岗位标识 默认不存在（非数据库字段）
      */
+    @TableField(exist = false)
     private boolean flag = false;
 }

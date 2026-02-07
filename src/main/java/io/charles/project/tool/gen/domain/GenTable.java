@@ -1,5 +1,6 @@
 package io.charles.project.tool.gen.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.common.constant.GenConstants;
 import io.charles.common.utils.StringUtils;
@@ -102,18 +103,21 @@ public class GenTable extends BaseEntity {
     private String genPath;
 
     /**
-     * 主键信息
+     * 主键信息（非数据库字段）
      */
+    @TableField(exist = false)
     private GenTableColumn pkColumn;
 
     /**
-     * 子表信息
+     * 子表信息（非数据库字段）
      */
+    @TableField(exist = false)
     private GenTable subTable;
 
     /**
-     * 表列信息
+     * 表列信息（非数据库字段）
      */
+    @TableField(exist = false)
     @Valid
     private List<GenTableColumn> columns;
 
@@ -123,28 +127,33 @@ public class GenTable extends BaseEntity {
     private String options;
 
     /**
-     * 树编码字段
+     * 树编码字段（非数据库字段）
      */
+    @TableField(exist = false)
     private String treeCode;
 
     /**
-     * 树父编码字段
+     * 树父编码字段（非数据库字段）
      */
+    @TableField(exist = false)
     private String treeParentCode;
 
     /**
-     * 树名称字段
+     * 树名称字段（非数据库字段）
      */
+    @TableField(exist = false)
     private String treeName;
 
     /**
-     * 上级菜单ID字段
+     * 上级菜单ID字段（非数据库字段）
      */
+    @TableField(exist = false)
     private String parentMenuId;
 
     /**
-     * 上级菜单名称字段
+     * 上级菜单名称字段（非数据库字段）
      */
+    @TableField(exist = false)
     private String parentMenuName;
 
     public static boolean isSub(String tplCategory) {

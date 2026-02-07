@@ -1,5 +1,6 @@
 package io.charles.project.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.charles.framework.aspectj.lang.annotation.Excel;
@@ -109,8 +110,9 @@ public class SysUser extends BaseEntity {
     private String loginDate;
 
     /**
-     * 部门对象
+     * 部门对象（非数据库字段）
      */
+    @TableField(exist = false)
     @Excels({
             @Excel(name = "部门名称", targetAttr = "deptName", type = Type.EXPORT),
             @Excel(name = "部门负责人", targetAttr = "leader", type = Type.EXPORT)
@@ -118,23 +120,27 @@ public class SysUser extends BaseEntity {
     private SysDept dept;
 
     /**
-     * 角色对象
+     * 角色对象（非数据库字段）
      */
+    @TableField(exist = false)
     private List<SysRole> roles;
 
     /**
-     * 角色组
+     * 角色组（非数据库字段）
      */
+    @TableField(exist = false)
     private Long[] roleIds;
 
     /**
-     * 岗位组
+     * 岗位组（非数据库字段）
      */
+    @TableField(exist = false)
     private Long[] postIds;
 
     /**
-     * 角色ID
+     * 角色ID（非数据库字段）
      */
+    @TableField(exist = false)
     private Long roleId;
 
     public SysUser() {

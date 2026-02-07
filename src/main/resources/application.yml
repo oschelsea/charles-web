@@ -120,6 +120,8 @@ mybatis-plus:
   mapperLocations: classpath*:mybatis/**/*Mapper.xml
   # 加载全局的配置文件
   configLocation: classpath:mybatis/mybatis-config.xml
+  # 注册全局 TypeHandler（处理 LocalDateTime 多数据库兼容）
+  typeHandlersPackage: io.charles.framework.config.typehandler
 
 # PageHelper分页插件
 pagehelper:

@@ -1,5 +1,6 @@
 package io.charles.framework.web.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
@@ -16,8 +17,9 @@ public class BaseEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 搜索值
+     * 搜索值（非数据库字段）
      */
+    @TableField(exist = false)
     private String searchValue;
 
     /**
@@ -48,7 +50,8 @@ public class BaseEntity implements Serializable {
     private String remark;
 
     /**
-     * 请求参数
+     * 请求参数（非数据库字段）
      */
+    @TableField(exist = false)
     private Map<String, Object> params;
 }

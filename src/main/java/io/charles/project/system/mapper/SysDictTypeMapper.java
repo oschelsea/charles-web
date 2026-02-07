@@ -1,10 +1,15 @@
 package io.charles.project.system.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.charles.common.utils.StringUtils;
 import io.charles.project.system.domain.SysDictType;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 字典表 数据层
@@ -19,14 +24,34 @@ public interface SysDictTypeMapper extends BaseMapper<SysDictType> {
      * @param dictType 字典类型信息
      * @return 字典类型集合信息
      */
-    public List<SysDictType> selectDictTypeList(SysDictType dictType);
+    default List<SysDictType> selectDictTypeList(SysDictType dictType) {
+        LambdaQueryWrapper<SysDictType> wrapper = Wrappers.lambdaQuery();
+        if (dictType != null) {
+            wrapper.like(StringUtils.isNotEmpty(dictType.getDictName()), SysDictType::getDictName, dictType.getDictName())
+                    .eq(StringUtils.isNotEmpty(dictType.getStatus()), SysDictType::getStatus, dictType.getStatus())
+                    .like(StringUtils.isNotEmpty(dictType.getDictType()), SysDictType::getDictType, dictType.getDictType());
+
+            Map<String, Object> params = dictType.getParams();
+            if (params != null) {
+                if (params.get("beginTime") != null && StringUtils.isNotEmpty(params.get("beginTime").toString())) {
+                    wrapper.ge(SysDictType::getCreateTime, params.get("beginTime"));
+                }
+                if (params.get("endTime") != null && StringUtils.isNotEmpty(params.get("endTime").toString())) {
+                    wrapper.le(SysDictType::getCreateTime, params.get("endTime"));
+                }
+            }
+        }
+        return selectList(wrapper);
+    }
 
     /**
      * 根据所有字典类型
      *
      * @return 字典类型集合信息
      */
-    public List<SysDictType> selectDictTypeAll();
+    default List<SysDictType> selectDictTypeAll() {
+        return selectList(null);
+    }
 
     /**
      * 根据字典类型ID查询信息
@@ -34,7 +59,9 @@ public interface SysDictTypeMapper extends BaseMapper<SysDictType> {
      * @param dictId 字典类型ID
      * @return 字典类型
      */
-    public SysDictType selectDictTypeById(Long dictId);
+    default SysDictType selectDictTypeById(Long dictId) {
+        return selectById(dictId);
+    }
 
     /**
      * 根据字典类型查询信息
@@ -42,7 +69,11 @@ public interface SysDictTypeMapper extends BaseMapper<SysDictType> {
      * @param dictType 字典类型
      * @return 字典类型
      */
-    public SysDictType selectDictTypeByType(String dictType);
+    default SysDictType selectDictTypeByType(String dictType) {
+        return selectOne(new LambdaQueryWrapper<SysDictType>()
+                .eq(SysDictType::getDictType, dictType)
+                .last("limit 1"));
+    }
 
     /**
      * 通过字典ID删除字典信息
@@ -50,7 +81,9 @@ public interface SysDictTypeMapper extends BaseMapper<SysDictType> {
      * @param dictId 字典ID
      * @return 结果
      */
-    public int deleteDictTypeById(Long dictId);
+    default int deleteDictTypeById(Long dictId) {
+        return deleteById(dictId);
+    }
 
     /**
      * 批量删除字典类型信息
@@ -58,7 +91,9 @@ public interface SysDictTypeMapper extends BaseMapper<SysDictType> {
      * @param dictIds 需要删除的字典ID
      * @return 结果
      */
-    public int deleteDictTypeByIds(Long[] dictIds);
+    default int deleteDictTypeByIds(Long[] dictIds) {
+        return deleteBatchIds(Arrays.asList(dictIds));
+    }
 
     /**
      * 新增字典类型信息
@@ -66,7 +101,9 @@ public interface SysDictTypeMapper extends BaseMapper<SysDictType> {
      * @param dictType 字典类型信息
      * @return 结果
      */
-    public int insertDictType(SysDictType dictType);
+    default int insertDictType(SysDictType dictType) {
+        return insert(dictType);
+    }
 
     /**
      * 修改字典类型信息
@@ -74,7 +111,9 @@ public interface SysDictTypeMapper extends BaseMapper<SysDictType> {
      * @param dictType 字典类型信息
      * @return 结果
      */
-    public int updateDictType(SysDictType dictType);
+    default int updateDictType(SysDictType dictType) {
+        return updateById(dictType);
+    }
 
     /**
      * 校验字典类型称是否唯一
@@ -82,5 +121,9 @@ public interface SysDictTypeMapper extends BaseMapper<SysDictType> {
      * @param dictType 字典类型
      * @return 结果
      */
-    public SysDictType checkDictTypeUnique(String dictType);
+    default SysDictType checkDictTypeUnique(String dictType) {
+        return selectOne(new LambdaQueryWrapper<SysDictType>()
+                .eq(SysDictType::getDictType, dictType)
+                .last("limit 1"));
+    }
 }

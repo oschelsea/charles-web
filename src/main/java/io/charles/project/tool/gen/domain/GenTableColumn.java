@@ -1,5 +1,6 @@
 package io.charles.project.tool.gen.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.common.utils.StringUtils;
 import io.charles.framework.web.domain.BaseEntity;
@@ -109,6 +110,12 @@ public class GenTableColumn extends BaseEntity {
      * 排序
      */
     private Integer sort;
+
+    /**
+     * 备注（非数据库字段）
+     */
+    @TableField(exist = false)
+    private String remark;
 
     public static boolean isSuperColumn(String javaField) {
         return StringUtils.equalsAnyIgnoreCase(javaField,

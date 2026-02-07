@@ -1,5 +1,6 @@
 package io.charles.project.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.framework.aspectj.lang.annotation.Excel;
 import io.charles.framework.aspectj.lang.annotation.Excel.ColumnType;
@@ -78,18 +79,21 @@ public class SysRole extends BaseEntity {
     private String delFlag;
 
     /**
-     * 用户是否存在此角色标识 默认不存在
+     * 用户是否存在此角色标识 默认不存在（非数据库字段）
      */
+    @TableField(exist = false)
     private boolean flag = false;
 
     /**
-     * 菜单组
+     * 菜单组（非数据库字段）
      */
+    @TableField(exist = false)
     private Long[] menuIds;
 
     /**
-     * 部门组（数据权限）
+     * 部门组（数据权限，非数据库字段）
      */
+    @TableField(exist = false)
     private Long[] deptIds;
 
     public SysRole() {
