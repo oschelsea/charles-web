@@ -1,9 +1,10 @@
 package io.charles.project.system.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import io.charles.project.system.domain.SysUser;
 import io.charles.project.system.domain.SysUserPost;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -18,7 +19,10 @@ public interface SysUserPostMapper extends BaseMapper<SysUserPost> {
      * @param userId 用户ID
      * @return 结果
      */
-    public int deleteUserPostByUserId(Long userId);
+    default int deleteUserPostByUserId(Long userId) {
+        return delete(new LambdaQueryWrapper<SysUserPost>()
+                .eq(SysUserPost::getUserId, userId));
+    }
 
     /**
      * 通过岗位ID查询岗位使用数量
@@ -26,7 +30,10 @@ public interface SysUserPostMapper extends BaseMapper<SysUserPost> {
      * @param postId 岗位ID
      * @return 结果
      */
-    public int countUserPostById(Long postId);
+    default int countUserPostById(Long postId) {
+        return Math.toIntExact(selectCount(new LambdaQueryWrapper<SysUserPost>()
+                .eq(SysUserPost::getPostId, postId)));
+    }
 
     /**
      * 批量删除用户和岗位关联
@@ -34,7 +41,10 @@ public interface SysUserPostMapper extends BaseMapper<SysUserPost> {
      * @param ids 需要删除的数据ID
      * @return 结果
      */
-    public int deleteUserPost(Long[] ids);
+    default int deleteUserPost(Long[] ids) {
+        return delete(new LambdaQueryWrapper<SysUserPost>()
+                .in(SysUserPost::getUserId, Arrays.asList(ids)));
+    }
 
     /**
      * 批量新增用户岗位信息

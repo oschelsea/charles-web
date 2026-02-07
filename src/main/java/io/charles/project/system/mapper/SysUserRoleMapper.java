@@ -1,10 +1,12 @@
 package io.charles.project.system.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import io.charles.project.system.domain.SysUserPost;
 import io.charles.project.system.domain.SysUserRole;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -19,7 +21,10 @@ public interface SysUserRoleMapper extends BaseMapper<SysUserRole> {
      * @param userId 用户ID
      * @return 结果
      */
-    public int deleteUserRoleByUserId(Long userId);
+    default int deleteUserRoleByUserId(Long userId) {
+        return delete(new LambdaQueryWrapper<SysUserRole>()
+                .eq(SysUserRole::getUserId, userId));
+    }
 
     /**
      * 批量删除用户和角色关联
@@ -27,7 +32,10 @@ public interface SysUserRoleMapper extends BaseMapper<SysUserRole> {
      * @param ids 需要删除的数据ID
      * @return 结果
      */
-    public int deleteUserRole(Long[] ids);
+    default int deleteUserRole(Long[] ids) {
+        return delete(new LambdaQueryWrapper<SysUserRole>()
+                .in(SysUserRole::getUserId, Arrays.asList(ids)));
+    }
 
     /**
      * 通过角色ID查询角色使用数量
@@ -35,7 +43,10 @@ public interface SysUserRoleMapper extends BaseMapper<SysUserRole> {
      * @param roleId 角色ID
      * @return 结果
      */
-    public int countUserRoleByRoleId(Long roleId);
+    default int countUserRoleByRoleId(Long roleId) {
+        return Math.toIntExact(selectCount(new LambdaQueryWrapper<SysUserRole>()
+                .eq(SysUserRole::getRoleId, roleId)));
+    }
 
     /**
      * 批量新增用户角色信息
@@ -51,7 +62,11 @@ public interface SysUserRoleMapper extends BaseMapper<SysUserRole> {
      * @param userRole 用户和角色关联信息
      * @return 结果
      */
-    public int deleteUserRoleInfo(SysUserRole userRole);
+    default int deleteUserRoleInfo(SysUserRole userRole) {
+        return delete(new LambdaQueryWrapper<SysUserRole>()
+                .eq(SysUserRole::getUserId, userRole.getUserId())
+                .eq(SysUserRole::getRoleId, userRole.getRoleId()));
+    }
 
     /**
      * 批量取消授权用户角色
@@ -60,5 +75,9 @@ public interface SysUserRoleMapper extends BaseMapper<SysUserRole> {
      * @param userIds 需要删除的用户数据ID
      * @return 结果
      */
-    public int deleteUserRoleInfos(@Param("roleId") Long roleId, @Param("userIds") Long[] userIds);
+    default int deleteUserRoleInfos(@Param("roleId") Long roleId, @Param("userIds") Long[] userIds) {
+        return delete(new LambdaQueryWrapper<SysUserRole>()
+                .eq(SysUserRole::getRoleId, roleId)
+                .in(SysUserRole::getUserId, Arrays.asList(userIds)));
+    }
 }

@@ -1,8 +1,12 @@
 package io.charles.project.system.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.charles.common.utils.StringUtils;
 import io.charles.project.system.domain.SysPost;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -17,14 +21,24 @@ public interface SysPostMapper extends BaseMapper<SysPost> {
      * @param post 岗位信息
      * @return 岗位数据集合
      */
-    public List<SysPost> selectPostList(SysPost post);
+    default List<SysPost> selectPostList(SysPost post) {
+        LambdaQueryWrapper<SysPost> wrapper = Wrappers.lambdaQuery();
+        if (post != null) {
+            wrapper.like(StringUtils.isNotEmpty(post.getPostCode()), SysPost::getPostCode, post.getPostCode())
+                    .eq(StringUtils.isNotEmpty(post.getStatus()), SysPost::getStatus, post.getStatus())
+                    .like(StringUtils.isNotEmpty(post.getPostName()), SysPost::getPostName, post.getPostName());
+        }
+        return selectList(wrapper);
+    }
 
     /**
      * 查询所有岗位
      *
      * @return 岗位列表
      */
-    public List<SysPost> selectPostAll();
+    default List<SysPost> selectPostAll() {
+        return selectList(null);
+    }
 
     /**
      * 通过岗位ID查询岗位信息
@@ -32,7 +46,9 @@ public interface SysPostMapper extends BaseMapper<SysPost> {
      * @param postId 岗位ID
      * @return 角色对象信息
      */
-    public SysPost selectPostById(Long postId);
+    default SysPost selectPostById(Long postId) {
+        return selectById(postId);
+    }
 
     /**
      * 根据用户ID获取岗位选择框列表
@@ -56,7 +72,9 @@ public interface SysPostMapper extends BaseMapper<SysPost> {
      * @param postId 岗位ID
      * @return 结果
      */
-    public int deletePostById(Long postId);
+    default int deletePostById(Long postId) {
+        return deleteById(postId);
+    }
 
     /**
      * 批量删除岗位信息
@@ -64,7 +82,9 @@ public interface SysPostMapper extends BaseMapper<SysPost> {
      * @param postIds 需要删除的岗位ID
      * @return 结果
      */
-    public int deletePostByIds(Long[] postIds);
+    default int deletePostByIds(Long[] postIds) {
+        return deleteBatchIds(Arrays.asList(postIds));
+    }
 
     /**
      * 修改岗位信息
@@ -72,7 +92,9 @@ public interface SysPostMapper extends BaseMapper<SysPost> {
      * @param post 岗位信息
      * @return 结果
      */
-    public int updatePost(SysPost post);
+    default int updatePost(SysPost post) {
+        return updateById(post);
+    }
 
     /**
      * 新增岗位信息
@@ -80,7 +102,9 @@ public interface SysPostMapper extends BaseMapper<SysPost> {
      * @param post 岗位信息
      * @return 结果
      */
-    public int insertPost(SysPost post);
+    default int insertPost(SysPost post) {
+        return insert(post);
+    }
 
     /**
      * 校验岗位名称
@@ -88,7 +112,11 @@ public interface SysPostMapper extends BaseMapper<SysPost> {
      * @param postName 岗位名称
      * @return 结果
      */
-    public SysPost checkPostNameUnique(String postName);
+    default SysPost checkPostNameUnique(String postName) {
+        return selectOne(new LambdaQueryWrapper<SysPost>()
+                .eq(SysPost::getPostName, postName)
+                .last("limit 1"));
+    }
 
     /**
      * 校验岗位编码
@@ -96,5 +124,9 @@ public interface SysPostMapper extends BaseMapper<SysPost> {
      * @param postCode 岗位编码
      * @return 结果
      */
-    public SysPost checkPostCodeUnique(String postCode);
+    default SysPost checkPostCodeUnique(String postCode) {
+        return selectOne(new LambdaQueryWrapper<SysPost>()
+                .eq(SysPost::getPostCode, postCode)
+                .last("limit 1"));
+    }
 }

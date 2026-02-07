@@ -1,26 +1,32 @@
 package io.charles.project.monitor.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.charles.framework.aspectj.lang.annotation.Excel;
 import io.charles.framework.aspectj.lang.annotation.Excel.ColumnType;
-import io.charles.framework.web.domain.BaseEntity;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 操作日志记录表 oper_log
  *
  * @author charles
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class SysOperLog extends BaseEntity {
+public class SysOperLog implements java.io.Serializable {
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 请求参数
+     */
+    @TableField(exist = false)
+    private java.util.Map<String, Object> params;
 
     /**
      * 日志主键
      */
     @Excel(name = "操作序号", cellType = ColumnType.NUMERIC)
+    @TableId
     private Long operId;
 
     /**
@@ -38,6 +44,7 @@ public class SysOperLog extends BaseEntity {
     /**
      * 业务类型数组
      */
+    @TableField(exist = false)
     private Integer[] businessTypes;
 
     /**

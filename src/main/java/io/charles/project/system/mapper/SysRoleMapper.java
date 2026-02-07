@@ -1,9 +1,11 @@
 package io.charles.project.system.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.charles.project.system.domain.SysRole;
-import io.charles.project.system.domain.SysRoleDept;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,7 +35,9 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      *
      * @return 角色列表
      */
-    public List<SysRole> selectRoleAll();
+    default List<SysRole> selectRoleAll() {
+        return selectList(null);
+    }
 
     /**
      * 根据用户ID获取角色选择框列表
@@ -57,6 +61,12 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param userName 用户名
      * @return 角色列表
      */
+    /**
+     * 根据用户ID查询角色
+     *
+     * @param userName 用户名
+     * @return 角色列表
+     */
     public List<SysRole> selectRolesByUserName(String userName);
 
     /**
@@ -65,7 +75,11 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param roleName 角色名称
      * @return 角色信息
      */
-    public SysRole checkRoleNameUnique(String roleName);
+    default SysRole checkRoleNameUnique(String roleName) {
+        return selectOne(new LambdaQueryWrapper<SysRole>()
+                .eq(SysRole::getRoleName, roleName)
+                .last("LIMIT 1"));
+    }
 
     /**
      * 校验角色权限是否唯一
@@ -73,7 +87,11 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param roleKey 角色权限
      * @return 角色信息
      */
-    public SysRole checkRoleKeyUnique(String roleKey);
+    default SysRole checkRoleKeyUnique(String roleKey) {
+        return selectOne(new LambdaQueryWrapper<SysRole>()
+                .eq(SysRole::getRoleKey, roleKey)
+                .last("LIMIT 1"));
+    }
 
     /**
      * 修改角色信息
@@ -81,7 +99,9 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param role 角色信息
      * @return 结果
      */
-    public int updateRole(SysRole role);
+    default int updateRole(SysRole role) {
+        return updateById(role);
+    }
 
     /**
      * 新增角色信息
@@ -89,7 +109,9 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param role 角色信息
      * @return 结果
      */
-    public int insertRole(SysRole role);
+    default int insertRole(SysRole role) {
+        return insert(role);
+    }
 
     /**
      * 通过角色ID删除角色
@@ -97,7 +119,11 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param roleId 角色ID
      * @return 结果
      */
-    public int deleteRoleById(Long roleId);
+    default int deleteRoleById(Long roleId) {
+        return update(null, new LambdaUpdateWrapper<SysRole>()
+                .eq(SysRole::getRoleId, roleId)
+                .set(SysRole::getDelFlag, "2"));
+    }
 
     /**
      * 批量删除角色信息
@@ -105,5 +131,9 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param roleIds 需要删除的角色ID
      * @return 结果
      */
-    public int deleteRoleByIds(Long[] roleIds);
+    default int deleteRoleByIds(Long[] roleIds) {
+        return update(null, new LambdaUpdateWrapper<SysRole>()
+                .in(SysRole::getRoleId, Arrays.asList(roleIds))
+                .set(SysRole::getDelFlag, "2"));
+    }
 }

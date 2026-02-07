@@ -1,5 +1,6 @@
 package io.charles.project.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.framework.web.domain.BaseEntity;
 import lombok.Data;
@@ -36,6 +37,7 @@ public class SysMenu extends BaseEntity {
     /**
      * 父菜单名称
      */
+    @TableField(exist = false)
     private String parentName;
 
     /**
@@ -64,6 +66,7 @@ public class SysMenu extends BaseEntity {
     /**
      * 路由参数
      */
+    @TableField(exist = false)
     private String query;
 
     /**
@@ -106,5 +109,6 @@ public class SysMenu extends BaseEntity {
     /**
      * 子菜单
      */
+    @TableField(exist = false)
     private List<SysMenu> children = new ArrayList<SysMenu>();
 }

@@ -1,8 +1,11 @@
 package io.charles.project.tool.gen.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import io.charles.common.utils.StringUtils;
 import io.charles.project.tool.gen.domain.GenTable;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -11,14 +14,6 @@ import java.util.List;
  * @author charles
  */
 public interface GenTableMapper extends BaseMapper<GenTable> {
-    /**
-     * 查询业务列表
-     *
-     * @param genTable 业务信息
-     * @return 业务集合
-     */
-    public List<GenTable> selectGenTableList(GenTable genTable);
-
     /**
      * 查询据库列表
      *
@@ -64,7 +59,9 @@ public interface GenTableMapper extends BaseMapper<GenTable> {
      * @param genTable 业务信息
      * @return 结果
      */
-    public int insertGenTable(GenTable genTable);
+    default int insertGenTable(GenTable genTable) {
+        return insert(genTable);
+    }
 
     /**
      * 修改业务
@@ -72,7 +69,9 @@ public interface GenTableMapper extends BaseMapper<GenTable> {
      * @param genTable 业务信息
      * @return 结果
      */
-    public int updateGenTable(GenTable genTable);
+    default int updateGenTable(GenTable genTable) {
+        return updateById(genTable);
+    }
 
     /**
      * 批量删除业务
@@ -80,5 +79,21 @@ public interface GenTableMapper extends BaseMapper<GenTable> {
      * @param ids 需要删除的数据ID
      * @return 结果
      */
-    public int deleteGenTableByIds(Long[] ids);
+    default int deleteGenTableByIds(Long[] ids) {
+        return delete(new LambdaQueryWrapper<GenTable>().in(GenTable::getTableId, Arrays.asList(ids)));
+    }
+
+    /**
+     * 查询业务列表
+     *
+     * @param genTable 业务信息
+     * @return 业务集合
+     */
+    default List<GenTable> selectGenTableList(GenTable genTable) {
+        return selectList(new LambdaQueryWrapper<GenTable>()
+                .like(StringUtils.isNotEmpty(genTable.getTableName()), GenTable::getTableName, genTable.getTableName())
+                .like(StringUtils.isNotEmpty(genTable.getTableComment()), GenTable::getTableComment, genTable.getTableComment())
+                .ge(genTable.getParams() != null && genTable.getParams().get("beginTime") != null, GenTable::getCreateTime, genTable.getParams() != null ? genTable.getParams().get("beginTime") : null)
+                .le(genTable.getParams() != null && genTable.getParams().get("endTime") != null, GenTable::getCreateTime, genTable.getParams() != null ? genTable.getParams().get("endTime") : null));
+    }
 }

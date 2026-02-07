@@ -1,5 +1,6 @@
 package io.charles.project.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.framework.web.domain.BaseEntity;
 import lombok.Data;
@@ -81,10 +82,18 @@ public class SysDept extends BaseEntity {
     /**
      * 父部门名称
      */
+    @TableField(exist = false)
     private String parentName;
 
     /**
      * 子部门
      */
+    @TableField(exist = false)
     private List<SysDept> children = new ArrayList<SysDept>();
+
+    /**
+     * 备注（覆盖父类，非数据库字段）
+     */
+    @TableField(exist = false)
+    private String remark;
 }

@@ -1,9 +1,10 @@
 package io.charles.project.system.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import io.charles.project.system.domain.SysPost;
 import io.charles.project.system.domain.SysRoleDept;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -18,7 +19,10 @@ public interface SysRoleDeptMapper extends BaseMapper<SysRoleDept> {
      * @param roleId 角色ID
      * @return 结果
      */
-    public int deleteRoleDeptByRoleId(Long roleId);
+    default int deleteRoleDeptByRoleId(Long roleId) {
+        return delete(new LambdaQueryWrapper<SysRoleDept>()
+                .eq(SysRoleDept::getRoleId, roleId));
+    }
 
     /**
      * 批量删除角色部门关联信息
@@ -26,7 +30,10 @@ public interface SysRoleDeptMapper extends BaseMapper<SysRoleDept> {
      * @param ids 需要删除的数据ID
      * @return 结果
      */
-    public int deleteRoleDept(Long[] ids);
+    default int deleteRoleDept(Long[] ids) {
+        return delete(new LambdaQueryWrapper<SysRoleDept>()
+                .in(SysRoleDept::getRoleId, Arrays.asList(ids)));
+    }
 
     /**
      * 查询部门使用数量
@@ -34,7 +41,10 @@ public interface SysRoleDeptMapper extends BaseMapper<SysRoleDept> {
      * @param deptId 部门ID
      * @return 结果
      */
-    public int selectCountRoleDeptByDeptId(Long deptId);
+    default int selectCountRoleDeptByDeptId(Long deptId) {
+        return Math.toIntExact(selectCount(new LambdaQueryWrapper<SysRoleDept>()
+                .eq(SysRoleDept::getDeptId, deptId)));
+    }
 
     /**
      * 批量新增角色部门信息

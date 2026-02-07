@@ -1,10 +1,12 @@
 package io.charles.project.system.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import io.charles.project.system.domain.SysRoleMenu;
 import io.charles.project.system.domain.SysUser;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -59,7 +61,9 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param user 用户信息
      * @return 结果
      */
-    public int insertUser(SysUser user);
+    default int insertUser(SysUser user) {
+        return insert(user);
+    }
 
     /**
      * 修改用户信息
@@ -67,7 +71,9 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param user 用户信息
      * @return 结果
      */
-    public int updateUser(SysUser user);
+    default int updateUser(SysUser user) {
+        return updateById(user);
+    }
 
     /**
      * 修改用户头像
@@ -76,7 +82,11 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param avatar   头像地址
      * @return 结果
      */
-    public int updateUserAvatar(@Param("userName") String userName, @Param("avatar") String avatar);
+    default int updateUserAvatar(@Param("userName") String userName, @Param("avatar") String avatar) {
+        return update(null, new LambdaUpdateWrapper<SysUser>()
+                .eq(SysUser::getUserName, userName)
+                .set(SysUser::getAvatar, avatar));
+    }
 
     /**
      * 重置用户密码
@@ -85,7 +95,11 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param password 密码
      * @return 结果
      */
-    public int resetUserPwd(@Param("userName") String userName, @Param("password") String password);
+    default int resetUserPwd(@Param("userName") String userName, @Param("password") String password) {
+        return update(null, new LambdaUpdateWrapper<SysUser>()
+                .eq(SysUser::getUserName, userName)
+                .set(SysUser::getPassword, password));
+    }
 
     /**
      * 通过用户ID删除用户
@@ -93,7 +107,11 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param userId 用户ID
      * @return 结果
      */
-    public int deleteUserById(Long userId);
+    default int deleteUserById(Long userId) {
+        return update(null, new LambdaUpdateWrapper<SysUser>()
+                .eq(SysUser::getUserId, userId)
+                .set(SysUser::getDelFlag, "2"));
+    }
 
     /**
      * 批量删除用户信息
@@ -101,7 +119,11 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param userIds 需要删除的用户ID
      * @return 结果
      */
-    public int deleteUserByIds(Long[] userIds);
+    default int deleteUserByIds(Long[] userIds) {
+        return update(null, new LambdaUpdateWrapper<SysUser>()
+                .in(SysUser::getUserId, Arrays.asList(userIds))
+                .set(SysUser::getDelFlag, "2"));
+    }
 
     /**
      * 校验用户名称是否唯一
@@ -109,7 +131,10 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param userName 用户名称
      * @return 结果
      */
-    public int checkUserNameUnique(String userName);
+    default int checkUserNameUnique(String userName) {
+        return Math.toIntExact(selectCount(new LambdaQueryWrapper<SysUser>()
+                .eq(SysUser::getUserName, userName)));
+    }
 
     /**
      * 校验手机号码是否唯一
@@ -117,7 +142,12 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param phonenumber 手机号码
      * @return 结果
      */
-    public SysUser checkPhoneUnique(String phonenumber);
+    default SysUser checkPhoneUnique(String phonenumber) {
+        return selectOne(new LambdaQueryWrapper<SysUser>()
+                .select(SysUser::getUserId, SysUser::getPhonenumber)
+                .eq(SysUser::getPhonenumber, phonenumber)
+                .last("LIMIT 1"));
+    }
 
     /**
      * 校验email是否唯一
@@ -125,5 +155,10 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param email 用户邮箱
      * @return 结果
      */
-    public SysUser checkEmailUnique(String email);
+    default SysUser checkEmailUnique(String email) {
+        return selectOne(new LambdaQueryWrapper<SysUser>()
+                .select(SysUser::getUserId, SysUser::getEmail)
+                .eq(SysUser::getEmail, email)
+                .last("LIMIT 1"));
+    }
 }

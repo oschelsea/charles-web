@@ -36,11 +36,11 @@ public class ScheduleAndAsyncConfig implements SchedulingConfigurer, AsyncConfig
      *
      * @return ThreadPoolTaskScheduler 线程池
      */
-    @Bean(name = "taskScheduler" , destroyMethod = "shutdown")
+    @Bean(name = "taskScheduler", destroyMethod = "shutdown")
     public ThreadPoolTaskScheduler taskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         ///根据任务数来控制，Runtime.getRuntime().availableProcessors()
-        scheduler.setPoolSize(1);
+        scheduler.setPoolSize(2);
         scheduler.setDaemon(true);
         scheduler.setThreadNamePrefix("timer-");
         return scheduler;
@@ -51,7 +51,7 @@ public class ScheduleAndAsyncConfig implements SchedulingConfigurer, AsyncConfig
      *
      * @return ThreadPoolTaskScheduler 线程池
      */
-    @Bean(name = "asyncExecutor" , destroyMethod = "shutdown")
+    @Bean(name = "asyncExecutor", destroyMethod = "shutdown")
     public ThreadPoolTaskExecutor asyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         int poolSize = Runtime.getRuntime().availableProcessors() * 2;

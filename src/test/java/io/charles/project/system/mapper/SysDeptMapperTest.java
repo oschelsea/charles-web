@@ -120,4 +120,26 @@ class SysDeptMapperTest {
         Long count = sysDeptMapper.selectCount(null);
         assertNotNull(count, "查询数量不应为null");
     }
+
+    /**
+     * 测试根据ID查询所有子部门
+     */
+    @Test
+    @Order(9)
+    void testSelectChildrenDeptById() {
+        // 100 为核心祖先节点 ID
+        List<SysDept> children = sysDeptMapper.selectChildrenDeptById(100L);
+        assertNotNull(children, "子部门列表不应为null");
+        assertTrue(children.size() > 0, "应查询到子部门");
+    }
+
+    /**
+     * 测试根据ID查询所有子部门（正常状态）
+     */
+    @Test
+    @Order(10)
+    void testSelectNormalChildrenDeptById() {
+        int count = sysDeptMapper.selectNormalChildrenDeptById(100L);
+        assertTrue(count >= 0, "正常状态子部门数应大于等于0");
+    }
 }

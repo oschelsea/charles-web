@@ -1,9 +1,10 @@
 package io.charles.project.tool.gen.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import io.charles.project.system.domain.SysUserRole;
 import io.charles.project.tool.gen.domain.GenTableColumn;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -26,7 +27,11 @@ public interface GenTableColumnMapper extends BaseMapper<GenTableColumn> {
      * @param tableId 业务字段编号
      * @return 业务字段集合
      */
-    public List<GenTableColumn> selectGenTableColumnListByTableId(Long tableId);
+    default List<GenTableColumn> selectGenTableColumnListByTableId(Long tableId) {
+        return selectList(new LambdaQueryWrapper<GenTableColumn>()
+                .eq(GenTableColumn::getTableId, tableId)
+                .orderByAsc(GenTableColumn::getSort));
+    }
 
     /**
      * 新增业务字段
@@ -34,7 +39,9 @@ public interface GenTableColumnMapper extends BaseMapper<GenTableColumn> {
      * @param genTableColumn 业务字段信息
      * @return 结果
      */
-    public int insertGenTableColumn(GenTableColumn genTableColumn);
+    default int insertGenTableColumn(GenTableColumn genTableColumn) {
+        return insert(genTableColumn);
+    }
 
     /**
      * 修改业务字段
@@ -42,7 +49,9 @@ public interface GenTableColumnMapper extends BaseMapper<GenTableColumn> {
      * @param genTableColumn 业务字段信息
      * @return 结果
      */
-    public int updateGenTableColumn(GenTableColumn genTableColumn);
+    default int updateGenTableColumn(GenTableColumn genTableColumn) {
+        return updateById(genTableColumn);
+    }
 
     /**
      * 删除业务字段
@@ -50,7 +59,12 @@ public interface GenTableColumnMapper extends BaseMapper<GenTableColumn> {
      * @param genTableColumns 列数据
      * @return 结果
      */
-    public int deleteGenTableColumns(List<GenTableColumn> genTableColumns);
+    default int deleteGenTableColumns(List<GenTableColumn> genTableColumns) {
+        for (GenTableColumn column : genTableColumns) {
+            deleteById(column.getColumnId());
+        }
+        return genTableColumns.size();
+    }
 
     /**
      * 批量删除业务字段
@@ -58,5 +72,7 @@ public interface GenTableColumnMapper extends BaseMapper<GenTableColumn> {
      * @param ids 需要删除的数据ID
      * @return 结果
      */
-    public int deleteGenTableColumnByIds(Long[] ids);
+    default int deleteGenTableColumnByIds(Long[] ids) {
+        return deleteBatchIds(Arrays.asList(ids));
+    }
 }
