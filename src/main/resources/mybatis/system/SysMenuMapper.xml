@@ -20,8 +20,8 @@
         <result property="perms" column="perms"/>
         <result property="icon" column="icon"/>
         <result property="createBy" column="create_by"/>
-        <result property="createTime" column="create_time"/>
-        <result property="updateTime" column="update_time"/>
+        <result property="createTime" column="create_time" typeHandler="io.charles.framework.config.typehandler.LocalDateTimeTypeHandler"/>
+        <result property="updateTime" column="update_time" typeHandler="io.charles.framework.config.typehandler.LocalDateTimeTypeHandler"/>
         <result property="updateBy" column="update_by"/>
         <result property="remark" column="remark"/>
     </resultMap>

@@ -34,7 +34,7 @@ public class BaseEntity implements Serializable {
      * 创建时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @TableField(fill = FieldFill.INSERT)
+    @TableField(fill = FieldFill.INSERT, typeHandler = io.charles.framework.config.typehandler.LocalDateTimeTypeHandler.class)
     private LocalDateTime createTime;
 
     /**
@@ -47,7 +47,7 @@ public class BaseEntity implements Serializable {
      * 更新时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField(fill = FieldFill.INSERT_UPDATE, typeHandler = io.charles.framework.config.typehandler.LocalDateTimeTypeHandler.class)
     private LocalDateTime updateTime;
 
     /**

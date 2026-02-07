@@ -122,6 +122,11 @@ mybatis-plus:
   configLocation: classpath:mybatis/mybatis-config.xml
   # 注册全局 TypeHandler（处理 LocalDateTime 多数据库兼容）
   typeHandlersPackage: io.charles.framework.config.typehandler
+  # 全局配置
+  global-config:
+    db-config:
+      # 主键策略：自增
+      id-type: auto
 
 # PageHelper分页插件
 pagehelper:

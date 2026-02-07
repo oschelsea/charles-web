@@ -5,7 +5,7 @@
 -- Table structure for gen_table
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS gen_table (
-  table_id SERIAL PRIMARY KEY,
+  table_id BIGBIGSERIAL PRIMARY KEY,
   table_name VARCHAR(200),
   table_comment VARCHAR(500),
   sub_table_name VARCHAR(64),
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS gen_table (
 -- Table structure for gen_table_column
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS gen_table_column (
-  column_id SERIAL PRIMARY KEY,
+  column_id BIGSERIAL PRIMARY KEY,
   table_id VARCHAR(64),
   column_name VARCHAR(200),
   column_comment VARCHAR(500),
@@ -215,7 +215,7 @@ CREATE TABLE IF NOT EXISTS qrtz_simprop_triggers (
 -- Table structure for sys_config
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS sys_config (
-  config_id SERIAL PRIMARY KEY,
+  config_id BIGSERIAL PRIMARY KEY,
   config_name VARCHAR(100),
   config_key VARCHAR(100),
   config_value VARCHAR(500),
@@ -231,7 +231,7 @@ CREATE TABLE IF NOT EXISTS sys_config (
 -- Table structure for sys_dept
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS sys_dept (
-  dept_id SERIAL PRIMARY KEY,
+  dept_id BIGSERIAL PRIMARY KEY,
   parent_id BIGINT DEFAULT 0,
   ancestors VARCHAR(50),
   dept_name VARCHAR(30),
@@ -251,7 +251,7 @@ CREATE TABLE IF NOT EXISTS sys_dept (
 -- Table structure for sys_dict_data
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS sys_dict_data (
-  dict_code SERIAL PRIMARY KEY,
+  dict_code BIGSERIAL PRIMARY KEY,
   dict_sort INTEGER DEFAULT 0,
   dict_label VARCHAR(100),
   dict_value VARCHAR(100),
@@ -271,7 +271,7 @@ CREATE TABLE IF NOT EXISTS sys_dict_data (
 -- Table structure for sys_dict_type
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS sys_dict_type (
-  dict_id SERIAL PRIMARY KEY,
+  dict_id BIGSERIAL PRIMARY KEY,
   dict_name VARCHAR(100),
   dict_type VARCHAR(100),
   status CHAR(1) DEFAULT '0',
@@ -306,7 +306,7 @@ CREATE TABLE IF NOT EXISTS sys_job (
 -- Table structure for sys_job_log
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS sys_job_log (
-  job_log_id SERIAL PRIMARY KEY,
+  job_log_id BIGSERIAL PRIMARY KEY,
   job_name VARCHAR(64) NOT NULL,
   job_group VARCHAR(64) NOT NULL,
   invoke_target VARCHAR(500) NOT NULL,
@@ -320,7 +320,7 @@ CREATE TABLE IF NOT EXISTS sys_job_log (
 -- Table structure for sys_logininfor
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS sys_logininfor (
-  info_id SERIAL PRIMARY KEY,
+  info_id BIGSERIAL PRIMARY KEY,
   user_name VARCHAR(50),
   ipaddr VARCHAR(128),
   login_location VARCHAR(255),
@@ -335,7 +335,7 @@ CREATE TABLE IF NOT EXISTS sys_logininfor (
 -- Table structure for sys_menu
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS sys_menu (
-  menu_id SERIAL PRIMARY KEY,
+  menu_id BIGSERIAL PRIMARY KEY,
   menu_name VARCHAR(50) NOT NULL,
   parent_id BIGINT DEFAULT 0,
   order_num INTEGER DEFAULT 0,
@@ -359,7 +359,7 @@ CREATE TABLE IF NOT EXISTS sys_menu (
 -- Table structure for sys_notice
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS sys_notice (
-  notice_id SERIAL PRIMARY KEY,
+  notice_id BIGSERIAL PRIMARY KEY,
   notice_title VARCHAR(50) NOT NULL,
   notice_type CHAR(1) NOT NULL,
   notice_content VARCHAR(2000),
@@ -375,7 +375,7 @@ CREATE TABLE IF NOT EXISTS sys_notice (
 -- Table structure for sys_oper_log
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS sys_oper_log (
-  oper_id SERIAL PRIMARY KEY,
+  oper_id BIGSERIAL PRIMARY KEY,
   title VARCHAR(50),
   business_type INTEGER DEFAULT 0,
   method VARCHAR(100),
@@ -397,7 +397,7 @@ CREATE TABLE IF NOT EXISTS sys_oper_log (
 -- Table structure for sys_post
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS sys_post (
-  post_id SERIAL PRIMARY KEY,
+  post_id BIGSERIAL PRIMARY KEY,
   post_code VARCHAR(64) NOT NULL,
   post_name VARCHAR(50) NOT NULL,
   post_sort INTEGER NOT NULL,
@@ -413,7 +413,7 @@ CREATE TABLE IF NOT EXISTS sys_post (
 -- Table structure for sys_role
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS sys_role (
-  role_id SERIAL PRIMARY KEY,
+  role_id BIGSERIAL PRIMARY KEY,
   role_name VARCHAR(30) NOT NULL,
   role_key VARCHAR(100) NOT NULL,
   role_sort INTEGER NOT NULL,
@@ -449,7 +449,7 @@ CREATE TABLE IF NOT EXISTS sys_role_menu (
 -- Table structure for sys_user
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS sys_user (
-  user_id SERIAL PRIMARY KEY,
+  user_id BIGSERIAL PRIMARY KEY,
   dept_id BIGINT,
   user_name VARCHAR(30) NOT NULL,
   nick_name VARCHAR(30) NOT NULL,

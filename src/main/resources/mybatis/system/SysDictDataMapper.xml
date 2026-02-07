@@ -15,9 +15,9 @@
         <result property="isDefault" column="is_default"/>
         <result property="status" column="status"/>
         <result property="createBy" column="create_by"/>
-        <result property="createTime" column="create_time"/>
+        <result property="createTime" column="create_time" typeHandler="io.charles.framework.config.typehandler.LocalDateTimeTypeHandler"/>
         <result property="updateBy" column="update_by"/>
-        <result property="updateTime" column="update_time"/>
+        <result property="updateTime" column="update_time" typeHandler="io.charles.framework.config.typehandler.LocalDateTimeTypeHandler"/>
     </resultMap>
 
     <sql id="selectDictDataVo">

@@ -253,7 +253,7 @@ CREATE TABLE IF NOT EXISTS "sys_dept" (
 -- Table structure for sys_dict_data
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_dict_data" (
-  "dict_code" INTEGER(20) NOT NULL,
+  "dict_code" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   "dict_sort" INTEGER(4) DEFAULT 0,
   "dict_label" TEXT(100),
   "dict_value" TEXT(100),
@@ -266,8 +266,7 @@ CREATE TABLE IF NOT EXISTS "sys_dict_data" (
   "create_time" TEXT,
   "update_by" TEXT(64),
   "update_time" TEXT,
-  "remark" TEXT(254),
-  PRIMARY KEY ("dict_code")
+  "remark" TEXT(254)
 );
 
 -- ----------------------------
