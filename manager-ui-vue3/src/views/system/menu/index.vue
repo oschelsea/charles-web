@@ -168,6 +168,19 @@ function reset() {
   getMeunTree();
 }
 
+// 自定义树过滤函数，支持翻译后的菜单名搜索
+function filterTree(pattern: string, option: TreeOption): boolean {
+  if (!pattern) {
+    return true;
+  }
+  let menuName = String(option.menuName || '');
+  // 如果是国际化 key，转换为实际文本
+  if (menuName.startsWith('route.') || menuName.startsWith('menu.')) {
+    menuName = $t(menuName as App.I18n.I18nKey);
+  }
+  return menuName.toLowerCase().includes(pattern.toLowerCase());
+}
+
 function handleClickTree(option: Array<TreeOption | null>) {
   checkedKeys.value = option?.map(item => item?.menuId as CommonType.IdType);
 
@@ -381,6 +394,7 @@ const renderIframeQuery = (queryParam: string) => {
           :default-expanded-keys="[0]"
           :show-irrelevant-nodes="false"
           :pattern="name"
+          :filter="filterTree"
           class="menu-tree h-full min-h-200px py-3"
           key-field="menuId"
           label-field="menuName"

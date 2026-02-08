@@ -1,0 +1,3 @@
+logging:
+  level:
+    "io.charles.project.system.mapper": debug
