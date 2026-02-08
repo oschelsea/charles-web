@@ -14,21 +14,34 @@ declare namespace Api {
     namespace ${ModuleName} {
         /** ${businessname} */
         type ${BusinessName} = Common.CommonRecord<{
-            #foreach($column in $columns)#if(!$BaseEntity.contains($column.javaField))
+#foreach($column in $columns)
+#if(!$BaseEntity.contains($column.javaField))
             /** $column.columnComment */
-                $column.javaField:#if($column.javaField.indexOf("id") != -1 || $column.javaField.indexOf("Id") != -1) CommonType.IdType; #elseif($column.javaType == 'Long' || $column.javaType == 'Integer' || $column.javaType == 'Double' || $column.javaType == 'Float' || $column.javaType == 'BigDecimal') number; #elseif($column.javaType == 'Boolean') boolean; #else string; #end
-            #end#end
+#if($column.javaField.indexOf("id") != -1 || $column.javaField.indexOf("Id") != -1)
+            $column.javaField: CommonType.IdType;
+#elseif($column.javaType == 'Long' || $column.javaType == 'Integer' || $column.javaType == 'Double' || $column.javaType == 'Float' || $column.javaType == 'BigDecimal')
+            $column.javaField: number;
+#elseif($column.javaType == 'Boolean')
+            $column.javaField: boolean;
+#else
+            $column.javaField: string;
+#end
+#end
+#end
         }>;
 
         /** ${businessname} search params */
         type ${BusinessName}SearchParams = CommonType.RecordNullable<
             Pick<
                 Api.${ModuleName}.${BusinessName},
-                #foreach($column in $columns)
-                    #if($column.query && $column.queryType != 'BETWEEN')
-                        | '${column.javaField}'
-                    #end
-                #end
+#set($first = true)
+#foreach($column in $columns)
+#if($column.query && $column.queryType != 'BETWEEN')
+#if($first)                '$column.javaField'#set($first = false)#else
+                | '$column.javaField'#end
+#end
+#end
+
             > &
             Api.Common.CommonSearchParams
         >;
@@ -37,11 +50,14 @@ declare namespace Api {
         type ${BusinessName}OperateParams = CommonType.RecordNullable<
             Pick<
                 Api.${ModuleName}.${BusinessName},
-                #foreach($column in $columns)
-                    #if($column.insert || $column.edit)
-                        | '${column.javaField}'
-                    #end
-                #end
+#set($first = true)
+#foreach($column in $columns)
+#if($column.insert || $column.edit)
+#if($first)                '$column.javaField'#set($first = false)#else
+                | '$column.javaField'#end
+#end
+#end
+
             >
         >;
 

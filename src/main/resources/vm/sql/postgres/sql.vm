@@ -1,0 +1,23 @@
+-- 菜单 SQL (PostgreSQL)
+-- 使用 CTE (WITH) 和 RETURNING 子句获取插入的 ID
+
+-- 插入主菜单并获取 ID
+WITH inserted_menu AS (
+    INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
+    VALUES ('${functionName}', '${parentMenuId}', '1', '${businessName}', '${moduleName}/${businessName}/index', 1, 0, 'C', '0', '0', '${permissionPrefix}:list', '#', 'admin', NOW(), '', NULL, '${functionName}菜单')
+    RETURNING menu_id
+)
+-- 插入按钮菜单
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
+SELECT menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark
+FROM (
+    SELECT '${functionName}查询' AS menu_name, (SELECT menu_id FROM inserted_menu) AS parent_id, '1' AS order_num, '#' AS path, '' AS component, 1 AS is_frame, 0 AS is_cache, 'F' AS menu_type, '0' AS visible, '0' AS status, '${permissionPrefix}:query' AS perms, '#' AS icon, 'admin' AS create_by, NOW() AS create_time, '' AS update_by, NULL::TIMESTAMP AS update_time, '' AS remark
+    UNION ALL
+    SELECT '${functionName}新增', (SELECT menu_id FROM inserted_menu), '2', '#', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:add', '#', 'admin', NOW(), '', NULL, ''
+    UNION ALL
+    SELECT '${functionName}修改', (SELECT menu_id FROM inserted_menu), '3', '#', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:edit', '#', 'admin', NOW(), '', NULL, ''
+    UNION ALL
+    SELECT '${functionName}删除', (SELECT menu_id FROM inserted_menu), '4', '#', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:remove', '#', 'admin', NOW(), '', NULL, ''
+    UNION ALL
+    SELECT '${functionName}导出', (SELECT menu_id FROM inserted_menu), '5', '#', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:export', '#', 'admin', NOW(), '', NULL, ''
+) AS button_menus;

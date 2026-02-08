@@ -1,22 +1,22 @@
--- 菜单 SQL
-insert into sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
-values('${functionName}', '${parentMenuId}', '1', '${businessName}', '${moduleName}/${businessName}/index', 1, 0, 'C', '0', '0', '${permissionPrefix}:list', '#', 'admin', datetime(), '', null, '${functionName}菜单');
+-- 菜单 SQL (SQLite 3.35+)
+-- 使用 CTE (WITH) 和 RETURNING 子句获取插入的 ID
 
--- 按钮父菜单ID
-SELECT @parentId := LAST_INSERT_ID();
-
--- 按钮 SQL
-insert into sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
-values('${functionName}查询', @parentId, '1',  '#', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:query',        '#', 'admin', datetime(), '', null, '');
-
-insert into sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
-values('${functionName}新增', @parentId, '2',  '#', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:add',          '#', 'admin', datetime(), '', null, '');
-
-insert into sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
-values('${functionName}修改', @parentId, '3',  '#', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:edit',         '#', 'admin', datetime(), '', null, '');
-
-insert into sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
-values('${functionName}删除', @parentId, '4',  '#', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:remove',       '#', 'admin', datetime(), '', null, '');
-
-insert into sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
-values('${functionName}导出', @parentId, '5',  '#', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:export',       '#', 'admin', datetime(), '', null, '');
+-- 插入主菜单并获取 ID，然后批量插入按钮菜单
+WITH inserted_menu AS (
+    INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
+    VALUES ('${functionName}', '${parentMenuId}', '1', '${businessName}', '${moduleName}/${businessName}/index', 1, 0, 'C', '0', '0', '${permissionPrefix}:list', '#', 'admin', datetime('now', 'localtime'), '', NULL, '${functionName}菜单')
+    RETURNING menu_id
+)
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
+SELECT menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark
+FROM (
+    SELECT '${functionName}查询' AS menu_name, (SELECT menu_id FROM inserted_menu) AS parent_id, '1' AS order_num, '#' AS path, '' AS component, 1 AS is_frame, 0 AS is_cache, 'F' AS menu_type, '0' AS visible, '0' AS status, '${permissionPrefix}:query' AS perms, '#' AS icon, 'admin' AS create_by, datetime('now', 'localtime') AS create_time, '' AS update_by, NULL AS update_time, '' AS remark
+    UNION ALL
+    SELECT '${functionName}新增', (SELECT menu_id FROM inserted_menu), '2', '#', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:add', '#', 'admin', datetime('now', 'localtime'), '', NULL, ''
+    UNION ALL
+    SELECT '${functionName}修改', (SELECT menu_id FROM inserted_menu), '3', '#', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:edit', '#', 'admin', datetime('now', 'localtime'), '', NULL, ''
+    UNION ALL
+    SELECT '${functionName}删除', (SELECT menu_id FROM inserted_menu), '4', '#', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:remove', '#', 'admin', datetime('now', 'localtime'), '', NULL, ''
+    UNION ALL
+    SELECT '${functionName}导出', (SELECT menu_id FROM inserted_menu), '5', '#', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:export', '#', 'admin', datetime('now', 'localtime'), '', NULL, ''
+) AS button_menus;
