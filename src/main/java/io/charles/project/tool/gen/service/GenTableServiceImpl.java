@@ -1,5 +1,6 @@
 package io.charles.project.tool.gen.service;
 
+import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.charles.common.constant.Constants;
 import io.charles.common.constant.GenConstants;
@@ -318,7 +319,7 @@ public class GenTableServiceImpl implements IGenTableService {
      */
     private void generatorCode(String tableName, ZipOutputStream zip) {
         // 查询表信息
-        GenTable table = genTableMapper.selectGenTableByName(tableName);
+        GenTable table = genTableMapper.selectGenTableById(Long.valueOf(tableName));
         // 设置主子表信息
         setSubTable(table);
         // 设置主键列信息
@@ -420,19 +421,20 @@ public class GenTableServiceImpl implements IGenTableService {
      * @param genTable 设置后的生成对象
      */
     public void setTableFromOptions(GenTable genTable) {
-        JSONObject paramsObj = new JSONObject(genTable.getOptions());
-        if (StringUtils.isNotNull(paramsObj)) {
-            String treeCode = paramsObj.getString(GenConstants.TREE_CODE);
-            String treeParentCode = paramsObj.getString(GenConstants.TREE_PARENT_CODE);
-            String treeName = paramsObj.getString(GenConstants.TREE_NAME);
-            String parentMenuId = paramsObj.getString(GenConstants.PARENT_MENU_ID);
-            String parentMenuName = paramsObj.getString(GenConstants.PARENT_MENU_NAME);
-
-            genTable.setTreeCode(treeCode);
-            genTable.setTreeParentCode(treeParentCode);
-            genTable.setTreeName(treeName);
-            genTable.setParentMenuId(parentMenuId);
-            genTable.setParentMenuName(parentMenuName);
+        if (StrUtil.isBlank(genTable.getOptions())) {
+            return;
         }
+        JSONObject paramsObj = new JSONObject(genTable.getOptions());
+        String treeCode = paramsObj.getString(GenConstants.TREE_CODE);
+        String treeParentCode = paramsObj.getString(GenConstants.TREE_PARENT_CODE);
+        String treeName = paramsObj.getString(GenConstants.TREE_NAME);
+        String parentMenuId = paramsObj.getString(GenConstants.PARENT_MENU_ID);
+        String parentMenuName = paramsObj.getString(GenConstants.PARENT_MENU_NAME);
+
+        genTable.setTreeCode(treeCode);
+        genTable.setTreeParentCode(treeParentCode);
+        genTable.setTreeName(treeName);
+        genTable.setParentMenuId(parentMenuId);
+        genTable.setParentMenuName(parentMenuName);
     }
 }

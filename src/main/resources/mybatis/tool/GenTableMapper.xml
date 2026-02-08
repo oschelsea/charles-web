@@ -75,7 +75,8 @@
     <!-- sqlite3配置 -->
     <select id="selectDbTableList" parameterType="GenTable" resultMap="GenTableResult">
         select tbl_name AS table_name from sqlite_master
-        where  tbl_name NOT LIKE 'qrtz_%' AND tbl_name NOT LIKE 'gen_%' AND tbl_name != 'sqlite_sequence'
+        where type='table' AND tbl_name != 'sqlite_sequence' AND tbl_name != 'flyway_schema_history'
+        AND tbl_name NOT LIKE 'qrtz_%' AND tbl_name NOT LIKE 'gen_%'
         AND tbl_name NOT IN (select table_name from gen_table)
         <if test="tableName != null and tableName != ''">
             <bind  name="table_name_like" value="'%' + tableName + '%'"/>
@@ -85,8 +86,9 @@
 
     <select id="selectDbTableListByNames" resultMap="GenTableResult">
         select tbl_name AS table_name from sqlite_master
-        where tbl_name NOT LIKE 'qrtz_%' and tbl_name NOT LIKE 'gen_%' AND tbl_name != 'sqlite_sequence'
-        and tbl_name in
+        where type='table' AND tbl_name != 'sqlite_sequence' AND tbl_name != 'flyway_schema_history'
+        AND tbl_name NOT LIKE 'qrtz_%' AND tbl_name NOT LIKE 'gen_%'
+        AND tbl_name in
         <foreach collection="array" item="name" open="(" separator="," close=")">
             #{name}
         </foreach>

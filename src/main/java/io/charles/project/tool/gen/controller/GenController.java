@@ -10,6 +10,7 @@ import io.charles.project.tool.gen.domain.GenTable;
 import io.charles.project.tool.gen.domain.GenTableColumn;
 import io.charles.project.tool.gen.service.IGenTableColumnService;
 import io.charles.project.tool.gen.service.IGenTableService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -172,10 +172,19 @@ public class GenController extends BaseController {
     @PreAuthorize("@ss.hasPermi('tool:gen:code')")
     @Log(title = "代码生成", businessType = BusinessType.GENCODE)
     @GetMapping("/batchGenCode")
-    public void batchGenCode(HttpServletResponse response, String tables) throws IOException {
+    public void batchGenCode(HttpServletResponse response, @RequestParam("tableIdStr") String tables) throws IOException {
         String[] tableNames = Convert.toStrArray(tables);
         byte[] data = genTableService.downloadCode(tableNames);
         genCode(response, data);
+    }
+
+    /**
+     * 查询数据源名称列表
+     */
+    @PreAuthorize("@ss.hasPermi('tool:gen:list')")
+    @GetMapping(value = "/getDataNames")
+    public AjaxResult getCurrentDataSourceNameList() {
+        return AjaxResult.success(List.of("master"));
     }
 
     /**
