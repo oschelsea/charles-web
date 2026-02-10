@@ -1,5 +1,6 @@
 package io.charles.project.system.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.common.constant.Constants;
 import io.charles.common.constant.UserConstants;
 import io.charles.common.core.text.Convert;
@@ -85,6 +86,10 @@ public class SysConfigServiceImpl implements ISysConfigService {
         return Convert.toBool(captchaOnOff);
     }
 
+    public List<SysConfig> selectConfigList(SysConfig config) {
+        return selectConfigList(null, config);
+    }
+
     /**
      * 查询参数配置列表
      *
@@ -92,8 +97,8 @@ public class SysConfigServiceImpl implements ISysConfigService {
      * @return 参数配置集合
      */
     @Override
-    public List<SysConfig> selectConfigList(SysConfig config) {
-        return configMapper.selectConfigList(config);
+    public List<SysConfig> selectConfigList(IPage<SysConfig> page, SysConfig config) {
+        return configMapper.selectConfigList(page, config);
     }
 
     /**
@@ -149,7 +154,7 @@ public class SysConfigServiceImpl implements ISysConfigService {
      */
     @Override
     public void loadingConfigCache() {
-        List<SysConfig> configsList = configMapper.selectConfigList(new SysConfig());
+        List<SysConfig> configsList = configMapper.selectConfigList(null, new SysConfig());
         for (SysConfig config : configsList) {
             cacheCache.setCacheObject(getCacheKey(config.getConfigKey()), config.getConfigValue());
         }

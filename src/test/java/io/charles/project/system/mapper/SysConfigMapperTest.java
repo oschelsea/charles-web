@@ -75,7 +75,7 @@ class SysConfigMapperTest {
     void testSelectConfigList() {
         SysConfig query = new SysConfig();
         query.setConfigName("测试");
-        List<SysConfig> list = sysConfigMapper.selectConfigList(query);
+        List<SysConfig> list = sysConfigMapper.selectConfigList(null, query);
         assertFalse(list.isEmpty(), "配置列表不应为空");
     }
 

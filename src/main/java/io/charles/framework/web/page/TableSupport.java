@@ -49,4 +49,11 @@ public class TableSupport {
     public static PageDomain buildPageRequest() {
         return getPageDomain();
     }
+
+    public static PageQuery getPageQuery() {
+        PageQuery pageQuery = new PageQuery(ServletUtils.getParameterToInt(PAGE_SIZE), ServletUtils.getParameterToInt(PAGE_NUM));
+        pageQuery.setOrderByColumn(ServletUtils.getParameter(ORDER_BY_COLUMN));
+        pageQuery.setIsAsc(ServletUtils.getParameter(IS_ASC));
+        return pageQuery;
+    }
 }

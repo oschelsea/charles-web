@@ -1,6 +1,7 @@
 package io.charles.framework.config;
 
 import cn.hutool.extra.spring.SpringUtil;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -44,6 +45,16 @@ public class AppProperties {
      * 认证类型,验证码类型 math 数组计算 char 字符验证
      */
     private String captchaType;
+    /**
+     * 数据库配置
+     */
+    private Database database;
+
+    @Data
+    public static class Database {
+        private String type;
+        private String name;
+    }
 
     public static String getGlobalProfile() {
         return SpringUtil.getBean(AppProperties.class).getProfile();

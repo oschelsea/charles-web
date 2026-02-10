@@ -1,5 +1,7 @@
 package io.charles.framework.web.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.charles.common.utils.DateUtils;
@@ -78,6 +80,22 @@ public class BaseController {
         rspData.setMsg("查询成功");
         rspData.setRows(list);
         rspData.setTotal(new PageInfo(list).getTotal());
+        return rspData;
+    }
+
+    protected <T> Page<T> getPage() {
+        return TableSupport.getPageQuery().build();
+    }
+
+    /**
+     * 根据分页对象构建表格分页数据对象
+     */
+    public static TableDataInfo build(IPage<?> page) {
+        TableDataInfo rspData = new TableDataInfo();
+        rspData.setCode(cn.hutool.http.HttpStatus.HTTP_OK);
+        rspData.setMsg("查询成功");
+        rspData.setRows(page.getRecords());
+        rspData.setTotal(page.getTotal());
         return rspData;
     }
 

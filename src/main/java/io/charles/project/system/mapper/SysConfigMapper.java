@@ -1,10 +1,10 @@
 package io.charles.project.system.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.charles.common.utils.StringUtils;
-import io.charles.project.monitor.domain.SysLogininfor;
 import io.charles.project.system.domain.SysConfig;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -35,7 +35,7 @@ public interface SysConfigMapper extends BaseMapper<SysConfig> {
      * @param config 参数配置信息
      * @return 参数配置集合
      */
-    default List<SysConfig> selectConfigList(SysConfig config) {
+    default List<SysConfig> selectConfigList(IPage<SysConfig> page, SysConfig config) {
         LambdaQueryWrapper<SysConfig> wrapper = Wrappers.lambdaQuery();
         wrapper.like(StringUtils.isNotEmpty(config.getConfigName()), SysConfig::getConfigName, config.getConfigName())
                 .eq(StringUtils.isNotEmpty(config.getConfigType()), SysConfig::getConfigType, config.getConfigType())
@@ -50,7 +50,7 @@ public interface SysConfigMapper extends BaseMapper<SysConfig> {
                 wrapper.le(SysConfig::getCreateTime, params.get("endTime"));
             }
         }
-        return selectList(wrapper);
+        return selectList(page, wrapper);
     }
 
     /**
@@ -102,6 +102,6 @@ public interface SysConfigMapper extends BaseMapper<SysConfig> {
      * @return 结果
      */
     default int deleteConfigByIds(Long[] configIds) {
-        return deleteBatchIds(Arrays.asList(configIds));
+        return deleteByIds(Arrays.asList(configIds));
     }
 }

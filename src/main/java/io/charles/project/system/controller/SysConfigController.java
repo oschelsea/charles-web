@@ -1,5 +1,6 @@
 package io.charles.project.system.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.charles.common.constant.UserConstants;
 import io.charles.common.utils.poi.ExcelUtil;
 import io.charles.framework.aspectj.lang.annotation.Log;
@@ -35,8 +36,8 @@ public class SysConfigController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:config:list')")
     @GetMapping("/list")
     public TableDataInfo list(SysConfig config) {
-        startPage();
-        List<SysConfig> list = configService.selectConfigList(config);
+        Page<SysConfig> page = getPage();
+        List<SysConfig> list = configService.selectConfigList(page, config);
         return getDataTable(list);
     }
 
@@ -45,7 +46,7 @@ public class SysConfigController extends BaseController {
     @PostMapping("/export")
     public void export(SysConfig config, HttpServletResponse response) {
         List<SysConfig> list = configService.selectConfigList(config);
-        ExcelUtil<SysConfig> util = new ExcelUtil<SysConfig>(SysConfig.class);
+        ExcelUtil<SysConfig> util = new ExcelUtil<>(SysConfig.class);
         util.exportExcel(response, list, "参数数据");
     }
 

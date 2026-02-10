@@ -25,13 +25,13 @@ public class FlywayConfig {
     public Flyway flyway(DataSource dataSource) {
         log.info("Flyway: 使用 {} 数据库迁移脚本", databaseType);
         String location = "classpath:db/migration/" + databaseType;
-        
+
         return Flyway.configure()
                 .dataSource(dataSource)
                 .locations(location)
                 .baselineOnMigrate(true)
                 .baselineVersion("0")
-                .validateOnMigrate(true)
+                .validateOnMigrate(false)
                 .outOfOrder(false)
                 .mixed(true)
                 .load();

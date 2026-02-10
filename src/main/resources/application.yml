@@ -130,7 +130,6 @@ mybatis-plus:
 
 # PageHelper分页插件
 pagehelper:
-  helperDialect: sqlite
   reasonable: true
   supportMethodsArguments: true
   params: count=countSql
