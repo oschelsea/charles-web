@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.charles.project.system.domain.SysUser;
 import org.apache.ibatis.annotations.Param;
 
@@ -164,5 +165,18 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
                 .select(SysUser::getUserId, SysUser::getEmail)
                 .eq(SysUser::getEmail, email)
                 .last("LIMIT 1"));
+    }
+
+    /**
+     * 查询部门是否存在用户
+     *
+     * @param deptId 部门ID
+     * @return 结果
+     */
+    default int checkDeptExistUser(Long deptId) {
+        LambdaQueryWrapper<SysUser> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(SysUser::getDeptId, deptId);
+        wrapper.eq(SysUser::getDelFlag, "0");
+        return Math.toIntExact(selectCount(wrapper));
     }
 }

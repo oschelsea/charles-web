@@ -3,13 +3,13 @@ package io.charles.framework.config;
 import io.charles.common.filter.RepeatableFilter;
 import io.charles.common.filter.XssFilter;
 import io.charles.common.utils.StringUtils;
+import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import jakarta.servlet.DispatcherType;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +19,7 @@ import java.util.Map;
  * @author charles
  */
 @Configuration
-@ConditionalOnProperty(value = "xss.enabled" , havingValue = "true")
+@ConditionalOnProperty(value = "xss.enabled", havingValue = "true")
 public class FilterConfig {
     @Value("${xss.excludes}")
     private String excludes;
@@ -27,7 +27,7 @@ public class FilterConfig {
     @Value("${xss.urlPatterns}")
     private String urlPatterns;
 
-    @SuppressWarnings({"rawtypes" , "unchecked"})
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Bean
     public FilterRegistrationBean xssFilterRegistration() {
         FilterRegistrationBean registration = new FilterRegistrationBean();
@@ -37,14 +37,14 @@ public class FilterConfig {
         registration.setName("xssFilter");
         registration.setOrder(FilterRegistrationBean.HIGHEST_PRECEDENCE);
         Map<String, String> initParameters = new HashMap<String, String>();
-        initParameters.put("excludes" , excludes);
+        initParameters.put("excludes", excludes);
         registration.setInitParameters(initParameters);
         return registration;
     }
 
-    @SuppressWarnings({"rawtypes" , "unchecked"})
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Bean
-    public FilterRegistrationBean someFilterRegistration() {
+    public FilterRegistrationBean repeatableFilterRegistration() {
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(new RepeatableFilter());
         registration.addUrlPatterns("/*");
@@ -52,5 +52,4 @@ public class FilterConfig {
         registration.setOrder(FilterRegistrationBean.LOWEST_PRECEDENCE);
         return registration;
     }
-
 }

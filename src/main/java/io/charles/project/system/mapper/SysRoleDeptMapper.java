@@ -3,6 +3,7 @@ package io.charles.project.system.mapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.charles.project.system.domain.SysRoleDept;
+import org.apache.ibatis.executor.BatchResult;
 
 import java.util.Arrays;
 import java.util.List;
@@ -52,5 +53,8 @@ public interface SysRoleDeptMapper extends BaseMapper<SysRoleDept> {
      * @param roleDeptList 角色部门列表
      * @return 结果
      */
-    public int batchRoleDept(List<SysRoleDept> roleDeptList);
+    default int batchRoleDept(List<SysRoleDept> roleDeptList) {
+        List<BatchResult> results = insert(roleDeptList);
+        return results.stream().map(t -> Arrays.stream(t.getUpdateCounts()).sum()).mapToInt(Integer::intValue).sum();
+    }
 }

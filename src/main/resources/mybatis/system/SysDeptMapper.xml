@@ -33,10 +33,6 @@
         order by d.parent_id, d.order_num
     </select>
 
-    <select id="checkDeptExistUser" parameterType="Long" resultType="int">
-		select count(1) from sys_user where dept_id = #{deptId} and del_flag = '0'
-	</select>
-
     <update id="updateDeptChildren" parameterType="java.util.List">
         update sys_dept set ancestors =
         <foreach collection="depts" item="item" index="index"

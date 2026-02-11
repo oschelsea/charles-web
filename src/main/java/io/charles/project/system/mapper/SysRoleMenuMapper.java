@@ -3,6 +3,7 @@ package io.charles.project.system.mapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.charles.project.system.domain.SysRoleMenu;
+import org.apache.ibatis.executor.BatchResult;
 
 import java.util.Arrays;
 import java.util.List;
@@ -52,5 +53,8 @@ public interface SysRoleMenuMapper extends BaseMapper<SysRoleMenu> {
      * @param roleMenuList 角色菜单列表
      * @return 结果
      */
-    public int batchRoleMenu(List<SysRoleMenu> roleMenuList);
+    default int batchRoleMenu(List<SysRoleMenu> roleMenuList) {
+        List<BatchResult> results = insert(roleMenuList);
+        return results.stream().map(t -> Arrays.stream(t.getUpdateCounts()).sum()).mapToInt(Integer::intValue).sum();
+    }
 }

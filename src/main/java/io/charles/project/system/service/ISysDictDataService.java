@@ -17,7 +17,7 @@ public interface ISysDictDataService {
      * @param dictData 字典数据信息
      * @return 字典数据集合信息
      */
-    public List<SysDictData> selectDictDataList(IPage<SysDictData> page, SysDictData dictData);
+    List<SysDictData> selectDictDataList(IPage<SysDictData> page, SysDictData dictData);
 
     /**
      * 根据字典类型和字典键值查询字典数据信息
@@ -26,7 +26,7 @@ public interface ISysDictDataService {
      * @param dictValue 字典键值
      * @return 字典标签
      */
-    public String selectDictLabel(String dictType, String dictValue);
+    String selectDictLabel(String dictType, String dictValue);
 
     /**
      * 根据字典数据ID查询信息
@@ -34,7 +34,7 @@ public interface ISysDictDataService {
      * @param dictCode 字典数据ID
      * @return 字典数据
      */
-    public SysDictData selectDictDataById(Long dictCode);
+    SysDictData selectDictDataById(Long dictCode);
 
     /**
      * 批量删除字典数据信息
@@ -42,7 +42,7 @@ public interface ISysDictDataService {
      * @param dictCodes 需要删除的字典数据ID
      * @return 结果
      */
-    public void deleteDictDataByIds(Long[] dictCodes);
+    void deleteDictDataByIds(Long[] dictCodes);
 
     /**
      * 新增保存字典数据信息
@@ -50,7 +50,7 @@ public interface ISysDictDataService {
      * @param dictData 字典数据信息
      * @return 结果
      */
-    public int insertDictData(SysDictData dictData);
+    int insertDictData(SysDictData dictData);
 
     /**
      * 修改保存字典数据信息
@@ -58,5 +58,5 @@ public interface ISysDictDataService {
      * @param dictData 字典数据信息
      * @return 结果
      */
-    public int updateDictData(SysDictData dictData);
+    int updateDictData(SysDictData dictData);
 }

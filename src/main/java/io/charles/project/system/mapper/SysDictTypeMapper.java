@@ -1,8 +1,8 @@
 package io.charles.project.system.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.charles.common.utils.StringUtils;
 import io.charles.project.system.domain.SysDictType;
@@ -106,7 +106,7 @@ public interface SysDictTypeMapper extends BaseMapper<SysDictType> {
      * @return 结果
      */
     default int deleteDictTypeByIds(Long[] dictIds) {
-        return deleteBatchIds(Arrays.asList(dictIds));
+        return deleteByIds(Arrays.asList(dictIds));
     }
 
     /**

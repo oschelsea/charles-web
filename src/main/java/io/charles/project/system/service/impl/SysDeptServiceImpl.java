@@ -12,6 +12,7 @@ import io.charles.project.system.domain.SysRole;
 import io.charles.project.system.domain.SysUser;
 import io.charles.project.system.mapper.SysDeptMapper;
 import io.charles.project.system.mapper.SysRoleMapper;
+import io.charles.project.system.mapper.SysUserMapper;
 import io.charles.project.system.service.ISysDeptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.aop.framework.AopContext;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 public class SysDeptServiceImpl implements ISysDeptService {
     private final SysDeptMapper deptMapper;
     private final SysRoleMapper roleMapper;
+    private final SysUserMapper userMapper;
 
     /**
      * 查询部门管理数据
@@ -140,7 +142,7 @@ public class SysDeptServiceImpl implements ISysDeptService {
     @Override
     public boolean hasChildByDeptId(Long deptId) {
         int result = deptMapper.hasChildByDeptId(deptId);
-        return result > 0 ? true : false;
+        return result > 0;
     }
 
     /**
@@ -151,8 +153,8 @@ public class SysDeptServiceImpl implements ISysDeptService {
      */
     @Override
     public boolean checkDeptExistUser(Long deptId) {
-        int result = deptMapper.checkDeptExistUser(deptId);
-        return result > 0 ? true : false;
+        int result = userMapper.checkDeptExistUser(deptId);
+        return result > 0;
     }
 
     /**
@@ -302,6 +304,6 @@ public class SysDeptServiceImpl implements ISysDeptService {
      * 判断是否有子节点
      */
     private boolean hasChild(List<SysDept> list, SysDept t) {
-        return getChildList(list, t).size() > 0 ? true : false;
+        return !getChildList(list, t).isEmpty();
     }
 }

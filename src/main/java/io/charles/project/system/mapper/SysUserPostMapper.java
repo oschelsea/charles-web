@@ -3,6 +3,7 @@ package io.charles.project.system.mapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.charles.project.system.domain.SysUserPost;
+import org.apache.ibatis.executor.BatchResult;
 
 import java.util.Arrays;
 import java.util.List;
@@ -52,5 +53,8 @@ public interface SysUserPostMapper extends BaseMapper<SysUserPost> {
      * @param userPostList 用户角色列表
      * @return 结果
      */
-    int batchUserPost(List<SysUserPost> userPostList);
+    default int batchUserPost(List<SysUserPost> userPostList) {
+        List<BatchResult> results = insert(userPostList);
+        return results.stream().map(t -> Arrays.stream(t.getUpdateCounts()).sum()).mapToInt(Integer::intValue).sum();
+    }
 }

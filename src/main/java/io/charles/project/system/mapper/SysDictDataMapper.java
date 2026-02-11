@@ -1,17 +1,13 @@
 package io.charles.project.system.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.charles.common.utils.StringUtils;
 import io.charles.project.system.domain.SysDictData;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.Arrays;
-import java.util.List;
-
 import java.util.List;
 
 /**
@@ -59,7 +55,8 @@ public interface SysDictDataMapper extends BaseMapper<SysDictData> {
     default List<SysDictData> selectDictDataByType(String dictType) {
         return selectList(new LambdaQueryWrapper<SysDictData>()
                 .eq(SysDictData::getDictType, dictType)
-                .eq(SysDictData::getStatus, "0") // 0 正常
+                 // 0 正常
+                .eq(SysDictData::getStatus, "0")
                 .orderByAsc(SysDictData::getDictSort));
     }
 
@@ -117,7 +114,7 @@ public interface SysDictDataMapper extends BaseMapper<SysDictData> {
      * @return 结果
      */
     default int deleteDictDataByIds(Long[] dictCodes) {
-        return deleteBatchIds(Arrays.asList(dictCodes));
+        return deleteByIds(Arrays.asList(dictCodes));
     }
 
     /**

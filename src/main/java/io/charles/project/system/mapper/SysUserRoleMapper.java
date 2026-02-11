@@ -3,7 +3,7 @@ package io.charles.project.system.mapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.charles.project.system.domain.SysUserRole;
-import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.executor.BatchResult;
 
 import java.util.Arrays;
 import java.util.List;
@@ -53,7 +53,10 @@ public interface SysUserRoleMapper extends BaseMapper<SysUserRole> {
      * @param userRoleList 用户角色列表
      * @return 结果
      */
-    int batchUserRole(List<SysUserRole> userRoleList);
+    default int batchUserRole(List<SysUserRole> userRoleList) {
+        List<BatchResult> results = insert(userRoleList);
+        return results.stream().map(t -> Arrays.stream(t.getUpdateCounts()).sum()).mapToInt(Integer::intValue).sum();
+    }
 
     /**
      * 删除用户和角色关联信息
@@ -74,7 +77,7 @@ public interface SysUserRoleMapper extends BaseMapper<SysUserRole> {
      * @param userIds 需要删除的用户数据ID
      * @return 结果
      */
-    default int deleteUserRoleInfos(@Param("roleId") Long roleId, @Param("userIds") Long[] userIds) {
+    default int deleteUserRoleInfos(Long roleId, Long[] userIds) {
         return delete(new LambdaQueryWrapper<SysUserRole>()
                 .eq(SysUserRole::getRoleId, roleId)
                 .in(SysUserRole::getUserId, Arrays.asList(userIds)));

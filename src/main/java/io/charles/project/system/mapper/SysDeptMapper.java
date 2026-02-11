@@ -1,11 +1,10 @@
 package io.charles.project.system.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.charles.common.utils.StringUtils;
 import io.charles.project.system.domain.SysDept;
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Arrays;
@@ -104,14 +103,6 @@ public interface SysDeptMapper extends BaseMapper<SysDept> {
                 .eq(SysDept::getDelFlag, "0")
                 .last("limit 1")));
     }
-
-    /**
-     * 查询部门是否存在用户
-     *
-     * @param deptId 部门ID
-     * @return 结果
-     */
-    int checkDeptExistUser(Long deptId);
 
     /**
      * 校验部门名称是否唯一
