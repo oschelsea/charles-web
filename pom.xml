@@ -205,19 +205,6 @@
             <version>${commons.collections.version}</version>
         </dependency>
 
-        <!-- 验证码 -->
-        <dependency>
-            <groupId>com.github.penggle</groupId>
-            <artifactId>kaptcha</artifactId>
-            <version>${kaptcha.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>javax.servlet-api</artifactId>
-                    <groupId>javax.servlet</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
         <!-- lombok-->
         <dependency>
             <groupId>org.projectlombok</groupId>

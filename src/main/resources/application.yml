@@ -12,12 +12,22 @@ app:
   profile: data
   # 远程获取ip地址开关
   addressEnabled: false
-  # 验证码类型 math 数组计算 char 字符验证
-  captchaType: math
   # 数据库类型: sqlite 或 postgresql
   database:
     type: sqlite
     name: charles
+
+captcha:
+  # 是否启用验证码校验
+  enable: true
+  # 验证码类型 math 数组计算 char 字符验证
+  type: MATH
+  # line 线段干扰 circle 圆圈干扰 shear 扭曲干扰
+  category: CIRCLE
+  # 数字验证码位数
+  numberLength: 1
+  # 字符验证码长度
+  charLength: 4
 
 # 开发环境配置
 server:
@@ -127,12 +137,6 @@ mybatis-plus:
     db-config:
       # 主键策略：自增
       id-type: auto
-
-# PageHelper分页插件
-pagehelper:
-  reasonable: true
-  supportMethodsArguments: true
-  params: count=countSql
 
 # 防止XSS攻击
 xss:
