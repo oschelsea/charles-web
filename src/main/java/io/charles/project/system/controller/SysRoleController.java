@@ -1,5 +1,6 @@
 package io.charles.project.system.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.charles.common.constant.UserConstants;
 import io.charles.common.utils.StringUtils;
 import io.charles.common.utils.poi.ExcelUtil;
@@ -42,16 +43,16 @@ public class SysRoleController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:role:list')")
     @GetMapping("/list")
     public TableDataInfo list(SysRole role) {
-        startPage();
-        List<SysRole> list = roleService.selectRoleList(role);
-        return getDataTable(list);
+        Page<SysRole> page = getPage();
+        roleService.selectRoleList(page, role);
+        return getDataTable(page);
     }
 
     @Log(title = "角色管理", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:role:export')")
     @PostMapping("/export")
     public void export(SysRole role, HttpServletResponse response) {
-        List<SysRole> list = roleService.selectRoleList(role);
+        List<SysRole> list = roleService.selectRoleList(null, role);
         ExcelUtil<SysRole> util = new ExcelUtil<SysRole>(SysRole.class);
         util.exportExcel(response, list, "角色数据");
     }
@@ -159,9 +160,9 @@ public class SysRoleController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:role:list')")
     @GetMapping("/authUser/allocatedList")
     public TableDataInfo allocatedList(SysUser user) {
-        startPage();
-        List<SysUser> list = userService.selectAllocatedList(user);
-        return getDataTable(list);
+        Page<SysUser> page = getPage();
+        userService.selectAllocatedList(page, user);
+        return getDataTable(page);
     }
 
     /**
@@ -170,9 +171,9 @@ public class SysRoleController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:role:list')")
     @GetMapping("/authUser/unallocatedList")
     public TableDataInfo unallocatedList(SysUser user) {
-        startPage();
-        List<SysUser> list = userService.selectUnallocatedList(user);
-        return getDataTable(list);
+        Page<SysUser> page = getPage();
+        userService.selectUnallocatedList(page, user);
+        return getDataTable(page);
     }
 
     /**

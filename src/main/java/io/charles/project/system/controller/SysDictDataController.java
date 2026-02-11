@@ -1,5 +1,6 @@
 package io.charles.project.system.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.charles.common.utils.StringUtils;
 import io.charles.common.utils.poi.ExcelUtil;
 import io.charles.framework.aspectj.lang.annotation.Log;
@@ -35,16 +36,16 @@ public class SysDictDataController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:dict:list')")
     @GetMapping("/list")
     public TableDataInfo list(SysDictData dictData) {
-        startPage();
-        List<SysDictData> list = dictDataService.selectDictDataList(dictData);
-        return getDataTable(list);
+        Page<SysDictData> page = getPage();
+        dictDataService.selectDictDataList(page, dictData);
+        return getDataTable(page);
     }
 
     @Log(title = "字典数据", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:dict:export')")
     @PostMapping("/export")
     public void export(SysDictData dictData, HttpServletResponse response) {
-        List<SysDictData> list = dictDataService.selectDictDataList(dictData);
+        List<SysDictData> list = dictDataService.selectDictDataList(null, dictData);
         ExcelUtil<SysDictData> util = new ExcelUtil<SysDictData>(SysDictData.class);
         util.exportExcel(response, list, "字典数据");
     }

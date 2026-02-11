@@ -1,5 +1,6 @@
 package io.charles.project.system.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.charles.common.constant.UserConstants;
 import io.charles.common.utils.poi.ExcelUtil;
 import io.charles.framework.aspectj.lang.annotation.Log;
@@ -38,9 +39,9 @@ public class SysPostController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:post:list')")
     @GetMapping("/list")
     public TableDataInfo list(SysPost post) {
-        startPage();
-        List<SysPost> list = postService.selectPostList(post);
-        return getDataTable(list);
+        Page<SysPost> page = getPage();
+        postService.selectPostList(page, post);
+        return getDataTable(page);
     }
 
     @Log(title = "岗位管理", businessType = BusinessType.EXPORT)

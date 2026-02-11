@@ -1,5 +1,6 @@
 package io.charles.project.tool.gen.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.project.tool.gen.domain.GenTable;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public interface IGenTableService {
      * @param genTable 业务信息
      * @return 业务集合
      */
-    public List<GenTable> selectGenTableList(GenTable genTable);
+    public List<GenTable> selectGenTableList(IPage<GenTable> page, GenTable genTable);
 
     /**
      * 查询据库列表
@@ -25,7 +26,7 @@ public interface IGenTableService {
      * @param genTable 业务信息
      * @return 数据库表集合
      */
-    public List<GenTable> selectDbTableList(GenTable genTable);
+    public List<GenTable> selectDbTableList(IPage<GenTable> page, GenTable genTable);
 
     /**
      * 查询据库列表

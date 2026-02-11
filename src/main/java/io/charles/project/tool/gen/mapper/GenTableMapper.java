@@ -2,8 +2,10 @@ package io.charles.project.tool.gen.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.common.utils.StringUtils;
 import io.charles.project.tool.gen.domain.GenTable;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +22,7 @@ public interface GenTableMapper extends BaseMapper<GenTable> {
      * @param genTable 业务信息
      * @return 数据库表集合
      */
-    public List<GenTable> selectDbTableList(GenTable genTable);
+    public List<GenTable> selectDbTableList(IPage<GenTable> page, @Param("genTable") GenTable genTable);
 
     /**
      * 查询据库列表
@@ -90,10 +92,34 @@ public interface GenTableMapper extends BaseMapper<GenTable> {
      * @return 业务集合
      */
     default List<GenTable> selectGenTableList(GenTable genTable) {
-        return selectList(new LambdaQueryWrapper<GenTable>()
-                .like(StringUtils.isNotEmpty(genTable.getTableName()), GenTable::getTableName, genTable.getTableName())
-                .like(StringUtils.isNotEmpty(genTable.getTableComment()), GenTable::getTableComment, genTable.getTableComment())
-                .ge(genTable.getParams() != null && genTable.getParams().get("beginTime") != null, GenTable::getCreateTime, genTable.getParams() != null ? genTable.getParams().get("beginTime") : null)
-                .le(genTable.getParams() != null && genTable.getParams().get("endTime") != null, GenTable::getCreateTime, genTable.getParams() != null ? genTable.getParams().get("endTime") : null));
+        return selectGenTableList(null, genTable);
+    }
+
+    /**
+     * 查询业务列表
+     *
+     * @param genTable 业务信息
+     * @return 业务集合
+     */
+    default List<GenTable> selectGenTableList(IPage<GenTable> page, GenTable genTable) {
+        LambdaQueryWrapper<GenTable> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(StringUtils.isNotEmpty(genTable.getTableName()), GenTable::getTableName, genTable.getTableName())
+                .like(StringUtils.isNotEmpty(genTable.getTableComment()), GenTable::getTableComment, genTable.getTableComment());
+        
+        if (genTable.getParams() != null) {
+            Object beginTime = genTable.getParams().get("beginTime");
+            Object endTime = genTable.getParams().get("endTime");
+            if (beginTime != null && !beginTime.toString().isEmpty()) {
+                wrapper.ge(GenTable::getCreateTime, beginTime);
+            }
+            if (endTime != null && !endTime.toString().isEmpty()) {
+                wrapper.le(GenTable::getCreateTime, endTime);
+            }
+        }
+        
+        if (page != null) {
+            return selectPage(page, wrapper).getRecords();
+        }
+        return selectList(wrapper);
     }
 }

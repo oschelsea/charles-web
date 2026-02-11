@@ -2,6 +2,7 @@ package io.charles.project.system.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.charles.common.utils.StringUtils;
 import io.charles.project.system.domain.SysNotice;
@@ -33,11 +34,25 @@ public interface SysNoticeMapper extends BaseMapper<SysNotice> {
      * @return 公告集合
      */
     default List<SysNotice> selectNoticeList(SysNotice notice) {
+        return selectNoticeList(null, notice);
+    }
+
+    /**
+     * 查询公告列表
+     *
+     * @param page   分页对象
+     * @param notice 公告信息
+     * @return 公告集合
+     */
+    default List<SysNotice> selectNoticeList(IPage<SysNotice> page, SysNotice notice) {
         LambdaQueryWrapper<SysNotice> wrapper = Wrappers.lambdaQuery();
         if (notice != null) {
             wrapper.like(StringUtils.isNotEmpty(notice.getNoticeTitle()), SysNotice::getNoticeTitle, notice.getNoticeTitle())
                     .eq(StringUtils.isNotEmpty(notice.getNoticeType()), SysNotice::getNoticeType, notice.getNoticeType())
                     .like(StringUtils.isNotEmpty(notice.getCreateBy()), SysNotice::getCreateBy, notice.getCreateBy());
+        }
+        if (page != null) {
+            return selectPage(page, wrapper).getRecords();
         }
         return selectList(wrapper);
     }

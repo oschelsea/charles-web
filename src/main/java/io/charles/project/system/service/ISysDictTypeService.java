@@ -1,6 +1,7 @@
 package io.charles.project.system.service;
 
 import io.charles.project.system.domain.SysDictData;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.project.system.domain.SysDictType;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public interface ISysDictTypeService {
      * @param dictType 字典类型信息
      * @return 字典类型集合信息
      */
-    public List<SysDictType> selectDictTypeList(SysDictType dictType);
+    public List<SysDictType> selectDictTypeList(IPage<SysDictType> page, SysDictType dictType);
 
     /**
      * 根据所有字典类型

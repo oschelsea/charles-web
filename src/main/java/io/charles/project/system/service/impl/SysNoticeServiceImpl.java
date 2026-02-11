@@ -1,5 +1,6 @@
 package io.charles.project.system.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.project.system.domain.SysNotice;
 import io.charles.project.system.mapper.SysNoticeMapper;
 import io.charles.project.system.service.ISysNoticeService;
@@ -39,6 +40,18 @@ public class SysNoticeServiceImpl implements ISysNoticeService {
     @Override
     public List<SysNotice> selectNoticeList(SysNotice notice) {
         return noticeMapper.selectNoticeList(notice);
+    }
+
+    /**
+     * 查询公告列表
+     *
+     * @param page 分页对象
+     * @param notice 公告信息
+     * @return 公告集合
+     */
+    @Override
+    public List<SysNotice> selectNoticeList(IPage<SysNotice> page, SysNotice notice) {
+        return noticeMapper.selectNoticeList(page, notice);
     }
 
     /**

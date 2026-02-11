@@ -1,7 +1,8 @@
 package io.charles.project.system.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.charles.common.utils.StringUtils;
 import io.charles.project.system.domain.SysPost;
@@ -22,11 +23,25 @@ public interface SysPostMapper extends BaseMapper<SysPost> {
      * @return 岗位数据集合
      */
     default List<SysPost> selectPostList(SysPost post) {
+        return selectPostList(null, post);
+    }
+
+    /**
+     * 查询岗位数据集合
+     *
+     * @param page 分页对象
+     * @param post 岗位信息
+     * @return 岗位数据集合
+     */
+    default List<SysPost> selectPostList(IPage<SysPost> page, SysPost post) {
         LambdaQueryWrapper<SysPost> wrapper = Wrappers.lambdaQuery();
         if (post != null) {
             wrapper.like(StringUtils.isNotEmpty(post.getPostCode()), SysPost::getPostCode, post.getPostCode())
                     .eq(StringUtils.isNotEmpty(post.getStatus()), SysPost::getStatus, post.getStatus())
                     .like(StringUtils.isNotEmpty(post.getPostName()), SysPost::getPostName, post.getPostName());
+        }
+        if (page != null) {
+            return selectPage(page, wrapper).getRecords();
         }
         return selectList(wrapper);
     }
@@ -56,7 +71,7 @@ public interface SysPostMapper extends BaseMapper<SysPost> {
      * @param userId 用户ID
      * @return 选中岗位ID列表
      */
-    public List<Integer> selectPostListByUserId(Long userId);
+    List<Integer> selectPostListByUserId(Long userId);
 
     /**
      * 查询用户所属岗位组
@@ -64,7 +79,7 @@ public interface SysPostMapper extends BaseMapper<SysPost> {
      * @param userName 用户名
      * @return 结果
      */
-    public List<SysPost> selectPostsByUserName(String userName);
+    List<SysPost> selectPostsByUserName(String userName);
 
     /**
      * 删除岗位信息

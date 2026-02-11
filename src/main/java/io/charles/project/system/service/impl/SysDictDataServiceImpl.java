@@ -1,5 +1,6 @@
 package io.charles.project.system.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.common.utils.DictUtils;
 import io.charles.project.system.domain.SysDictData;
 import io.charles.project.system.mapper.SysDictDataMapper;
@@ -27,8 +28,8 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
      * @return 字典数据集合信息
      */
     @Override
-    public List<SysDictData> selectDictDataList(SysDictData dictData) {
-        return dictDataMapper.selectDictDataList(dictData);
+    public List<SysDictData> selectDictDataList(IPage<SysDictData> page, SysDictData dictData) {
+        return dictDataMapper.selectDictDataList(page, dictData);
     }
 
     /**

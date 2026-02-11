@@ -3,6 +3,7 @@ package io.charles.project.system.controller;
 import io.charles.framework.aspectj.lang.annotation.Log;
 import io.charles.framework.aspectj.lang.enums.BusinessType;
 import io.charles.framework.web.controller.BaseController;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.charles.framework.web.domain.AjaxResult;
 import io.charles.framework.web.page.TableDataInfo;
 import io.charles.project.system.domain.SysNotice;
@@ -32,9 +33,9 @@ public class SysNoticeController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:notice:list')")
     @GetMapping("/list")
     public TableDataInfo list(SysNotice notice) {
-        startPage();
-        List<SysNotice> list = noticeService.selectNoticeList(notice);
-        return getDataTable(list);
+        Page<SysNotice> page = getPage();
+        noticeService.selectNoticeList(page, notice);
+        return getDataTable(page);
     }
 
     /**

@@ -1,6 +1,7 @@
 package io.charles.project.system.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.charles.common.utils.StringUtils;
@@ -26,6 +27,16 @@ public interface SysDictDataMapper extends BaseMapper<SysDictData> {
      * @return 字典数据集合信息
      */
     default List<SysDictData> selectDictDataList(SysDictData dictData) {
+        return selectDictDataList(null, dictData);
+    }
+
+    /**
+     * 根据条件分页查询字典数据
+     *
+     * @param dictData 字典数据信息
+     * @return 字典数据集合信息
+     */
+    default List<SysDictData> selectDictDataList(IPage<SysDictData> page, SysDictData dictData) {
         LambdaQueryWrapper<SysDictData> wrapper = Wrappers.lambdaQuery();
         if (dictData != null) {
             wrapper.eq(StringUtils.isNotEmpty(dictData.getDictType()), SysDictData::getDictType, dictData.getDictType())
@@ -33,6 +44,9 @@ public interface SysDictDataMapper extends BaseMapper<SysDictData> {
                     .eq(StringUtils.isNotEmpty(dictData.getStatus()), SysDictData::getStatus, dictData.getStatus());
         }
         wrapper.orderByAsc(SysDictData::getDictSort);
+        if (page != null) {
+            return selectPage(page, wrapper).getRecords();
+        }
         return selectList(wrapper);
     }
 

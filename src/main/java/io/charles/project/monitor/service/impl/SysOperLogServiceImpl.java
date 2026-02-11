@@ -1,5 +1,6 @@
 package io.charles.project.monitor.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.project.monitor.domain.SysOperLog;
 import io.charles.project.monitor.mapper.SysOperLogMapper;
 import io.charles.project.monitor.service.ISysOperLogService;
@@ -36,8 +37,8 @@ public class SysOperLogServiceImpl implements ISysOperLogService {
      * @return 操作日志集合
      */
     @Override
-    public List<SysOperLog> selectOperLogList(SysOperLog operLog) {
-        return operLogMapper.selectOperLogList(operLog);
+    public List<SysOperLog> selectOperLogList(IPage<SysOperLog> page, SysOperLog operLog) {
+        return operLogMapper.selectOperLogList(page, operLog);
     }
 
     /**

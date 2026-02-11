@@ -2,15 +2,10 @@ package io.charles.framework.web.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import io.charles.common.utils.DateUtils;
 import io.charles.common.utils.SecurityUtils;
-import io.charles.common.utils.StringUtils;
-import io.charles.common.utils.sql.SqlUtil;
 import io.charles.framework.security.LoginUser;
 import io.charles.framework.web.domain.AjaxResult;
-import io.charles.framework.web.page.PageDomain;
 import io.charles.framework.web.page.TableDataInfo;
 import io.charles.framework.web.page.TableSupport;
 import org.slf4j.Logger;
@@ -46,57 +41,31 @@ public class BaseController {
     }
 
     /**
-     * 设置请求分页数据
-     */
-    protected void startPage() {
-        PageDomain pageDomain = TableSupport.buildPageRequest();
-        Integer pageNum = pageDomain.getPageNum();
-        Integer pageSize = pageDomain.getPageSize();
-        if (StringUtils.isNotNull(pageNum) && StringUtils.isNotNull(pageSize)) {
-            String orderBy = SqlUtil.escapeOrderBySql(pageDomain.getOrderBy());
-            Boolean reasonable = pageDomain.getReasonable();
-            PageHelper.startPage(pageNum, pageSize, orderBy).setReasonable(reasonable);
-        }
-    }
-
-    /**
-     * 设置请求排序数据
-     */
-    protected void startOrderBy() {
-        PageDomain pageDomain = TableSupport.buildPageRequest();
-        if (StringUtils.isNotEmpty(pageDomain.getOrderBy())) {
-            String orderBy = SqlUtil.escapeOrderBySql(pageDomain.getOrderBy());
-            PageHelper.orderBy(orderBy);
-        }
-    }
-
-    /**
      * 响应请求分页数据
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
     protected TableDataInfo getDataTable(List<?> list) {
         TableDataInfo rspData = new TableDataInfo();
         rspData.setCode(HttpStatus.OK.value());
         rspData.setMsg("查询成功");
         rspData.setRows(list);
-        rspData.setTotal(new PageInfo(list).getTotal());
+        rspData.setTotal(list.size());
+        return rspData;
+    }
+
+    /**
+     * 响应请求分页数据
+     */
+    protected TableDataInfo getDataTable(IPage<?> page) {
+        TableDataInfo rspData = new TableDataInfo();
+        rspData.setCode(HttpStatus.OK.value());
+        rspData.setMsg("查询成功");
+        rspData.setRows(page.getRecords());
+        rspData.setTotal(page.getTotal());
         return rspData;
     }
 
     protected <T> Page<T> getPage() {
         return TableSupport.getPageQuery().build();
-    }
-
-    /**
-     * 根据分页对象构建表格分页数据对象
-     */
-    public static TableDataInfo build(IPage<?> page) {
-        TableDataInfo rspData = new TableDataInfo();
-        rspData.setCode(cn.hutool.http.HttpStatus.HTTP_OK);
-        rspData.setMsg("查询成功");
-        rspData.setRows(page.getRecords());
-        rspData.setTotal(page.getTotal());
-        return rspData;
     }
 
     /**

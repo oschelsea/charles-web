@@ -1,5 +1,6 @@
 package io.charles.project.monitor.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.project.monitor.domain.SysLogininfor;
 import io.charles.project.monitor.mapper.SysLogininforMapper;
 import io.charles.project.monitor.service.ISysLogininforService;
@@ -36,8 +37,8 @@ public class SysLogininforServiceImpl implements ISysLogininforService {
      * @return 登录记录集合
      */
     @Override
-    public List<SysLogininfor> selectLogininforList(SysLogininfor logininfor) {
-        return logininforMapper.selectLogininforList(logininfor);
+    public List<SysLogininfor> selectLogininforList(IPage<SysLogininfor> page, SysLogininfor logininfor) {
+        return logininforMapper.selectLogininforList(page, logininfor);
     }
 
     /**

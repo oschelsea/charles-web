@@ -1,7 +1,6 @@
 package io.charles.project.system.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.charles.project.system.domain.SysUserRole;
 import org.apache.ibatis.annotations.Param;
@@ -54,7 +53,7 @@ public interface SysUserRoleMapper extends BaseMapper<SysUserRole> {
      * @param userRoleList 用户角色列表
      * @return 结果
      */
-    public int batchUserRole(List<SysUserRole> userRoleList);
+    int batchUserRole(List<SysUserRole> userRoleList);
 
     /**
      * 删除用户和角色关联信息

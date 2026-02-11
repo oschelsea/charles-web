@@ -73,13 +73,13 @@
 		where t.table_name = #{tableName} order by c.sort
 	</select>
     <!-- sqlite3配置 -->
-    <select id="selectDbTableList" parameterType="GenTable" resultMap="GenTableResult">
+    <select id="selectDbTableList" resultMap="GenTableResult">
         select tbl_name AS table_name from sqlite_master
         where type='table' AND tbl_name != 'sqlite_sequence' AND tbl_name != 'flyway_schema_history'
         AND tbl_name NOT LIKE 'qrtz_%' AND tbl_name NOT LIKE 'gen_%'
         AND tbl_name NOT IN (select table_name from gen_table)
-        <if test="tableName != null and tableName != ''">
-            <bind  name="table_name_like" value="'%' + tableName + '%'"/>
+        <if test="genTable.tableName != null and genTable.tableName != ''">
+            <bind  name="table_name_like" value="'%' + genTable.tableName + '%'"/>
             AND lower(tbl_name) like lower(#{table_name_like})
         </if>
     </select>

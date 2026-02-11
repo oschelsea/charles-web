@@ -1,6 +1,7 @@
 package io.charles.project.system.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.charles.common.utils.StringUtils;
@@ -25,6 +26,16 @@ public interface SysDictTypeMapper extends BaseMapper<SysDictType> {
      * @return 字典类型集合信息
      */
     default List<SysDictType> selectDictTypeList(SysDictType dictType) {
+        return selectDictTypeList(null, dictType);
+    }
+
+    /**
+     * 根据条件分页查询字典类型
+     *
+     * @param dictType 字典类型信息
+     * @return 字典类型集合信息
+     */
+    default List<SysDictType> selectDictTypeList(IPage<SysDictType> page, SysDictType dictType) {
         LambdaQueryWrapper<SysDictType> wrapper = Wrappers.lambdaQuery();
         if (dictType != null) {
             wrapper.like(StringUtils.isNotEmpty(dictType.getDictName()), SysDictType::getDictName, dictType.getDictName())
@@ -40,6 +51,9 @@ public interface SysDictTypeMapper extends BaseMapper<SysDictType> {
                     wrapper.le(SysDictType::getCreateTime, params.get("endTime"));
                 }
             }
+        }
+        if (page != null) {
+            return selectPage(page, wrapper).getRecords();
         }
         return selectList(wrapper);
     }

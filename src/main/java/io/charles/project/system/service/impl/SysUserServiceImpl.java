@@ -1,5 +1,6 @@
 package io.charles.project.system.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.common.constant.UserConstants;
 import io.charles.common.exception.ServiceException;
 import io.charles.common.utils.SecurityUtils;
@@ -44,32 +45,46 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     @DataScope(deptAlias = "d", userAlias = "u")
-    public List<SysUser> selectUserList(SysUser user) {
-        return userMapper.selectUserList(user);
+    public List<SysUser> selectUserList(IPage<SysUser> page, SysUser user) {
+        List<SysUser> users = userMapper.selectUserList(page, user);
+        if (page != null) {
+            page.setRecords(users);
+        }
+        return users;
     }
 
     /**
      * 根据条件分页查询已分配用户角色列表
      *
+     * @param page 分页对象
      * @param user 用户信息
      * @return 用户信息集合信息
      */
     @Override
     @DataScope(deptAlias = "d", userAlias = "u")
-    public List<SysUser> selectAllocatedList(SysUser user) {
-        return userMapper.selectAllocatedList(user);
+    public List<SysUser> selectAllocatedList(IPage<SysUser> page, SysUser user) {
+        List<SysUser> users = userMapper.selectAllocatedList(page, user);
+        if (page != null) {
+            page.setRecords(users);
+        }
+        return users;
     }
 
     /**
      * 根据条件分页查询未分配用户角色列表
      *
+     * @param page 分页对象
      * @param user 用户信息
      * @return 用户信息集合信息
      */
     @Override
     @DataScope(deptAlias = "d", userAlias = "u")
-    public List<SysUser> selectUnallocatedList(SysUser user) {
-        return userMapper.selectUnallocatedList(user);
+    public List<SysUser> selectUnallocatedList(IPage<SysUser> page, SysUser user) {
+        List<SysUser> users = userMapper.selectUnallocatedList(page, user);
+        if (page != null) {
+            page.setRecords(users);
+        }
+        return users;
     }
 
     /**
@@ -201,7 +216,7 @@ public class SysUserServiceImpl implements ISysUserService {
         if (!SysUser.isAdmin(SecurityUtils.getUserId())) {
             SysUser user = new SysUser();
             user.setUserId(userId);
-            List<SysUser> users = ((ISysUserService) AopContext.currentProxy()).selectUserList(user);
+            List<SysUser> users = ((ISysUserService) AopContext.currentProxy()).selectUserList(null, user);
             if (StringUtils.isEmpty(users)) {
                 throw new ServiceException("没有权限访问用户数据！");
             }

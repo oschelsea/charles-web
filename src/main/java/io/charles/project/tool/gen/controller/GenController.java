@@ -1,5 +1,6 @@
 package io.charles.project.tool.gen.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.charles.common.core.text.Convert;
 import io.charles.framework.aspectj.lang.annotation.Log;
 import io.charles.framework.aspectj.lang.enums.BusinessType;
@@ -41,9 +42,9 @@ public class GenController extends BaseController {
     @PreAuthorize("@ss.hasPermi('tool:gen:list')")
     @GetMapping("/list")
     public TableDataInfo genList(GenTable genTable) {
-        startPage();
-        List<GenTable> list = genTableService.selectGenTableList(genTable);
-        return getDataTable(list);
+        Page<GenTable> page = getPage();
+        genTableService.selectGenTableList(page, genTable);
+        return getDataTable(page);
     }
 
     /**
@@ -68,9 +69,9 @@ public class GenController extends BaseController {
     @PreAuthorize("@ss.hasPermi('tool:gen:list')")
     @GetMapping("/db/list")
     public TableDataInfo dataList(GenTable genTable) {
-        startPage();
-        List<GenTable> list = genTableService.selectDbTableList(genTable);
-        return getDataTable(list);
+        Page<GenTable> page = getPage();
+        genTableService.selectDbTableList(page, genTable);
+        return getDataTable(page);
     }
 
     /**

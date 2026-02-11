@@ -1,5 +1,6 @@
 package io.charles.project.monitor.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.charles.common.utils.poi.ExcelUtil;
 import io.charles.framework.aspectj.lang.annotation.Log;
 import io.charles.framework.aspectj.lang.enums.BusinessType;
@@ -31,16 +32,16 @@ public class SysLogininforController extends BaseController {
     @PreAuthorize("@ss.hasPermi('monitor:logininfor:list')")
     @GetMapping("/list")
     public TableDataInfo list(SysLogininfor logininfor) {
-        startPage();
-        List<SysLogininfor> list = logininforService.selectLogininforList(logininfor);
-        return getDataTable(list);
+        Page<SysLogininfor> page = getPage();
+        logininforService.selectLogininforList(page, logininfor);
+        return getDataTable(page);
     }
 
     @Log(title = "登录日志", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('monitor:logininfor:export')")
     @PostMapping("/export")
     public void export(SysLogininfor logininfor, HttpServletResponse response) throws IOException {
-        List<SysLogininfor> list = logininforService.selectLogininforList(logininfor);
+        List<SysLogininfor> list = logininforService.selectLogininforList(null, logininfor);
         ExcelUtil<SysLogininfor> util = new ExcelUtil<SysLogininfor>(SysLogininfor.class);
         util.exportExcel(response, list, "登录日志");
     }

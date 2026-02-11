@@ -52,5 +52,5 @@ public interface SysUserPostMapper extends BaseMapper<SysUserPost> {
      * @param userPostList 用户角色列表
      * @return 结果
      */
-    public int batchUserPost(List<SysUserPost> userPostList);
+    int batchUserPost(List<SysUserPost> userPostList);
 }

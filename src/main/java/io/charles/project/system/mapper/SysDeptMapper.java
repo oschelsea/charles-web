@@ -32,7 +32,7 @@ public interface SysDeptMapper extends BaseMapper<SysDept> {
                     .eq(dept.getParentId() != null && dept.getParentId() != 0, SysDept::getParentId, dept.getParentId())
                     .like(StringUtils.isNotEmpty(dept.getDeptName()), SysDept::getDeptName, dept.getDeptName())
                     .eq(StringUtils.isNotEmpty(dept.getStatus()), SysDept::getStatus, dept.getStatus());
-            
+
             // 数据范围过滤
             Map<String, Object> params = dept.getParams();
             if (params != null && params.get("dataScope") != null) {
@@ -50,7 +50,7 @@ public interface SysDeptMapper extends BaseMapper<SysDept> {
      * @param deptCheckStrictly 部门树选择项是否关联显示
      * @return 选中部门列表
      */
-    public List<Integer> selectDeptListByRoleId(@Param("roleId") Long roleId, @Param("deptCheckStrictly") boolean deptCheckStrictly);
+    List<Integer> selectDeptListByRoleId(@Param("roleId") Long roleId, @Param("deptCheckStrictly") boolean deptCheckStrictly);
 
     /**
      * 根据部门ID查询信息
@@ -111,7 +111,7 @@ public interface SysDeptMapper extends BaseMapper<SysDept> {
      * @param deptId 部门ID
      * @return 结果
      */
-    public int checkDeptExistUser(Long deptId);
+    int checkDeptExistUser(Long deptId);
 
     /**
      * 校验部门名称是否唯一
@@ -164,7 +164,7 @@ public interface SysDeptMapper extends BaseMapper<SysDept> {
      * @param depts 子元素
      * @return 结果
      */
-    public int updateDeptChildren(@Param("depts") List<SysDept> depts);
+    int updateDeptChildren(@Param("depts") List<SysDept> depts);
 
     /**
      * 删除部门管理信息

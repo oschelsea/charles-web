@@ -2,6 +2,7 @@ package io.charles.project.monitor.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.charles.common.utils.DateUtils;
 import io.charles.common.utils.StringUtils;
@@ -35,6 +36,16 @@ public interface SysLogininforMapper extends BaseMapper<SysLogininfor> {
      * @return 登录记录集合
      */
     default List<SysLogininfor> selectLogininforList(SysLogininfor logininfor) {
+        return selectLogininforList(null, logininfor);
+    }
+
+    /**
+     * 查询系统登录日志集合
+     *
+     * @param logininfor 访问日志对象
+     * @return 登录记录集合
+     */
+    default List<SysLogininfor> selectLogininforList(IPage<SysLogininfor> page, SysLogininfor logininfor) {
         LambdaQueryWrapper<SysLogininfor> wrapper = Wrappers.lambdaQuery();
         if (logininfor != null) {
             wrapper.like(StringUtils.isNotEmpty(logininfor.getIpaddr()), SysLogininfor::getIpaddr, logininfor.getIpaddr())
@@ -52,6 +63,9 @@ public interface SysLogininforMapper extends BaseMapper<SysLogininfor> {
             }
         }
         wrapper.orderByDesc(SysLogininfor::getInfoId);
+        if (page != null) {
+            return selectPage(page, wrapper).getRecords();
+        }
         return selectList(wrapper);
     }
 

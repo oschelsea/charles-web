@@ -1,5 +1,6 @@
 package io.charles.project.system.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.project.system.domain.SysRole;
 import io.charles.project.system.domain.SysUserRole;
 
@@ -15,10 +16,11 @@ public interface ISysRoleService {
     /**
      * 根据条件分页查询角色数据
      *
+     * @param page 分页对象
      * @param role 角色信息
      * @return 角色数据集合信息
      */
-    public List<SysRole> selectRoleList(SysRole role);
+    public List<SysRole> selectRoleList(IPage<SysRole> page, SysRole role);
 
     /**
      * 根据用户ID查询角色列表

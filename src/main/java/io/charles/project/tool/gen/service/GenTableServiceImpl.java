@@ -1,7 +1,6 @@
 package io.charles.project.tool.gen.service;
 
-import cn.hutool.core.util.StrUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.common.constant.Constants;
 import io.charles.common.constant.GenConstants;
 import io.charles.common.core.text.CharsetKit;
@@ -51,7 +50,6 @@ public class GenTableServiceImpl implements IGenTableService {
     private static final Logger log = LoggerFactory.getLogger(GenTableServiceImpl.class);
     private final GenTableMapper genTableMapper;
     private final GenTableColumnMapper genTableColumnMapper;
-    private final ObjectMapper objectMapper;
 
     /**
      * 获取代码生成地址
@@ -88,8 +86,8 @@ public class GenTableServiceImpl implements IGenTableService {
      * @return 业务集合
      */
     @Override
-    public List<GenTable> selectGenTableList(GenTable genTable) {
-        return genTableMapper.selectGenTableList(genTable);
+    public List<GenTable> selectGenTableList(IPage<GenTable> page, GenTable genTable) {
+        return genTableMapper.selectGenTableList(page, genTable);
     }
 
     /**
@@ -99,8 +97,8 @@ public class GenTableServiceImpl implements IGenTableService {
      * @return 数据库表集合
      */
     @Override
-    public List<GenTable> selectDbTableList(GenTable genTable) {
-        return genTableMapper.selectDbTableList(genTable);
+    public List<GenTable> selectDbTableList(IPage<GenTable> page, GenTable genTable) {
+        return genTableMapper.selectDbTableList(page, genTable);
     }
 
     /**

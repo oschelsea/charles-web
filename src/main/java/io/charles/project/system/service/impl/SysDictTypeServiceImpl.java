@@ -1,5 +1,6 @@
 package io.charles.project.system.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.common.constant.UserConstants;
 import io.charles.common.exception.ServiceException;
 import io.charles.common.utils.DictUtils;
@@ -43,8 +44,8 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService {
      * @return 字典类型集合信息
      */
     @Override
-    public List<SysDictType> selectDictTypeList(SysDictType dictType) {
-        return dictTypeMapper.selectDictTypeList(dictType);
+    public List<SysDictType> selectDictTypeList(IPage<SysDictType> page, SysDictType dictType) {
+        return dictTypeMapper.selectDictTypeList(page, dictType);
     }
 
     /**

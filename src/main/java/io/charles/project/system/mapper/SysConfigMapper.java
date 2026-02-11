@@ -50,7 +50,10 @@ public interface SysConfigMapper extends BaseMapper<SysConfig> {
                 wrapper.le(SysConfig::getCreateTime, params.get("endTime"));
             }
         }
-        return selectList(page, wrapper);
+        if (page != null) {
+            return selectPage(page, wrapper).getRecords();
+        }
+        return selectList(wrapper);
     }
 
     /**

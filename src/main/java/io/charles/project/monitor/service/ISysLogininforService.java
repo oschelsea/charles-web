@@ -1,5 +1,6 @@
 package io.charles.project.monitor.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.project.monitor.domain.SysLogininfor;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public interface ISysLogininforService {
      * @param logininfor 访问日志对象
      * @return 登录记录集合
      */
-    public List<SysLogininfor> selectLogininforList(SysLogininfor logininfor);
+    public List<SysLogininfor> selectLogininforList(IPage<SysLogininfor> page, SysLogininfor logininfor);
 
     /**
      * 批量删除系统登录日志

@@ -3,7 +3,9 @@ package io.charles.project.system.mapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.project.system.domain.SysRole;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,10 +19,11 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
     /**
      * 根据条件分页查询角色数据
      *
+     * @param page 分页对象
      * @param role 角色信息
      * @return 角色数据集合信息
      */
-    public List<SysRole> selectRoleList(SysRole role);
+    List<SysRole> selectRoleList(IPage<SysRole> page, @Param("role") SysRole role);
 
     /**
      * 根据用户ID查询角色
@@ -28,7 +31,7 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param userId 用户ID
      * @return 角色列表
      */
-    public List<SysRole> selectRolePermissionByUserId(Long userId);
+    List<SysRole> selectRolePermissionByUserId(Long userId);
 
     /**
      * 查询所有角色
@@ -45,7 +48,7 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param userId 用户ID
      * @return 选中角色ID列表
      */
-    public List<Integer> selectRoleListByUserId(Long userId);
+    List<Integer> selectRoleListByUserId(Long userId);
 
     /**
      * 通过角色ID查询角色
@@ -53,7 +56,7 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param roleId 角色ID
      * @return 角色对象信息
      */
-    public SysRole selectRoleById(Long roleId);
+    SysRole selectRoleById(Long roleId);
 
     /**
      * 根据用户ID查询角色
@@ -67,7 +70,7 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param userName 用户名
      * @return 角色列表
      */
-    public List<SysRole> selectRolesByUserName(String userName);
+    List<SysRole> selectRolesByUserName(String userName);
 
     /**
      * 校验角色名称是否唯一

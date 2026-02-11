@@ -3,6 +3,7 @@ package io.charles.project.system.mapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.project.system.domain.SysUser;
 import org.apache.ibatis.annotations.Param;
 
@@ -18,26 +19,29 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
     /**
      * 根据条件分页查询用户列表
      *
-     * @param sysUser 用户信息
-     * @return 用户信息集合信息
-     */
-    public List<SysUser> selectUserList(SysUser sysUser);
-
-    /**
-     * 根据条件分页查询未已配用户角色列表
-     *
+     * @param page 分页对象
      * @param user 用户信息
      * @return 用户信息集合信息
      */
-    public List<SysUser> selectAllocatedList(SysUser user);
+    List<SysUser> selectUserList(IPage<SysUser> page, @Param("user") SysUser user);
+
+    /**
+     * 根据条件分页查询已分配用户角色列表
+     *
+     * @param page 分页对象
+     * @param user 用户信息
+     * @return 用户信息集合信息
+     */
+    List<SysUser> selectAllocatedList(IPage<SysUser> page, @Param("user") SysUser user);
 
     /**
      * 根据条件分页查询未分配用户角色列表
      *
+     * @param page 分页对象
      * @param user 用户信息
      * @return 用户信息集合信息
      */
-    public List<SysUser> selectUnallocatedList(SysUser user);
+    List<SysUser> selectUnallocatedList(IPage<SysUser> page, @Param("user") SysUser user);
 
     /**
      * 通过用户名查询用户
@@ -45,7 +49,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param userName 用户名
      * @return 用户对象信息
      */
-    public SysUser selectUserByUserName(String userName);
+    SysUser selectUserByUserName(String userName);
 
     /**
      * 通过用户ID查询用户
@@ -53,7 +57,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param userId 用户ID
      * @return 用户对象信息
      */
-    public SysUser selectUserById(Long userId);
+    SysUser selectUserById(Long userId);
 
     /**
      * 新增用户信息

@@ -1,5 +1,6 @@
 package io.charles.project.system.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.project.system.domain.SysDictData;
 
 import java.util.List;
@@ -16,7 +17,7 @@ public interface ISysDictDataService {
      * @param dictData 字典数据信息
      * @return 字典数据集合信息
      */
-    public List<SysDictData> selectDictDataList(SysDictData dictData);
+    public List<SysDictData> selectDictDataList(IPage<SysDictData> page, SysDictData dictData);
 
     /**
      * 根据字典类型和字典键值查询字典数据信息

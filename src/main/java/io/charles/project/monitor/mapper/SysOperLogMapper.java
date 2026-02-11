@@ -2,6 +2,7 @@ package io.charles.project.monitor.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.common.utils.DateUtils;
 import io.charles.common.utils.StringUtils;
 import io.charles.project.monitor.domain.SysOperLog;
@@ -32,6 +33,16 @@ public interface SysOperLogMapper extends BaseMapper<SysOperLog> {
      * @return 操作日志集合
      */
     default List<SysOperLog> selectOperLogList(SysOperLog operLog) {
+        return selectOperLogList(null, operLog);
+    }
+
+    /**
+     * 查询系统操作日志集合
+     *
+     * @param operLog 操作日志对象
+     * @return 操作日志集合
+     */
+    default List<SysOperLog> selectOperLogList(IPage<SysOperLog> page, SysOperLog operLog) {
         LambdaQueryWrapper<SysOperLog> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.isNotEmpty(operLog.getTitle()), SysOperLog::getTitle, operLog.getTitle())
                 .eq(operLog.getBusinessType() != null, SysOperLog::getBusinessType, operLog.getBusinessType())
@@ -50,6 +61,9 @@ public interface SysOperLogMapper extends BaseMapper<SysOperLog> {
             }
         }
         wrapper.orderByDesc(SysOperLog::getOperId);
+        if (page != null) {
+            return selectPage(page, wrapper).getRecords();
+        }
         return selectList(wrapper);
     }
 

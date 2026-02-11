@@ -1,5 +1,6 @@
 package io.charles.project.system.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.common.constant.UserConstants;
 import io.charles.common.exception.ServiceException;
 import io.charles.common.utils.SecurityUtils;
@@ -35,13 +36,18 @@ public class SysRoleServiceImpl implements ISysRoleService {
     /**
      * 根据条件分页查询角色数据
      *
+     * @param page 分页对象
      * @param role 角色信息
      * @return 角色数据集合信息
      */
     @Override
     @DataScope(deptAlias = "d")
-    public List<SysRole> selectRoleList(SysRole role) {
-        return roleMapper.selectRoleList(role);
+    public List<SysRole> selectRoleList(IPage<SysRole> page, SysRole role) {
+        List<SysRole> roles = roleMapper.selectRoleList(page, role);
+        if (page != null) {
+            page.setRecords(roles);
+        }
+        return roles;
     }
 
     /**
@@ -90,7 +96,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
      */
     @Override
     public List<SysRole> selectRoleAll() {
-        return ((ISysRoleService) AopContext.currentProxy()).selectRoleList(new SysRole());
+        return ((ISysRoleService) AopContext.currentProxy()).selectRoleList(null, new SysRole());
     }
 
     /**
@@ -169,7 +175,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
         if (!SysUser.isAdmin(SecurityUtils.getUserId())) {
             SysRole role = new SysRole();
             role.setRoleId(roleId);
-            List<SysRole> roles = ((ISysRoleService) AopContext.currentProxy()).selectRoleList(role);
+            List<SysRole> roles = ((ISysRoleService) AopContext.currentProxy()).selectRoleList(null, role);
             if (StringUtils.isEmpty(roles)) {
                 throw new ServiceException("没有权限访问角色数据！");
             }

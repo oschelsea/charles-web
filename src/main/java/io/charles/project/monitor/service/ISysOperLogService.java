@@ -1,5 +1,6 @@
 package io.charles.project.monitor.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.project.monitor.domain.SysOperLog;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public interface ISysOperLogService {
      * @param operLog 操作日志对象
      * @return 操作日志集合
      */
-    public List<SysOperLog> selectOperLogList(SysOperLog operLog);
+    public List<SysOperLog> selectOperLogList(IPage<SysOperLog> page, SysOperLog operLog);
 
     /**
      * 批量删除系统操作日志

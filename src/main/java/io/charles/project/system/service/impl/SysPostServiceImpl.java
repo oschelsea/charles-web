@@ -1,5 +1,6 @@
 package io.charles.project.system.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.common.constant.UserConstants;
 import io.charles.common.exception.ServiceException;
 import io.charles.common.utils.StringUtils;
@@ -33,6 +34,18 @@ public class SysPostServiceImpl implements ISysPostService {
     @Override
     public List<SysPost> selectPostList(SysPost post) {
         return postMapper.selectPostList(post);
+    }
+
+    /**
+     * 查询岗位信息集合
+     *
+     * @param page 分页对象
+     * @param post 岗位信息
+     * @return 岗位信息集合
+     */
+    @Override
+    public List<SysPost> selectPostList(IPage<SysPost> page, SysPost post) {
+        return postMapper.selectPostList(page, post);
     }
 
     /**

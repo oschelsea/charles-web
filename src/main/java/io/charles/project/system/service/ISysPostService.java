@@ -1,5 +1,6 @@
 package io.charles.project.system.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.project.system.domain.SysPost;
 
 import java.util.List;
@@ -17,6 +18,15 @@ public interface ISysPostService {
      * @return 岗位列表
      */
     public List<SysPost> selectPostList(SysPost post);
+
+    /**
+     * 查询岗位信息集合
+     *
+     * @param page 分页对象
+     * @param post 岗位信息
+     * @return 岗位列表
+     */
+    public List<SysPost> selectPostList(IPage<SysPost> page, SysPost post);
 
     /**
      * 查询所有岗位

@@ -1,5 +1,6 @@
 package io.charles.project.system.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.charles.common.constant.UserConstants;
 import io.charles.common.utils.SecurityUtils;
 import io.charles.common.utils.StringUtils;
@@ -48,16 +49,16 @@ public class SysUserController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:user:list')")
     @GetMapping("/list")
     public TableDataInfo list(SysUser user) {
-        startPage();
-        List<SysUser> list = userService.selectUserList(user);
-        return getDataTable(list);
+        Page<SysUser> page = getPage();
+        userService.selectUserList(page, user);
+        return getDataTable(page);
     }
 
     @Log(title = "用户管理", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:user:export')")
     @PostMapping("/export")
     public void export(SysUser user, HttpServletResponse response) {
-        List<SysUser> list = userService.selectUserList(user);
+        List<SysUser> list = userService.selectUserList(null, user);
         ExcelUtil<SysUser> util = new ExcelUtil<SysUser>(SysUser.class);
         util.exportExcel(response, list, "用户数据");
     }
