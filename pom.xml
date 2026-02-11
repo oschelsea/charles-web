@@ -29,7 +29,6 @@
         <poi.version>5.4.1</poi.version>
         <oshi.version>6.2.2</oshi.version>
         <jna.version>5.8.0</jna.version>
-        <velocity.version>1.7</velocity.version>
         <spring-boot.version>3.5.9</spring-boot.version>
     </properties>
 
@@ -112,8 +111,7 @@
         </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>
-            <!-- 使用mybatis-plus-jsqlparser有bug -->
-            <artifactId>mybatis-plus-jsqlparser-4.9</artifactId>
+            <artifactId>mybatis-plus-jsqlparser</artifactId>
             <version>3.5.16</version>
         </dependency>
         <dependency>
@@ -143,7 +141,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.18.0</version>
+            <version>3.20.0</version>
         </dependency>
 
         <!-- io常用工具类 -->
@@ -196,8 +194,8 @@
         <!-- velocity代码生成使用模板 -->
         <dependency>
             <groupId>org.apache.velocity</groupId>
-            <artifactId>velocity</artifactId>
-            <version>${velocity.version}</version>
+            <artifactId>velocity-engine-core</artifactId>
+            <version>2.4.1</version>
         </dependency>
 
         <!-- collections工具类 -->

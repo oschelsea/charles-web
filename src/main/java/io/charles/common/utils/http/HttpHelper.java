@@ -1,7 +1,7 @@
 package io.charles.common.utils.http;
 
 import jakarta.servlet.ServletRequest;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ public class HttpHelper {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    LOGGER.error(ExceptionUtils.getFullStackTrace(e));
+                    LOGGER.error(ExceptionUtils.getStackTrace(e));
                 }
             }
         }
