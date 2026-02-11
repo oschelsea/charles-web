@@ -22,7 +22,7 @@ public interface GenTableMapper extends BaseMapper<GenTable> {
      * @param genTable 业务信息
      * @return 数据库表集合
      */
-    public List<GenTable> selectDbTableList(IPage<GenTable> page, @Param("genTable") GenTable genTable);
+    List<GenTable> selectDbTableList(IPage<GenTable> page, @Param("genTable") GenTable genTable);
 
     /**
      * 查询据库列表
@@ -30,14 +30,14 @@ public interface GenTableMapper extends BaseMapper<GenTable> {
      * @param tableNames 表名称组
      * @return 数据库表集合
      */
-    public List<GenTable> selectDbTableListByNames(String[] tableNames);
+    List<GenTable> selectDbTableListByNames(String[] tableNames);
 
     /**
      * 查询所有表信息
      *
      * @return 表信息集合
      */
-    public List<GenTable> selectGenTableAll();
+    List<GenTable> selectGenTableAll();
 
     /**
      * 查询表ID业务信息
@@ -45,7 +45,7 @@ public interface GenTableMapper extends BaseMapper<GenTable> {
      * @param id 业务ID
      * @return 业务信息
      */
-    public GenTable selectGenTableById(Long id);
+    GenTable selectGenTableById(Long id);
 
     /**
      * 查询表名称业务信息
@@ -53,7 +53,7 @@ public interface GenTableMapper extends BaseMapper<GenTable> {
      * @param tableName 表名称
      * @return 业务信息
      */
-    public GenTable selectGenTableByName(String tableName);
+    GenTable selectGenTableByName(String tableName);
 
     /**
      * 新增业务
@@ -105,7 +105,7 @@ public interface GenTableMapper extends BaseMapper<GenTable> {
         LambdaQueryWrapper<GenTable> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.isNotEmpty(genTable.getTableName()), GenTable::getTableName, genTable.getTableName())
                 .like(StringUtils.isNotEmpty(genTable.getTableComment()), GenTable::getTableComment, genTable.getTableComment());
-        
+
         if (genTable.getParams() != null) {
             Object beginTime = genTable.getParams().get("beginTime");
             Object endTime = genTable.getParams().get("endTime");
@@ -116,7 +116,7 @@ public interface GenTableMapper extends BaseMapper<GenTable> {
                 wrapper.le(GenTable::getCreateTime, endTime);
             }
         }
-        
+
         if (page != null) {
             return selectPage(page, wrapper).getRecords();
         }

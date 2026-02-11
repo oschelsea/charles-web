@@ -1,5 +1,6 @@
 package io.charles.project.tool.gen.service;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.common.constant.Constants;
 import io.charles.common.constant.GenConstants;
@@ -98,7 +99,11 @@ public class GenTableServiceImpl implements IGenTableService {
      */
     @Override
     public List<GenTable> selectDbTableList(IPage<GenTable> page, GenTable genTable) {
-        return genTableMapper.selectDbTableList(page, genTable);
+        List<GenTable> tables = genTableMapper.selectDbTableList(page, genTable);
+        if (page != null) {
+            page.setRecords(tables);
+        }
+        return tables;
     }
 
     /**
