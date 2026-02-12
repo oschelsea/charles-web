@@ -11,6 +11,7 @@ import java.util.HashMap;
  *
  * @author charles
  */
+@Deprecated
 public class AjaxResult extends HashMap<String, Object> {
     /**
      * 状态码

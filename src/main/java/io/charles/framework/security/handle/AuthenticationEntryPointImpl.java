@@ -3,14 +3,14 @@ package io.charles.framework.security.handle;
 import io.charles.common.utils.JsonUtil;
 import io.charles.common.utils.ServletUtils;
 import io.charles.common.utils.StringUtils;
-import io.charles.framework.web.domain.AjaxResult;
+import io.charles.framework.web.domain.R;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -28,6 +28,6 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint, S
             throws IOException {
         int code = HttpStatus.UNAUTHORIZED.value();
         String msg = StringUtils.format("请求访问：{}，认证失败，无法访问系统资源", request.getRequestURI());
-        ServletUtils.renderString(response, JsonUtil.toJson(AjaxResult.error(code, msg)));
+        ServletUtils.renderString(response, JsonUtil.toJson(R.fail(code, msg)));
     }
 }

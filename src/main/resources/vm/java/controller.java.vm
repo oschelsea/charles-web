@@ -2,7 +2,7 @@ package ${packageName}.controller;
 
 import io.charles.common.utils.poi.ExcelUtil;
 import io.charles.framework.web.controller.BaseController;
-import io.charles.framework.web.domain.AjaxResult;
+import io.charles.framework.web.domain.R;
 #if($table.crud || $table.sub)
 import io.charles.framework.web.page.TableDataInfo;
 #elseif($table.tree)
@@ -46,9 +46,9 @@ public class ${ClassName}Controller extends BaseController {
         return getDataTable(list);
     }
 #elseif($table.tree)
-    public AjaxResult list(${ClassName} ${className}) {
+    public R<List<${ClassName}>> list(${ClassName} ${className}) {
         List<${ClassName}> list = ${className}Service.select${ClassName}List(${className});
-        return success(list);
+        return R.ok(list);
     }
 #end
 
@@ -71,11 +71,11 @@ public class ${ClassName}Controller extends BaseController {
     @Operation(summary = "获取${functionName}详细信息")
     @PreAuthorize("@ss.hasPermi('${permissionPrefix}:query')")
     @GetMapping(value = "/{${pkColumn.javaField}}")
-    public AjaxResult getInfo(@PathVariable("${pkColumn.javaField}") ${pkColumn.javaType} ${pkColumn.javaField}) {
+    public R<?> getInfo(@PathVariable("${pkColumn.javaField}") ${pkColumn.javaType} ${pkColumn.javaField}) {
 #if($table.sub)
-        return success(${className}Service.select${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaField}));
+        return R.ok(${className}Service.select${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaField}));
 #else
-        return success(${className}Service.getById(${pkColumn.javaField}));
+        return R.ok(${className}Service.getById(${pkColumn.javaField}));
 #end
     }
 
@@ -86,7 +86,7 @@ public class ${ClassName}Controller extends BaseController {
     @PreAuthorize("@ss.hasPermi('${permissionPrefix}:add')")
     @Log(title = "${functionName}", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody ${ClassName} ${className}) {
+    public R<Void> add(@RequestBody ${ClassName} ${className}) {
 #if($table.sub)
         return toAjax(${className}Service.insert${ClassName}(${className}));
 #else
@@ -101,7 +101,7 @@ public class ${ClassName}Controller extends BaseController {
     @PreAuthorize("@ss.hasPermi('${permissionPrefix}:edit')")
     @Log(title = "${functionName}", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody ${ClassName} ${className}) {
+    public R<Void> edit(@RequestBody ${ClassName} ${className}) {
 #if($table.sub)
         return toAjax(${className}Service.update${ClassName}(${className}));
 #else
@@ -116,7 +116,7 @@ public class ${ClassName}Controller extends BaseController {
     @PreAuthorize("@ss.hasPermi('${permissionPrefix}:remove')")
     @Log(title = "${functionName}", businessType = BusinessType.DELETE)
     @DeleteMapping("/{${pkColumn.javaField}s}")
-    public AjaxResult remove(@PathVariable ${pkColumn.javaType}[] ${pkColumn.javaField}s) {
+    public R<Void> remove(@PathVariable ${pkColumn.javaType}[] ${pkColumn.javaField}s) {
 #if($table.sub)
         return toAjax(${className}Service.delete${ClassName}By${pkColumn.capJavaField}s(${pkColumn.javaField}s));
 #else

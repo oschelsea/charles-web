@@ -3,7 +3,8 @@ package io.charles.framework.web.exception;
 import io.charles.common.exception.DemoModeException;
 import io.charles.common.exception.ServiceException;
 import io.charles.common.utils.StringUtils;
-import io.charles.framework.web.domain.AjaxResult;
+import io.charles.framework.web.domain.R;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -14,8 +15,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 全局异常处理器
@@ -31,10 +30,10 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public AjaxResult handleAccessDeniedException(AccessDeniedException e, HttpServletRequest request) {
+    public R<Void> handleAccessDeniedException(AccessDeniedException e, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
-        log.error("请求地址'{}',权限校验失败'{}'", requestURI, e.getMessage());
-        return AjaxResult.error(HttpStatus.FORBIDDEN.value(), "没有权限，请联系管理员授权");
+        log.info("请求地址'{}',权限校验失败'{}'", requestURI, e.getMessage());
+        return R.fail(HttpStatus.FORBIDDEN.value(), "没有权限，请联系管理员授权");
     }
 
     /**
@@ -42,41 +41,41 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-    public AjaxResult handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException e,
-                                                          HttpServletRequest request) {
+    public R<Void> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException e,
+                                                       HttpServletRequest request) {
         String requestURI = request.getRequestURI();
-        log.error("请求地址'{}',不支持'{}'请求", requestURI, e.getMethod());
-        return AjaxResult.error(HttpStatus.METHOD_NOT_ALLOWED.value(), e.getMessage());
+        log.info("请求地址'{}',不支持'{}'请求", requestURI, e.getMethod());
+        return R.fail(HttpStatus.METHOD_NOT_ALLOWED.value(), e.getMessage());
     }
 
     /**
      * 业务异常
      */
     @ExceptionHandler(ServiceException.class)
-    public AjaxResult handleServiceException(ServiceException e, HttpServletRequest request) {
+    public R<Void> handleServiceException(ServiceException e, HttpServletRequest request) {
         log.error(e.getMessage(), e);
         Integer code = e.getCode();
-        return StringUtils.isNotNull(code) ? AjaxResult.error(code, e.getMessage()) : AjaxResult.error(e.getMessage());
+        return StringUtils.isNotNull(code) ? R.fail(code, e.getMessage()) : R.fail(e.getMessage());
     }
 
     /**
      * 拦截未知的运行时异常
      */
     @ExceptionHandler(RuntimeException.class)
-    public AjaxResult handleRuntimeException(RuntimeException e, HttpServletRequest request) {
+    public R<Void> handleRuntimeException(RuntimeException e, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         log.error("请求地址'{}',发生未知异常.", requestURI, e);
-        return AjaxResult.error(e.getMessage());
+        return R.fail(e.getMessage());
     }
 
     /**
      * 系统异常
      */
     @ExceptionHandler(Exception.class)
-    public AjaxResult handleException(Exception e, HttpServletRequest request) {
+    public R<Void> handleException(Exception e, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         log.error("请求地址'{}',发生系统异常.", requestURI, e);
-        return AjaxResult.error(e.getMessage());
+        return R.fail(e.getMessage());
     }
 
     /**
@@ -84,10 +83,10 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public AjaxResult handleBindException(BindException e) {
-        log.error(e.getMessage(), e);
+    public R<Void> handleBindException(BindException e) {
+        log.info(e.getMessage(), e);
         String message = e.getAllErrors().get(0).getDefaultMessage();
-        return AjaxResult.error(HttpStatus.BAD_REQUEST.value(), message);
+        return R.fail(HttpStatus.BAD_REQUEST.value(), message);
     }
 
     /**
@@ -95,17 +94,17 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Object handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.error(e.getMessage(), e);
+    public R<Void> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.info(e.getMessage(), e);
         String message = e.getBindingResult().getFieldError().getDefaultMessage();
-        return AjaxResult.error(HttpStatus.BAD_REQUEST.value(), message);
+        return R.fail(HttpStatus.BAD_REQUEST.value(), message);
     }
 
     /**
      * 演示模式异常
      */
     @ExceptionHandler(DemoModeException.class)
-    public AjaxResult handleDemoModeException(DemoModeException e) {
-        return AjaxResult.error("演示模式，不允许操作");
+    public R<Void> handleDemoModeException(DemoModeException e) {
+        return R.fail("演示模式，不允许操作");
     }
 }

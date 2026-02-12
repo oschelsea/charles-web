@@ -6,7 +6,7 @@ import io.charles.common.utils.file.FileUploadUtils;
 import io.charles.common.utils.file.FileUtils;
 import io.charles.framework.config.AppProperties;
 import io.charles.framework.config.ServerConfig;
-import io.charles.framework.web.domain.AjaxResult;
+import io.charles.framework.web.domain.R;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -57,23 +57,23 @@ public class CommonController {
         }
     }
 
+    public record UploadResultVo(String fileName, String url) {
+    }
+
     /**
      * 通用上传请求
      */
     @PostMapping("/common/upload")
-    public AjaxResult uploadFile(MultipartFile file) throws Exception {
+    public R<UploadResultVo> uploadFile(MultipartFile file) throws Exception {
         try {
             // 上传文件路径
             String filePath = AppProperties.getUploadPath();
             // 上传并返回新文件名称
             String fileName = FileUploadUtils.upload(filePath, file);
             String url = serverConfig.getUrl() + fileName;
-            AjaxResult ajax = AjaxResult.success();
-            ajax.put("fileName", fileName);
-            ajax.put("url", url);
-            return ajax;
+            return R.ok(new UploadResultVo(fileName, url));
         } catch (Exception e) {
-            return AjaxResult.error(e.getMessage());
+            return R.fail(e.getMessage());
         }
     }
 

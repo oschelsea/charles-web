@@ -5,7 +5,7 @@ import io.charles.common.utils.poi.ExcelUtil;
 import io.charles.framework.aspectj.lang.annotation.Log;
 import io.charles.framework.aspectj.lang.enums.BusinessType;
 import io.charles.framework.web.controller.BaseController;
-import io.charles.framework.web.domain.AjaxResult;
+import io.charles.framework.web.domain.R;
 import io.charles.framework.web.page.TableDataInfo;
 import io.charles.project.monitor.domain.SysOperLog;
 import io.charles.project.monitor.service.ISysOperLogService;
@@ -48,15 +48,15 @@ public class SysOperlogController extends BaseController {
     @Log(title = "操作日志", businessType = BusinessType.DELETE)
     @PreAuthorize("@ss.hasPermi('monitor:operlog:remove')")
     @DeleteMapping("/{operIds}")
-    public AjaxResult remove(@PathVariable Long[] operIds) {
-        return toAjax(operLogService.deleteOperLogByIds(operIds));
+    public R<Void> remove(@PathVariable Long[] operIds) {
+        return toResult(operLogService.deleteOperLogByIds(operIds));
     }
 
     @Log(title = "操作日志", businessType = BusinessType.CLEAN)
     @PreAuthorize("@ss.hasPermi('monitor:operlog:remove')")
     @DeleteMapping("/clean")
-    public AjaxResult clean() {
+    public R<Void> clean() {
         operLogService.cleanOperLog();
-        return AjaxResult.success();
+        return R.ok();
     }
 }

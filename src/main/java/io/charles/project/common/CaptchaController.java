@@ -7,7 +7,7 @@ import io.charles.common.enums.CaptchaType;
 import io.charles.common.utils.StringUtils;
 import io.charles.framework.cache.ICacheService;
 import io.charles.framework.config.properties.CaptchaProperties;
-import io.charles.framework.web.domain.AjaxResult;
+import io.charles.framework.web.domain.R;
 import io.charles.project.system.service.ISysConfigService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -35,16 +35,17 @@ public class CaptchaController {
     private final ISysConfigService configService;
     private final ExpressionParser parser = new SpelExpressionParser();
 
+    public record CaptchaVo(boolean captchaOnOff, String uuid, String img) {
+    }
+
     /**
      * 生成验证码
      */
     @GetMapping("/captchaImage")
-    public AjaxResult getCode(HttpServletResponse response) throws IOException {
-        AjaxResult ajax = AjaxResult.success();
+    public R<CaptchaVo> getCode(HttpServletResponse response) throws IOException {
         boolean captchaOnOff = configService.selectCaptchaOnOff();
-        ajax.put("captchaOnOff", captchaOnOff);
         if (!captchaOnOff) {
-            return ajax;
+            return R.ok(new CaptchaVo(false, null, null));
         }
         // 保存验证码信息
         String uuid = IdUtil.simpleUUID();
@@ -58,8 +59,6 @@ public class CaptchaController {
             code = exp.getValue(String.class);
         }
         cacheCache.setCacheObject(verifyKey, code, Constants.CAPTCHA_EXPIRATION.longValue(), TimeUnit.MINUTES);
-        ajax.put("uuid", uuid);
-        ajax.put("img", captchaGenerator.getImageBase64());
-        return ajax;
+        return R.ok(new CaptchaVo(true, uuid, captchaGenerator.getImageBase64()));
     }
 }

@@ -7,7 +7,7 @@ import io.charles.framework.aspectj.lang.enums.BusinessType;
 import io.charles.framework.cache.ICacheService;
 import io.charles.framework.security.LoginUser;
 import io.charles.framework.web.controller.BaseController;
-import io.charles.framework.web.domain.AjaxResult;
+import io.charles.framework.web.domain.R;
 import io.charles.framework.web.page.TableDataInfo;
 import io.charles.project.monitor.domain.SysUserOnline;
 import io.charles.project.system.service.ISysUserOnlineService;
@@ -67,8 +67,8 @@ public class SysUserOnlineController extends BaseController {
     @PreAuthorize("@ss.hasPermi('monitor:online:forceLogout')")
     @Log(title = "在线用户", businessType = BusinessType.FORCE)
     @DeleteMapping("/{tokenId}")
-    public AjaxResult forceLogout(@PathVariable String tokenId) {
+    public R<Void> forceLogout(@PathVariable String tokenId) {
         cacheService.deleteObject(Constants.LOGIN_TOKEN_KEY + tokenId);
-        return AjaxResult.success();
+        return R.ok();
     }
 }

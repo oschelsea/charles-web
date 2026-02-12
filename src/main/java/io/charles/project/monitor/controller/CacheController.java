@@ -1,6 +1,6 @@
 package io.charles.project.monitor.controller;
 
-import io.charles.framework.web.domain.AjaxResult;
+import io.charles.framework.web.domain.R;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +19,7 @@ public class CacheController {
 
     @PreAuthorize("@ss.hasPermi('monitor:cache:list')")
     @GetMapping()
-    public AjaxResult getInfo() throws Exception {
+    public R<Void> getInfo() throws Exception {
 //        Properties info = (Properties) redisTemplate.execute((RedisCallback<Object>) connection -> connection.info());
 //        Properties commandStats = (Properties) redisTemplate.execute((RedisCallback<Object>) connection -> connection.info("commandstats"));
 //        Object dbSize = redisTemplate.execute((RedisCallback<Object>) connection -> connection.dbSize());
@@ -37,6 +37,6 @@ public class CacheController {
 //            pieList.add(data);
 //        });
 //        result.put("commandStats" , pieList);
-        return AjaxResult.success();
+        return R.ok();
     }
 }

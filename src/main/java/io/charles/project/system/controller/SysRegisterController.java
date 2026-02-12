@@ -3,7 +3,7 @@ package io.charles.project.system.controller;
 import io.charles.framework.security.RegisterBody;
 import io.charles.framework.security.service.SysRegisterService;
 import io.charles.framework.web.controller.BaseController;
-import io.charles.framework.web.domain.AjaxResult;
+import io.charles.framework.web.domain.R;
 import io.charles.project.system.service.ISysConfigService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +24,11 @@ public class SysRegisterController extends BaseController {
     private final ISysConfigService configService;
 
     @PostMapping("/register")
-    public AjaxResult register(@RequestBody RegisterBody user) {
+    public R<Void> register(@RequestBody RegisterBody user) {
         if (!("true".equals(configService.selectConfigByKey("sys.account.registerUser")))) {
-            return error("当前系统没有开启注册功能！");
+            return R.fail("当前系统没有开启注册功能！");
         }
         String msg = registerService.register(user);
-        return StringUtils.isEmpty(msg) ? success() : error(msg);
+        return StringUtils.isEmpty(msg) ? R.ok() : R.fail(msg);
     }
 }

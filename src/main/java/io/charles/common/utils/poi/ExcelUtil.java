@@ -12,7 +12,7 @@ import io.charles.common.utils.reflect.ReflectUtils;
 import io.charles.framework.aspectj.lang.annotation.Excel;
 import io.charles.framework.aspectj.lang.annotation.Excels;
 import io.charles.framework.config.AppProperties;
-import io.charles.framework.web.domain.AjaxResult;
+import io.charles.framework.web.domain.R;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ooxml.POIXMLDocumentPart;
@@ -393,7 +393,7 @@ public class ExcelUtil<T> {
      * @param sheetName 工作表的名称
      * @return 结果
      */
-    public AjaxResult exportExcel(List<T> list, String sheetName) {
+    public R<Void> exportExcel(List<T> list, String sheetName) {
         this.init(list, sheetName, Excel.Type.EXPORT);
         return exportExcel();
     }
@@ -420,7 +420,7 @@ public class ExcelUtil<T> {
      * @param sheetName 工作表的名称
      * @return 结果
      */
-    public AjaxResult importTemplateExcel(String sheetName) {
+    public R<Void> importTemplateExcel(String sheetName) {
         this.init(null, sheetName, Excel.Type.IMPORT);
         return exportExcel();
     }
@@ -459,14 +459,14 @@ public class ExcelUtil<T> {
      *
      * @return 结果
      */
-    public AjaxResult exportExcel() {
+    public R<Void> exportExcel() {
         OutputStream out = null;
         try {
             writeSheet();
             String filename = encodingFilename(sheetName);
             out = new FileOutputStream(getAbsoluteFile(filename));
             wb.write(out);
-            return AjaxResult.success(filename);
+            return R.ok(filename);
         } catch (Exception e) {
             log.error("导出Excel异常{}", e.getMessage());
             throw new UtilException("导出Excel失败，请联系网站管理员！");

@@ -3,7 +3,7 @@ package io.charles.framework.interceptor;
 import io.charles.common.utils.JsonUtil;
 import io.charles.common.utils.ServletUtils;
 import io.charles.framework.interceptor.annotation.RepeatSubmit;
-import io.charles.framework.web.domain.AjaxResult;
+import io.charles.framework.web.domain.R;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
@@ -27,8 +27,8 @@ public abstract class RepeatSubmitInterceptor implements HandlerInterceptor {
             RepeatSubmit annotation = method.getAnnotation(RepeatSubmit.class);
             if (annotation != null) {
                 if (this.isRepeatSubmit(request, annotation)) {
-                    AjaxResult ajaxResult = AjaxResult.error(annotation.message());
-                    ServletUtils.renderString(response, JsonUtil.toJson(ajaxResult));
+                    R<Void> r = R.fail(annotation.message());
+                    ServletUtils.renderString(response, JsonUtil.toJson(r));
                     return false;
                 }
             }

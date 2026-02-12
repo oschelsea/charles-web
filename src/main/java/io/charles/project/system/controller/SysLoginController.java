@@ -1,13 +1,13 @@
 package io.charles.project.system.controller;
 
-import io.charles.common.constant.Constants;
 import io.charles.common.utils.SecurityUtils;
 import io.charles.framework.security.LoginBody;
 import io.charles.framework.security.service.SysLoginService;
 import io.charles.framework.security.service.SysPermissionService;
-import io.charles.framework.web.domain.AjaxResult;
+import io.charles.framework.web.domain.R;
 import io.charles.project.system.domain.SysMenu;
 import io.charles.project.system.domain.SysUser;
+import io.charles.project.system.domain.vo.RouterVo;
 import io.charles.project.system.service.ISysMenuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +31,9 @@ public class SysLoginController {
     private final ISysMenuService menuService;
     private final SysPermissionService permissionService;
 
+    public record LoginInfoVo(String token) {
+    }
+
     /**
      * 登录方法
      *
@@ -38,13 +41,11 @@ public class SysLoginController {
      * @return 结果
      */
     @PostMapping("/login")
-    public AjaxResult login(@RequestBody LoginBody loginBody) {
-        AjaxResult ajax = AjaxResult.success();
+    public R<LoginInfoVo> login(@RequestBody LoginBody loginBody) {
         // 生成令牌
         String token = loginService.login(loginBody.getUsername(), loginBody.getPassword(), loginBody.getCode(),
                 loginBody.getUuid());
-        ajax.put(Constants.TOKEN, token);
-        return ajax;
+        return R.ok(new LoginInfoVo(token));
     }
 
     /**
@@ -53,17 +54,16 @@ public class SysLoginController {
      * @return 用户信息
      */
     @GetMapping("getInfo")
-    public AjaxResult getInfo() {
+    public R<UserInfoVo> getInfo() {
         SysUser user = SecurityUtils.getLoginUser().getUser();
         // 角色集合
         Set<String> roles = permissionService.getRolePermission(user);
         // 权限集合
         Set<String> permissions = permissionService.getMenuPermission(user);
-        AjaxResult ajax = AjaxResult.success();
-        ajax.put("user", user);
-        ajax.put("roles", roles);
-        ajax.put("permissions", permissions);
-        return ajax;
+        return R.ok(new UserInfoVo(user, roles, permissions));
+    }
+
+    public record UserInfoVo(SysUser user, Set<String> roles, Set<String> permissions) {
     }
 
     /**
@@ -72,9 +72,9 @@ public class SysLoginController {
      * @return 路由信息
      */
     @GetMapping("getRouters")
-    public AjaxResult getRouters() {
+    public R<List<RouterVo>> getRouters() {
         Long userId = SecurityUtils.getUserId();
         List<SysMenu> menus = menuService.selectMenuTreeByUserId(userId);
-        return AjaxResult.success(menuService.buildMenus(menus));
+        return R.ok(menuService.buildMenus(menus));
     }
 }

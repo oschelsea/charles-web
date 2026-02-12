@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.charles.common.utils.DateUtils;
 import io.charles.common.utils.SecurityUtils;
 import io.charles.framework.security.LoginUser;
-import io.charles.framework.web.domain.AjaxResult;
+import io.charles.framework.web.domain.R;
 import io.charles.framework.web.page.TableDataInfo;
 import io.charles.framework.web.page.TableSupport;
 import org.slf4j.Logger;
@@ -69,41 +69,13 @@ public class BaseController {
     }
 
     /**
-     * 返回成功
-     */
-    public AjaxResult success() {
-        return AjaxResult.success();
-    }
-
-    /**
-     * 返回失败消息
-     */
-    public AjaxResult error() {
-        return AjaxResult.error();
-    }
-
-    /**
-     * 返回成功消息
-     */
-    public AjaxResult success(String message) {
-        return AjaxResult.success(message);
-    }
-
-    /**
-     * 返回失败消息
-     */
-    public AjaxResult error(String message) {
-        return AjaxResult.error(message);
-    }
-
-    /**
      * 响应返回结果
      *
      * @param rows 影响行数
      * @return 操作结果
      */
-    protected AjaxResult toAjax(int rows) {
-        return rows > 0 ? AjaxResult.success() : AjaxResult.error();
+    protected R<Void> toResult(int rows) {
+        return toResult(rows > 0);
     }
 
     /**
@@ -112,8 +84,8 @@ public class BaseController {
      * @param result 结果
      * @return 操作结果
      */
-    protected AjaxResult toAjax(boolean result) {
-        return result ? success() : error();
+    protected R<Void> toResult(boolean result) {
+        return result ? R.ok() : R.fail();
     }
 
     /**
