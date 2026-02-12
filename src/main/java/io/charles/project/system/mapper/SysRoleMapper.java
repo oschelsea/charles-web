@@ -2,20 +2,27 @@ package io.charles.project.system.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.github.yulichang.base.MPJBaseMapper;
+import com.github.yulichang.query.MPJLambdaQueryWrapper;
+import com.github.yulichang.query.MPJQueryWrapper;
+import com.github.yulichang.toolkit.JoinWrappers;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import io.charles.project.system.domain.SysRole;
+import io.charles.project.system.domain.SysUser;
+import io.charles.project.system.domain.SysUserRole;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 角色表 数据层
  *
  * @author charles
  */
-public interface SysRoleMapper extends BaseMapper<SysRole> {
+public interface SysRoleMapper extends MPJBaseMapper<SysRole> {
     /**
      * 根据条件分页查询角色数据
      *
@@ -23,7 +30,7 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param role 角色信息
      * @return 角色数据集合信息
      */
-    List<SysRole> selectRoleList(IPage<SysRole> page, @Param("role") SysRole role);
+    List<SysRole> selectRoleList(IPage<SysRole> page, @Param("role") SysRole role, @Param("ew") MPJLambdaQueryWrapper<SysRole> wrapper);
 
     /**
      * 根据用户ID查询角色
@@ -31,7 +38,16 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param userId 用户ID
      * @return 角色列表
      */
-    List<SysRole> selectRolePermissionByUserId(Long userId);
+    default List<SysRole> selectRolePermissionByUserId(Long userId) {
+        MPJLambdaWrapper<SysRole> wrapper = JoinWrappers.lambda();
+        wrapper.distinct()
+                .selectAll(SysRole.class)
+                .leftJoin(SysUserRole.class, SysUserRole::getRoleId, SysRole::getRoleId)
+                .leftJoin(SysUser.class, SysUser::getUserId, SysUserRole::getUserId)
+                .eq(SysRole::getDelFlag, "0")
+                .eq(SysUser::getUserId, userId);
+        return selectJoinList(wrapper);
+    }
 
     /**
      * 查询所有角色
@@ -48,7 +64,14 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param userId 用户ID
      * @return 选中角色ID列表
      */
-    List<Integer> selectRoleListByUserId(Long userId);
+    default List<Integer> selectRoleListByUserId(Long userId) {
+        MPJLambdaWrapper<SysRole> wrapper = JoinWrappers.lambda();
+        wrapper.distinct()
+                .select(SysRole::getRoleId)
+                .leftJoin(SysUserRole.class, SysUserRole::getRoleId, SysRole::getRoleId)
+                .eq(SysUserRole::getUserId, userId);
+        return selectObjs(wrapper).stream().map(o -> Integer.parseInt(o.toString())).collect(Collectors.toList());
+    }
 
     /**
      * 通过角色ID查询角色
@@ -56,7 +79,9 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param roleId 角色ID
      * @return 角色对象信息
      */
-    SysRole selectRoleById(Long roleId);
+    default SysRole selectRoleById(Long roleId) {
+        return selectById(roleId);
+    }
 
     /**
      * 根据用户ID查询角色
@@ -64,13 +89,16 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
      * @param userName 用户名
      * @return 角色列表
      */
-    /**
-     * 根据用户ID查询角色
-     *
-     * @param userName 用户名
-     * @return 角色列表
-     */
-    List<SysRole> selectRolesByUserName(String userName);
+    default List<SysRole> selectRolesByUserName(String userName) {
+        MPJLambdaWrapper<SysRole> wrapper = JoinWrappers.lambda();
+        wrapper.distinct()
+                .selectAll(SysRole.class)
+                .leftJoin(SysUserRole.class, SysUserRole::getRoleId, SysRole::getRoleId)
+                .leftJoin(SysUser.class, SysUser::getUserId, SysUserRole::getUserId)
+                .eq(SysRole::getDelFlag, "0")
+                .eq(SysUser::getUserName, userName);
+        return selectJoinList(wrapper);
+    }
 
     /**
      * 校验角色名称是否唯一

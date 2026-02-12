@@ -11,10 +11,14 @@ import io.charles.framework.security.service.SysPermissionService;
 import io.charles.framework.security.service.TokenService;
 import io.charles.framework.web.controller.BaseController;
 import io.charles.framework.web.domain.AjaxResult;
+import io.charles.framework.web.domain.R;
+import io.charles.framework.web.domain.TreeSelect;
 import io.charles.framework.web.page.TableDataInfo;
+import io.charles.project.system.domain.SysDept;
 import io.charles.project.system.domain.SysRole;
 import io.charles.project.system.domain.SysUser;
 import io.charles.project.system.domain.SysUserRole;
+import io.charles.project.system.service.ISysDeptService;
 import io.charles.project.system.service.ISysRoleService;
 import io.charles.project.system.service.ISysUserService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,6 +43,7 @@ public class SysRoleController extends BaseController {
     private final TokenService tokenService;
     private final SysPermissionService permissionService;
     private final ISysUserService userService;
+    private final ISysDeptService deptService;
 
     @PreAuthorize("@ss.hasPermi('system:role:list')")
     @GetMapping("/list")
@@ -204,5 +209,19 @@ public class SysRoleController extends BaseController {
     @PutMapping("/authUser/selectAll")
     public AjaxResult selectAuthUserAll(Long roleId, Long[] userIds) {
         return toAjax(roleService.insertAuthUsers(roleId, userIds));
+    }
+
+    /**
+     * 加载对应角色部门列表树
+     */
+    @PreAuthorize("@ss.hasPermi('system:role:list')")
+    @GetMapping(value = "/deptTree/{roleId}")
+    public R<DeptTreeSelectVo> roleDeptTreeselect(@PathVariable("roleId") Long roleId) {
+        List<SysDept> depts = deptService.selectDeptList(new SysDept());
+        DeptTreeSelectVo selectVo = new DeptTreeSelectVo(deptService.selectDeptListByRoleId(roleId), deptService.buildDeptTreeSelect(depts));
+        return R.ok(selectVo);
+    }
+
+    public record DeptTreeSelectVo(List<Integer> checkedKeys, List<TreeSelect> depts) {
     }
 }

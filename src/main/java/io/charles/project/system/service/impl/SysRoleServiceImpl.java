@@ -1,6 +1,7 @@
 package io.charles.project.system.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.github.yulichang.query.MPJLambdaQueryWrapper;
 import io.charles.common.constant.UserConstants;
 import io.charles.common.exception.ServiceException;
 import io.charles.common.utils.SecurityUtils;
@@ -43,7 +44,17 @@ public class SysRoleServiceImpl implements ISysRoleService {
     @Override
     @DataScope(deptAlias = "d")
     public List<SysRole> selectRoleList(IPage<SysRole> page, SysRole role) {
-        List<SysRole> roles = roleMapper.selectRoleList(page, role);
+        MPJLambdaQueryWrapper<SysRole> queryWrapper = new MPJLambdaQueryWrapper<>();
+        queryWrapper.setAlias("r").eq(SysRole::getStatus, "0")
+                .eqIfExists(SysRole::getRoleId, role.getRoleId())
+                .likeIfExists(SysRole::getRoleName, role.getRoleName())
+                .eqIfExists(SysRole::getStatus, role.getStatus())
+                .likeIfExists(SysRole::getRoleKey, role.getRoleKey());
+        if (role.getParams() != null) {
+            queryWrapper.ge(role.getParams().get("beginTime") != null, SysRole::getCreateBy, role.getParams().get("beginTime"));
+            queryWrapper.le(role.getParams().get("endTime") != null, SysRole::getCreateBy, role.getParams().get("endTime"));
+        }
+        List<SysRole> roles = roleMapper.selectRoleList(page, role, queryWrapper);
         if (page != null) {
             page.setRecords(roles);
         }

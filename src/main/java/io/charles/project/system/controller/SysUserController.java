@@ -9,8 +9,10 @@ import io.charles.framework.aspectj.lang.annotation.Log;
 import io.charles.framework.aspectj.lang.enums.BusinessType;
 import io.charles.framework.web.controller.BaseController;
 import io.charles.framework.web.domain.AjaxResult;
+import io.charles.framework.web.domain.R;
 import io.charles.framework.web.page.TableDataInfo;
 import io.charles.project.system.domain.SysDept;
+import io.charles.project.system.domain.SysPost;
 import io.charles.project.system.domain.SysRole;
 import io.charles.project.system.domain.SysUser;
 import io.charles.project.system.service.ISysDeptService;
@@ -18,6 +20,7 @@ import io.charles.project.system.service.ISysPostService;
 import io.charles.project.system.service.ISysRoleService;
 import io.charles.project.system.service.ISysUserService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,18 +88,23 @@ public class SysUserController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('system:user:query')")
     @GetMapping(value = {"/", "/{userId}"})
-    public AjaxResult getInfo(@PathVariable(value = "userId", required = false) Long userId) {
+    public R<UserInfoVo> getInfo(@PathVariable(value = "userId", required = false) Long userId) {
         userService.checkUserDataScope(userId);
-        AjaxResult ajax = AjaxResult.success();
         List<SysRole> roles = roleService.selectRoleAll();
-        ajax.put("roles", SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));
-        ajax.put("posts", postService.selectPostAll());
-        if (StringUtils.isNotNull(userId)) {
-            ajax.put(AjaxResult.DATA_TAG, userService.selectUserById(userId));
-            ajax.put("postIds", postService.selectPostListByUserId(userId));
-            ajax.put("roleIds", roleService.selectRoleListByUserId(userId));
-        }
-        return ajax;
+        return R.ok(new UserInfoVo(userId == null ? null : userService.selectUserById(userId),
+                SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()),
+                postService.selectPostAll(),
+                userId == null ? null : postService.selectPostListByUserId(userId),
+                userId == null ? null : roleService.selectRoleListByUserId(userId)));
+    }
+
+    public record UserInfoVo(
+            SysUser user,
+            List<SysRole> roles,
+            List<SysPost> posts,
+            List<Integer> postIds,
+            List<Integer> roleIds
+    ) {
     }
 
     /**
@@ -209,5 +217,14 @@ public class SysUserController extends BaseController {
     @GetMapping("/deptTree")
     public AjaxResult deptTree(SysDept dept) {
         return AjaxResult.success(deptService.selectDeptTreeList(dept));
+    }
+
+    /**
+     * 获取部门下的所有用户信息
+     */
+    @PreAuthorize("@ss.hasPermi('system:user:list')")
+    @GetMapping("/list/dept/{deptId}")
+    public R<List<SysUser>> listByDept(@PathVariable @NotNull Long deptId) {
+        return R.ok(userService.selectUserListByDept(deptId));
     }
 }

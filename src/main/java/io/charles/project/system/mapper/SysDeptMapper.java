@@ -1,5 +1,6 @@
 package io.charles.project.system.mapper;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -35,7 +36,7 @@ public interface SysDeptMapper extends BaseMapper<SysDept> {
             // 数据范围过滤
             Map<String, Object> params = dept.getParams();
             if (params != null && params.get("dataScope") != null) {
-                wrapper.apply(params.get("dataScope").toString());
+                //wrapper.apply(StrUtil.stripIgnoreCase(StrUtil.stripIgnoreCase(params.get("dataScope").toString(), "AND"), "OR"));
             }
         }
         wrapper.orderByAsc(SysDept::getParentId, SysDept::getOrderNum);

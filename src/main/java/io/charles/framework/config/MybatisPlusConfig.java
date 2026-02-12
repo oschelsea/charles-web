@@ -3,9 +3,8 @@ package io.charles.framework.config;
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.*;
+import io.charles.framework.datapermission.CustomDataPermissionHandler;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.mapping.VendorDatabaseIdProvider;
 import org.mybatis.spring.annotation.MapperScan;
@@ -36,6 +35,9 @@ public class MybatisPlusConfig {
         interceptor.addInnerInterceptor(optimisticLockerInnerInterceptor());
         // 阻断插件
         interceptor.addInnerInterceptor(blockAttackInnerInterceptor());
+        // 数据权限插件
+        InnerInterceptor dataPermissionInterceptor = new DataPermissionInterceptor(new CustomDataPermissionHandler());
+        interceptor.addInnerInterceptor(dataPermissionInterceptor);
         // 分页插件 必须放最后
         interceptor.addInnerInterceptor(paginationInnerInterceptor());
         return interceptor;

@@ -1,6 +1,9 @@
 package io.charles.project.system.mapper;
 
+import io.charles.project.system.domain.SysDept;
+import io.charles.project.system.domain.SysRole;
 import io.charles.project.system.domain.SysUser;
+import io.charles.project.system.domain.SysUserRole;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +24,15 @@ class SysUserMapperTest {
 
     @Autowired
     private SysUserMapper sysUserMapper;
+
+    @Autowired
+    private SysDeptMapper sysDeptMapper;
+
+    @Autowired
+    private SysRoleMapper sysRoleMapper;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
 
     private static Long testUserId;
 
@@ -65,7 +77,7 @@ class SysUserMapperTest {
     void testSelectUserList() {
         SysUser query = new SysUser();
         query.setNickName("测试");
-        List<SysUser> list = sysUserMapper.selectUserList(query);
+        List<SysUser> list = sysUserMapper.selectUserList(null, query);
         assertFalse(list.isEmpty(), "用户列表不应为空");
     }
 
@@ -147,5 +159,152 @@ class SysUserMapperTest {
     void testSelectCount() {
         Long count = sysUserMapper.selectCount(null);
         assertNotNull(count, "查询数量不应为null");
+    }
+
+    /**
+     * 测试查询已分配用户角色列表
+     */
+    @Test
+    @Order(10)
+    void testSelectAllocatedList() {
+        // 数据准备
+        SysUser user = new SysUser();
+        user.setUserName("alloc_user_" + System.currentTimeMillis());
+        user.setNickName("Alloc User");
+        sysUserMapper.insertUser(user);
+        Long userId = user.getUserId();
+
+        SysRole role = new SysRole();
+        role.setRoleName("Alloc Role");
+        role.setRoleKey("alloc_role_" + System.currentTimeMillis());
+        role.setRoleSort("1");
+        role.setStatus("0");
+        sysRoleMapper.insertRole(role);
+        Long roleId = role.getRoleId();
+
+        SysUserRole ur = new SysUserRole();
+        ur.setUserId(userId);
+        ur.setRoleId(roleId);
+        sysUserRoleMapper.insert(ur);
+
+        // 执行查询
+        SysUser query = new SysUser();
+        query.setRoleId(roleId);
+        List<SysUser> list = sysUserMapper.selectAllocatedList(null, query);
+        assertFalse(list.isEmpty(), "应查询到已分配用户");
+        boolean exists = list.stream().anyMatch(u -> u.getUserId().equals(userId));
+        assertTrue(exists, "应包含刚分配的用户");
+    }
+
+    /**
+     * 测试查询未分配用户角色列表
+     */
+    @Test
+    @Order(11)
+    void testSelectUnallocatedList() {
+        // 数据准备 - 创建一个用户但不分配特定角色
+        SysUser user = new SysUser();
+        user.setUserName("unalloc_user_" + System.currentTimeMillis());
+        user.setNickName("Unalloc User");
+        sysUserMapper.insertUser(user);
+        Long userId = user.getUserId();
+
+        SysRole role = new SysRole();
+        role.setRoleName("Unalloc Role");
+        role.setRoleKey("unalloc_role_" + System.currentTimeMillis());
+        role.setRoleSort("2");
+        role.setStatus("0");
+        sysRoleMapper.insertRole(role);
+        Long roleId = role.getRoleId();
+
+        // 此时 user 未分配给 role
+
+        // 执行查询
+        SysUser query = new SysUser();
+        query.setRoleId(roleId);
+        List<SysUser> list = sysUserMapper.selectUnallocatedList(null, query);
+        assertFalse(list.isEmpty(), "应查询到未分配用户");
+        boolean exists = list.stream().anyMatch(u -> u.getUserId().equals(userId));
+        assertTrue(exists, "应包含未分配的用户");
+    }
+
+    /**
+     * 测试修改用户头像
+     */
+    @Test
+    @Order(12)
+    void testUpdateUserAvatar() {
+        SysUser user = sysUserMapper.selectUserById(testUserId);
+        String newAvatar = "avatar_path_" + System.currentTimeMillis();
+        int result = sysUserMapper.updateUserAvatar(user.getUserName(), newAvatar);
+        assertEquals(1, result, "修改头像应成功");
+
+        SysUser updatedUser = sysUserMapper.selectUserById(testUserId);
+        assertEquals(newAvatar, updatedUser.getAvatar(), "头像应更新");
+    }
+
+    /**
+     * 测试校验手机号码是否唯一
+     */
+    @Test
+    @Order(13)
+    void testCheckPhoneUnique() {
+        String phone = "139" + System.currentTimeMillis() % 100000000;
+        SysUser user = new SysUser();
+        user.setUserName("phone_user_" + System.currentTimeMillis());
+        user.setPhonenumber(phone);
+        user.setNickName("Phone User");
+        sysUserMapper.insertUser(user);
+
+        SysUser result = sysUserMapper.checkPhoneUnique(phone);
+        assertNotNull(result, "应查询到用户");
+        assertEquals(user.getUserId(), result.getUserId(), "ID应一致");
+    }
+
+    /**
+     * 测试校验email是否唯一
+     */
+    @Test
+    @Order(14)
+    void testCheckEmailUnique() {
+        String email = "unique_" + System.currentTimeMillis() + "@test.com";
+        SysUser user = new SysUser();
+        user.setUserName("email_user_" + System.currentTimeMillis());
+        user.setEmail(email);
+        user.setNickName("Email User");
+        sysUserMapper.insertUser(user);
+
+        SysUser result = sysUserMapper.checkEmailUnique(email);
+        assertNotNull(result, "应查询到用户");
+        assertEquals(user.getUserId(), result.getUserId(), "ID应一致");
+    }
+
+    /**
+     * 测试查询部门是否存在用户
+     */
+    @Test
+    @Order(15)
+    void testCheckDeptExistUser() {
+        // 创建一个部门
+        SysDept dept = new SysDept();
+        dept.setDeptName("Test Dept " + System.currentTimeMillis());
+        dept.setParentId(100L); // 假设100是存在的父ID
+        dept.setOrderNum("1");
+        dept.setStatus("0");
+        sysDeptMapper.insertDept(dept);
+        Long deptId = dept.getDeptId();
+
+        // 创建一个用户属于该部门
+        SysUser user = new SysUser();
+        user.setUserName("dept_user_" + System.currentTimeMillis());
+        user.setDeptId(deptId);
+        user.setNickName("Dept User");
+        sysUserMapper.insertUser(user);
+
+        int count = sysUserMapper.checkDeptExistUser(deptId);
+        assertTrue(count > 0, "部门下应存在用户");
+
+        int zeroCount = sysUserMapper.checkDeptExistUser(deptId + 99999); // 不存在的部门
+        assertEquals(0, zeroCount, "不存在的部门应返回0");
     }
 }

@@ -207,4 +207,12 @@ public interface ISysUserService {
      * @return 结果
      */
     String importUser(List<SysUser> userList, Boolean isUpdateSupport, String operName);
+
+    /**
+     * 通过部门id查询当前部门所有用户
+     *
+     * @param deptId 部门id
+     * @return 结果
+     */
+    List<SysUser> selectUserListByDept(Long deptId);
 }
