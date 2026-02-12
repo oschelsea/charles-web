@@ -4,19 +4,18 @@ import io.charles.common.utils.SecurityUtils;
 import io.charles.common.utils.StringUtils;
 import io.charles.framework.aspectj.lang.annotation.DataScope;
 import io.charles.framework.security.LoginUser;
-import io.charles.framework.web.domain.BaseEntity;
 import io.charles.project.system.domain.SysRole;
 import io.charles.project.system.domain.SysUser;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 
 /**
  * 数据过滤处理
@@ -50,11 +49,6 @@ public class DataScopeAspect {
      * 仅本人数据权限
      */
     public static final String DATA_SCOPE_SELF = "5";
-
-    /**
-     * 数据权限过滤关键字
-     */
-    public static final String DATA_SCOPE = "dataScope";
 
     /**
      * 数据范围过滤
@@ -96,11 +90,7 @@ public class DataScopeAspect {
         }
 
         if (StringUtils.isNotBlank(sqlString.toString())) {
-            Object params = joinPoint.getArgs()[0];
-            if (StringUtils.isNotNull(params) && params instanceof BaseEntity) {
-                BaseEntity baseEntity = (BaseEntity) params;
-                baseEntity.getParams().put(DATA_SCOPE, " AND (" + sqlString.substring(4) + ")");
-            }
+            DataScopeContextHolder.set("(" + sqlString.substring(4) + ")");
         }
     }
 
@@ -109,10 +99,14 @@ public class DataScopeAspect {
     public void dataScopePointCut() {
     }
 
-    @Before("dataScopePointCut()")
-    public void doBefore(JoinPoint point) throws Throwable {
-        clearDataScope(point);
+    @Around("dataScopePointCut()")
+    public Object doAround(ProceedingJoinPoint point) throws Throwable {
         handleDataScope(point);
+        try {
+            return point.proceed();
+        } finally {
+            DataScopeContextHolder.clear();
+        }
     }
 
     protected void handleDataScope(final JoinPoint joinPoint) {
@@ -145,18 +139,5 @@ public class DataScopeAspect {
             return method.getAnnotation(DataScope.class);
         }
         return null;
-    }
-
-    /**
-     * 拼接权限sql前先清空params.dataScope参数防止注入
-     */
-    private void clearDataScope(final JoinPoint joinPoint) {
-        Object params = joinPoint.getArgs()[0];
-        if (StringUtils.isNotNull(params) && params instanceof BaseEntity) {
-            BaseEntity baseEntity = (BaseEntity) params;
-            if (baseEntity.getParams() != null) {
-                baseEntity.getParams().put(DATA_SCOPE, "");
-            }
-        }
     }
 }

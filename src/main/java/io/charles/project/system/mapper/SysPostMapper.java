@@ -1,11 +1,14 @@
 package io.charles.project.system.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.github.yulichang.base.MPJBaseMapper;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import io.charles.common.utils.StringUtils;
 import io.charles.project.system.domain.SysPost;
+import io.charles.project.system.domain.SysUser;
+import io.charles.project.system.domain.SysUserPost;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,7 +18,7 @@ import java.util.List;
  *
  * @author charles
  */
-public interface SysPostMapper extends BaseMapper<SysPost> {
+public interface SysPostMapper extends MPJBaseMapper<SysPost> {
     /**
      * 查询岗位数据集合
      *
@@ -71,7 +74,13 @@ public interface SysPostMapper extends BaseMapper<SysPost> {
      * @param userId 用户ID
      * @return 选中岗位ID列表
      */
-    List<Integer> selectPostListByUserId(Long userId);
+    default List<Integer> selectPostListByUserId(Long userId) {
+        return selectJoinList(Integer.class, new MPJLambdaWrapper<SysPost>()
+                .select(SysPost::getPostId)
+                .leftJoin(SysUserPost.class, SysUserPost::getPostId, SysPost::getPostId)
+                .leftJoin(SysUser.class, SysUser::getUserId, SysUserPost::getUserId)
+                .eq(SysUser::getUserId, userId));
+    }
 
     /**
      * 查询用户所属岗位组
@@ -79,7 +88,13 @@ public interface SysPostMapper extends BaseMapper<SysPost> {
      * @param userName 用户名
      * @return 结果
      */
-    List<SysPost> selectPostsByUserName(String userName);
+    default List<SysPost> selectPostsByUserName(String userName) {
+        return selectJoinList(SysPost.class, new MPJLambdaWrapper<SysPost>()
+                .select(SysPost::getPostId, SysPost::getPostName, SysPost::getPostCode)
+                .leftJoin(SysUserPost.class, SysUserPost::getPostId, SysPost::getPostId)
+                .leftJoin(SysUser.class, SysUser::getUserId, SysUserPost::getUserId)
+                .eq(SysUser::getUserName, userName));
+    }
 
     /**
      * 删除岗位信息
@@ -98,7 +113,7 @@ public interface SysPostMapper extends BaseMapper<SysPost> {
      * @return 结果
      */
     default int deletePostByIds(Long[] postIds) {
-        return deleteBatchIds(Arrays.asList(postIds));
+        return deleteByIds(Arrays.asList(postIds));
     }
 
     /**

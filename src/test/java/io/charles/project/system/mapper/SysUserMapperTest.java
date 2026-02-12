@@ -70,15 +70,51 @@ class SysUserMapperTest {
     }
 
     /**
-     * 测试查询用户列表
+     * 测试通过用户名查询用户
      */
     @Test
     @Order(3)
+    void testSelectUserByUserName() {
+        SysUser user = sysUserMapper.selectUserByUserName("testuser" + testUserId); // Note: Original testInsertUser uses "testuser" + System.currentTimeMillis() which is hard to predict.
+        // Actually, let's just use the user we created in testInsertUser.
+        // But we need to know the username.
+        // Since testInsertUser sets a dynamic username and assigns it to a local variable but doesn't store it in a static field,
+        // we should probably query by ID first to get the username, then test selectUserByUserName.
+        SysUser existingUser = sysUserMapper.selectUserById(testUserId);
+        assertNotNull(existingUser, "User should exist before testing selectUserByUserName");
+
+        SysUser userByName = sysUserMapper.selectUserByUserName(existingUser.getUserName());
+        assertNotNull(userByName, "Should find user by username");
+        assertEquals(existingUser.getUserId(), userByName.getUserId(), "User IDs should match");
+    }
+
+    /**
+     * 测试查询用户列表
+     */
+    @Test
+    @Order(4)
     void testSelectUserList() {
+        // 1. Basic query
         SysUser query = new SysUser();
         query.setNickName("测试");
         List<SysUser> list = sysUserMapper.selectUserList(null, query);
         assertFalse(list.isEmpty(), "用户列表不应为空");
+
+        // 2. Date range query
+        query = new SysUser();
+        java.util.Map<String, Object> params = new java.util.HashMap<>();
+        // Set a wide range to ensure we hit the user created in testInsertUser
+        params.put("beginTime", "2000-01-01");
+        params.put("endTime", "2099-12-31");
+        query.setParams(params);
+        list = sysUserMapper.selectUserList(null, query);
+        assertFalse(list.isEmpty(), "Should find users within date range");
+
+        // 3. Dept ID query (nested)
+        query = new SysUser();
+        query.setDeptId(100L); // Assuming 100L is the dept used in insert
+        list = sysUserMapper.selectUserList(null, query);
+        assertFalse(list.isEmpty(), "Should find users in dept 100");
     }
 
     /**

@@ -1,23 +1,23 @@
 package io.charles.project.system.mapper;
 
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.github.yulichang.base.MPJBaseMapper;
+import com.github.yulichang.toolkit.MPJWrappers;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import io.charles.common.utils.StringUtils;
 import io.charles.project.system.domain.SysDept;
-import org.apache.ibatis.annotations.Param;
+import io.charles.project.system.domain.SysRoleDept;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 部门管理 数据层
  *
  * @author charles
  */
-public interface SysDeptMapper extends BaseMapper<SysDept> {
+public interface SysDeptMapper extends MPJBaseMapper<SysDept> {
     /**
      * 查询部门管理数据
      *
@@ -25,19 +25,14 @@ public interface SysDeptMapper extends BaseMapper<SysDept> {
      * @return 部门信息集合
      */
     default List<SysDept> selectDeptList(SysDept dept) {
-        LambdaQueryWrapper<SysDept> wrapper = Wrappers.lambdaQuery();
+        MPJLambdaWrapper<SysDept> wrapper = MPJWrappers.lambdaJoin();
+        wrapper.setAlias("d");
         wrapper.eq(SysDept::getDelFlag, "0");
         if (dept != null) {
             wrapper.eq(dept.getDeptId() != null && dept.getDeptId() != 0, SysDept::getDeptId, dept.getDeptId())
                     .eq(dept.getParentId() != null && dept.getParentId() != 0, SysDept::getParentId, dept.getParentId())
                     .like(StringUtils.isNotEmpty(dept.getDeptName()), SysDept::getDeptName, dept.getDeptName())
                     .eq(StringUtils.isNotEmpty(dept.getStatus()), SysDept::getStatus, dept.getStatus());
-
-            // 数据范围过滤
-            Map<String, Object> params = dept.getParams();
-            if (params != null && params.get("dataScope") != null) {
-                //wrapper.apply(StrUtil.stripIgnoreCase(StrUtil.stripIgnoreCase(params.get("dataScope").toString(), "AND"), "OR"));
-            }
         }
         wrapper.orderByAsc(SysDept::getParentId, SysDept::getOrderNum);
         return selectList(wrapper);
@@ -50,7 +45,21 @@ public interface SysDeptMapper extends BaseMapper<SysDept> {
      * @param deptCheckStrictly 部门树选择项是否关联显示
      * @return 选中部门列表
      */
-    List<Integer> selectDeptListByRoleId(@Param("roleId") Long roleId, @Param("deptCheckStrictly") boolean deptCheckStrictly);
+    default List<Integer> selectDeptListByRoleId(Long roleId, boolean deptCheckStrictly) {
+        MPJLambdaWrapper<SysDept> wrapper = new MPJLambdaWrapper<SysDept>()
+                .select(SysDept::getDeptId)
+                .leftJoin(SysRoleDept.class, "rd", SysRoleDept::getDeptId, SysDept::getDeptId)
+                .eq(SysRoleDept::getRoleId, roleId);
+        if (deptCheckStrictly) {
+            wrapper.notIn(SysDept::getDeptId, SysDept.class, w -> w
+                    .select(SysDept::getParentId)
+                    .innerJoin(SysRoleDept.class, "rd", SysRoleDept::getDeptId, SysDept::getDeptId)
+                    .eq(SysRoleDept::getRoleId, roleId));
+        }
+        wrapper.orderByAsc(SysDept::getParentId)
+                .orderByAsc(SysDept::getOrderNum);
+        return selectJoinList(Integer.class, wrapper);
+    }
 
     /**
      * 根据部门ID查询信息
@@ -156,7 +165,15 @@ public interface SysDeptMapper extends BaseMapper<SysDept> {
      * @param depts 子元素
      * @return 结果
      */
-    int updateDeptChildren(@Param("depts") List<SysDept> depts);
+    default int updateDeptChildren(List<SysDept> depts) {
+        int count = 0;
+        for (SysDept dept : depts) {
+            count += update(null, Wrappers.<SysDept>lambdaUpdate()
+                    .set(SysDept::getAncestors, dept.getAncestors())
+                    .eq(SysDept::getDeptId, dept.getDeptId()));
+        }
+        return count;
+    }
 
     /**
      * 删除部门管理信息

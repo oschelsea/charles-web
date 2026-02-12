@@ -66,11 +66,7 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     @DataScope(deptAlias = "d", userAlias = "u")
     public List<SysUser> selectAllocatedList(IPage<SysUser> page, SysUser user) {
-        List<SysUser> users = userMapper.selectAllocatedList(page, user);
-        if (page != null) {
-            page.setRecords(users);
-        }
-        return users;
+        return userMapper.selectAllocatedList(page, user);
     }
 
     /**

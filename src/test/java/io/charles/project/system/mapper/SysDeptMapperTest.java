@@ -1,7 +1,10 @@
 package io.charles.project.system.mapper;
 
 import io.charles.project.system.domain.SysDept;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -22,6 +25,11 @@ class SysDeptMapperTest {
     @Autowired
     private SysDeptMapper sysDeptMapper;
 
+    @Autowired
+    private SysRoleMapper sysRoleMapper;
+
+    @Autowired
+    private SysRoleDeptMapper sysRoleDeptMapper;
     private static Long testDeptId;
 
     /**
@@ -141,5 +149,82 @@ class SysDeptMapperTest {
     void testSelectNormalChildrenDeptById() {
         int count = sysDeptMapper.selectNormalChildrenDeptById(100L);
         assertTrue(count >= 0, "正常状态子部门数应大于等于0");
+    }
+
+    /**
+     * 测试根据角色ID查询部门列表
+     */
+    @Test
+    @Order(11)
+    void testSelectDeptListByRoleId() {
+        // 1. 创建角色
+        io.charles.project.system.domain.SysRole role = new io.charles.project.system.domain.SysRole();
+        role.setRoleName("Dept Role");
+        role.setRoleKey("dept_role_" + System.currentTimeMillis());
+        role.setRoleSort("1");
+        role.setStatus("0");
+        sysRoleMapper.insertRole(role);
+        Long roleId = role.getRoleId();
+
+        // 2. 部门已在 testInsertDept 中创建 testDeptId
+
+        // 3. 关联
+        io.charles.project.system.domain.SysRoleDept rd = new io.charles.project.system.domain.SysRoleDept();
+        rd.setRoleId(roleId);
+        rd.setDeptId(testDeptId);
+        sysRoleDeptMapper.insert(rd);
+
+        // 4. 查询
+        List<Integer> list = sysDeptMapper.selectDeptListByRoleId(roleId, false);
+        assertNotNull(list, "部门列表不应为null");
+        assertTrue(list.contains(testDeptId.intValue()), "应包含测试部门ID");
+    }
+
+    /**
+     * 测试修改子元素关系
+     */
+    @Test
+    @Order(12)
+    void testUpdateDeptChildren() {
+        SysDept child = new SysDept();
+        child.setParentId(testDeptId);
+        child.setAncestors("0,100," + testDeptId);
+        child.setDeptName("Child Dept");
+        child.setOrderNum("1");
+        child.setStatus("0");
+        sysDeptMapper.insertDept(child);
+        Long childId = child.getDeptId();
+
+        // 更新 ancestors
+        child.setAncestors("0,100," + testDeptId + ",updated");
+        int result = sysDeptMapper.updateDeptChildren(java.util.Collections.singletonList(child));
+        assertEquals(1, result, "更新数量应为1");
+
+        SysDept updatedChild = sysDeptMapper.selectDeptById(childId);
+        assertEquals("0,100," + testDeptId + ",updated", updatedChild.getAncestors(), "Ancestors should be updated");
+    }
+
+    /**
+     * 测试修改所在部门正常状态
+     */
+    @Test
+    @Order(13)
+    void testUpdateDeptStatusNormal() {
+        // 创建一个状态为停用(1)的部门
+        SysDept dept = new SysDept();
+        dept.setParentId(testDeptId);
+        dept.setAncestors("0,100," + testDeptId);
+        dept.setDeptName("Status Test Dept");
+        dept.setOrderNum("1");
+        dept.setStatus("1");
+        sysDeptMapper.insertDept(dept);
+        Long deptId = dept.getDeptId();
+
+        // 执行更新
+        sysDeptMapper.updateDeptStatusNormal(new Long[]{deptId});
+
+        // 验证
+        SysDept updatedDept = sysDeptMapper.selectDeptById(deptId);
+        assertEquals("0", updatedDept.getStatus(), "部门状态应更新为正常(0)");
     }
 }

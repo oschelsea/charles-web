@@ -7,7 +7,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -60,5 +59,5 @@ public class BaseEntity implements Serializable {
      * 请求参数（非数据库字段）
      */
     @TableField(exist = false)
-    private Map<String, Object> params = new HashMap<>();
+    private Map<String, Object> params;
 }

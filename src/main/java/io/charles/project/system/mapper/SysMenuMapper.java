@@ -1,9 +1,10 @@
 package io.charles.project.system.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.github.yulichang.base.MPJBaseMapper;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import io.charles.common.utils.StringUtils;
-import io.charles.project.system.domain.SysMenu;
+import io.charles.project.system.domain.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
  *
  * @author charles
  */
-public interface SysMenuMapper extends BaseMapper<SysMenu> {
+public interface SysMenuMapper extends MPJBaseMapper<SysMenu> {
     /**
      * 查询系统菜单列表
      *
@@ -34,7 +35,13 @@ public interface SysMenuMapper extends BaseMapper<SysMenu> {
      *
      * @return 权限列表
      */
-    List<String> selectMenuPerms();
+    default List<String> selectMenuPerms() {
+        return selectJoinList(String.class, new MPJLambdaWrapper<SysMenu>()
+                .distinct()
+                .select(SysMenu::getPerms)
+                .leftJoin(SysRoleMenu.class, "rm", SysRoleMenu::getMenuId, SysMenu::getMenuId)
+                .leftJoin(SysUserRole.class, "ur", SysUserRole::getRoleId, SysRoleMenu::getRoleId));
+    }
 
     /**
      * 根据用户查询系统菜单列表
@@ -42,7 +49,20 @@ public interface SysMenuMapper extends BaseMapper<SysMenu> {
      * @param menu 菜单信息
      * @return 菜单列表
      */
-    List<SysMenu> selectMenuListByUserId(SysMenu menu);
+    default List<SysMenu> selectMenuListByUserId(SysMenu menu, Long userId) {
+        return selectJoinList(SysMenu.class, new MPJLambdaWrapper<SysMenu>()
+                .distinct()
+                .selectAll(SysMenu.class)
+                .leftJoin(SysRoleMenu.class, "rm", SysRoleMenu::getMenuId, SysMenu::getMenuId)
+                .leftJoin(SysUserRole.class, "ur", SysUserRole::getRoleId, SysRoleMenu::getRoleId)
+                .leftJoin(SysRole.class, "ro", SysRole::getRoleId, SysUserRole::getRoleId)
+                .eq(SysUserRole::getUserId, userId)
+                .likeIfExists(SysMenu::getMenuName, menu.getMenuName())
+                .eqIfExists(SysMenu::getVisible, menu.getVisible())
+                .eqIfExists(SysMenu::getStatus, menu.getStatus())
+                .orderByAsc(SysMenu::getParentId)
+                .orderByAsc(SysMenu::getOrderNum));
+    }
 
     /**
      * 根据用户ID查询权限
@@ -50,7 +70,17 @@ public interface SysMenuMapper extends BaseMapper<SysMenu> {
      * @param userId 用户ID
      * @return 权限列表
      */
-    List<String> selectMenuPermsByUserId(Long userId);
+    default List<String> selectMenuPermsByUserId(Long userId) {
+        return selectJoinList(String.class, new MPJLambdaWrapper<SysMenu>()
+                .distinct()
+                .select(SysMenu::getPerms)
+                .leftJoin(SysRoleMenu.class, "rm", SysRoleMenu::getMenuId, SysMenu::getMenuId)
+                .leftJoin(SysUserRole.class, "ur", SysUserRole::getRoleId, SysRoleMenu::getRoleId)
+                .leftJoin(SysRole.class, "r", SysRole::getRoleId, SysUserRole::getRoleId)
+                .eq(SysMenu::getStatus, "0")
+                .eq(SysRole::getStatus, "0")
+                .eq(SysUserRole::getUserId, userId));
+    }
 
     /**
      * 根据用户ID查询菜单
@@ -71,7 +101,21 @@ public interface SysMenuMapper extends BaseMapper<SysMenu> {
      * @param userId 用户ID
      * @return 菜单列表
      */
-    List<SysMenu> selectMenuTreeByUserId(Long userId);
+    default List<SysMenu> selectMenuTreeByUserId(Long userId) {
+        return selectJoinList(SysMenu.class, new MPJLambdaWrapper<SysMenu>()
+                .distinct().setAlias("m")
+                .selectAll(SysMenu.class)
+                .leftJoin(SysRoleMenu.class, "rm", SysRoleMenu::getMenuId, SysMenu::getMenuId)
+                .leftJoin(SysUserRole.class, "ur", SysUserRole::getRoleId, SysRoleMenu::getRoleId)
+                .leftJoin(SysRole.class, "ro", SysRole::getRoleId, SysUserRole::getRoleId)
+                .leftJoin(SysUser.class, "u", SysUser::getUserId, SysUserRole::getUserId)
+                .eq(SysUser::getUserId, userId)
+                .in(SysMenu::getMenuType, "M", "C")
+                .eq(SysMenu::getStatus, "0")
+                .eq(SysRole::getStatus, "0")
+                .orderByAsc(SysMenu::getParentId)
+                .orderByAsc(SysMenu::getOrderNum));
+    }
 
     /**
      * 根据角色ID查询菜单树信息
@@ -80,7 +124,19 @@ public interface SysMenuMapper extends BaseMapper<SysMenu> {
      * @param menuCheckStrictly 菜单树选择项是否关联显示
      * @return 选中菜单列表
      */
-    List<Integer> selectMenuListByRoleId(@Param("roleId") Long roleId, @Param("menuCheckStrictly") boolean menuCheckStrictly);
+    default List<Integer> selectMenuListByRoleId(Long roleId, boolean menuCheckStrictly) {
+        MPJLambdaWrapper<SysMenu> wrapper = new MPJLambdaWrapper<SysMenu>()
+                .select(SysMenu::getMenuId).setAlias("m")
+                .leftJoin(SysRoleMenu.class, "rm", SysRoleMenu::getMenuId, SysMenu::getMenuId)
+                .eq(SysRoleMenu::getRoleId, roleId);
+        if (menuCheckStrictly) {
+            wrapper.notIn(SysMenu::getMenuId, SysMenu.class, w ->
+                    w.select(SysMenu::getParentId).innerJoin(SysRoleMenu.class, "rm", SysRoleMenu::getMenuId, SysMenu::getMenuId).eq(SysRoleMenu::getRoleId, roleId));
+        }
+        wrapper.orderByAsc(SysMenu::getParentId)
+                .orderByAsc(SysMenu::getOrderNum);
+        return selectJoinList(Integer.class, wrapper);
+    }
 
     /**
      * 根据菜单ID查询信息

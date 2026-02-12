@@ -4,14 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.yulichang.base.MPJBaseMapper;
-import com.github.yulichang.query.MPJLambdaQueryWrapper;
-import com.github.yulichang.query.MPJQueryWrapper;
 import com.github.yulichang.toolkit.JoinWrappers;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
+import io.charles.project.system.domain.SysDept;
 import io.charles.project.system.domain.SysRole;
 import io.charles.project.system.domain.SysUser;
 import io.charles.project.system.domain.SysUserRole;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +28,39 @@ public interface SysRoleMapper extends MPJBaseMapper<SysRole> {
      * @param role 角色信息
      * @return 角色数据集合信息
      */
-    List<SysRole> selectRoleList(IPage<SysRole> page, @Param("role") SysRole role, @Param("ew") MPJLambdaQueryWrapper<SysRole> wrapper);
+    default List<SysRole> selectRoleList(IPage<SysRole> page, SysRole role) {
+        MPJLambdaWrapper<SysRole> wrapper = JoinWrappers.lambda();
+        wrapper.distinct()
+                .setAlias("r")
+                .selectAll(SysRole.class)
+                .leftJoin(SysUserRole.class, "ur", SysUserRole::getRoleId, SysRole::getRoleId)
+                .leftJoin(SysUser.class, "u", SysUser::getUserId, SysUserRole::getUserId)
+                .leftJoin(SysDept.class, "d", SysDept::getDeptId, SysUser::getDeptId)
+                .eq(SysRole::getDelFlag, "0")
+                .eqIfExists(SysRole::getRoleId, role.getRoleId())
+                .likeIfExists(SysRole::getRoleName, role.getRoleName())
+                .eqIfExists(SysRole::getStatus, role.getStatus())
+                .likeIfExists(SysRole::getRoleKey, role.getRoleKey());
+
+        if (role.getParams() != null) {
+            String beginTime = (String) role.getParams().get("beginTime");
+            String endTime = (String) role.getParams().get("endTime");
+            if (beginTime != null) {
+                wrapper.ge(SysRole::getCreateTime, beginTime);
+            }
+            if (endTime != null) {
+                wrapper.le(SysRole::getCreateTime, endTime);
+            }
+        }
+
+        wrapper.orderByAsc(SysRole::getRoleSort);
+
+        if (page != null) {
+            selectJoinPage(page, wrapper);
+            return page.getRecords();
+        }
+        return selectJoinList(wrapper);
+    }
 
     /**
      * 根据用户ID查询角色

@@ -58,8 +58,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
         if (SysUser.isAdmin(userId)) {
             menuList = menuMapper.selectMenuList(menu);
         } else {
-            menu.getParams().put("userId", userId);
-            menuList = menuMapper.selectMenuListByUserId(menu);
+            menuList = menuMapper.selectMenuListByUserId(menu, userId);
         }
         return menuList;
     }
