@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.charles.common.utils.StringUtils;
+import io.charles.common.utils.WrapperBuilder;
 import io.charles.project.system.domain.SysDictType;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -44,12 +45,7 @@ public interface SysDictTypeMapper extends BaseMapper<SysDictType> {
 
             Map<String, Object> params = dictType.getParams();
             if (params != null) {
-                if (params.get("beginTime") != null && StringUtils.isNotEmpty(params.get("beginTime").toString())) {
-                    wrapper.ge(SysDictType::getCreateTime, params.get("beginTime"));
-                }
-                if (params.get("endTime") != null && StringUtils.isNotEmpty(params.get("endTime").toString())) {
-                    wrapper.le(SysDictType::getCreateTime, params.get("endTime"));
-                }
+                WrapperBuilder.addTimeRange(wrapper, SysDictType::getCreateTime, params);
             }
         }
         if (page != null) {

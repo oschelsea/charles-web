@@ -16,6 +16,8 @@ app:
   database:
     type: sqlite
     name: charles
+    # host: 127.0.0.1
+    # port: 5432
 
 captcha:
   # 是否启用验证码校验
@@ -69,10 +71,10 @@ spring:
         cachecontrol:
           max-age: 24H
   datasource:
-    # SQLite配置（默认）
-    username: ${APP_DB_USERNAME:}
-    password: ${APP_DB_PASSWORD:}
     druid:
+      # SQLite配置（默认）
+      username: ${APP_DB_USERNAME:}
+      password: ${APP_DB_PASSWORD:}
       # 初始连接数
       initialSize: 5
       # 最小连接池数量

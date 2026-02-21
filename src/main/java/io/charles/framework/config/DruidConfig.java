@@ -1,10 +1,8 @@
 package io.charles.framework.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceBuilder;
 import com.alibaba.druid.spring.boot3.autoconfigure.properties.DruidStatProperties;
 import com.alibaba.druid.util.Utils;
-import io.charles.framework.config.properties.DruidProperties;
 import jakarta.servlet.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 
 /**
  * druid 配置
@@ -42,13 +41,28 @@ public class DruidConfig {
     @Value("${app.database.port:5432}")
     private String port;
 
+    /**
+     * 配置数据源，通过 @ConfigurationProperties 直接将 spring.datasource.druid 下的属性绑定到 DruidDataSource
+     */
     @Bean
     @ConfigurationProperties("spring.datasource.druid")
-    public DataSource dataSource(DruidProperties druidProperties) {
-        DruidDataSource dataSource = new DruidDataSource();
-        druidProperties.dataSource(dataSource);
+    public DataSource dataSource() {
+        boolean isSqlite = "sqlite".equalsIgnoreCase(databaseType);
 
-        if ("sqlite".equalsIgnoreCase(databaseType)) {
+        // 重写 init()，在 @ConfigurationProperties 绑定之后、连接池启动之前强制覆盖 SQLite 连接池参数
+        DruidDataSource dataSource = new DruidDataSource() {
+            @Override
+            public void init() throws SQLException {
+                if (isSqlite) {
+                    super.setInitialSize(1);
+                    super.setMinIdle(1);
+                    super.setMaxActive(1);
+                }
+                super.init();
+            }
+        };
+
+        if (isSqlite) {
             // SQLite 并发优化配置
             Path dbPath = Paths.get("data", databaseName + ".db").toAbsolutePath();
             File dir = dbPath.toFile().getParentFile();
@@ -65,11 +79,6 @@ public class DruidConfig {
             dataSource.setUrl("jdbc:sqlite:" + dbPath);
             dataSource.setDriverClassName("org.sqlite.JDBC");
             dataSource.setConnectProperties(config.toProperties());
-
-            // sqlite单连接配置
-            dataSource.setInitialSize(1);
-            dataSource.setMinIdle(1);
-            dataSource.setMaxActive(1);
         } else if ("postgresql".equalsIgnoreCase(databaseType)) {
             dataSource.setUrl("jdbc:postgresql://" + host + ":" + port + "/" + databaseName);
             dataSource.setDriverClassName("org.postgresql.Driver");

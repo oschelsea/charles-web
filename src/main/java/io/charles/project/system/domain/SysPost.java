@@ -5,11 +5,11 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.framework.aspectj.lang.annotation.Excel;
 import io.charles.framework.aspectj.lang.annotation.Excel.ColumnType;
 import io.charles.framework.web.domain.BaseEntity;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 /**
  * 岗位表 sys_post
@@ -48,8 +48,8 @@ public class SysPost extends BaseEntity {
      * 岗位排序
      */
     @Excel(name = "岗位排序")
-    @NotBlank(message = "显示顺序不能为空")
-    private String postSort;
+    @NotNull(message = "显示顺序不能为空")
+    private Integer postSort;
 
     /**
      * 状态（0正常 1停用）

@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.common.utils.DateUtils;
 import io.charles.common.utils.StringUtils;
+import io.charles.common.utils.WrapperBuilder;
 import io.charles.project.monitor.domain.SysOperLog;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,7 +24,7 @@ public interface SysOperLogMapper extends BaseMapper<SysOperLog> {
      * @param operLog 操作日志对象
      */
     default int insertOperlog(SysOperLog operLog) {
-        operLog.setOperTime(DateUtils.getTime());
+        operLog.setOperTime(LocalDateTime.now());
         return insert(operLog);
     }
 
@@ -51,14 +53,10 @@ public interface SysOperLogMapper extends BaseMapper<SysOperLog> {
                 .like(StringUtils.isNotEmpty(operLog.getOperName()), SysOperLog::getOperName, operLog.getOperName());
 
         if (operLog.getParams() != null) {
-            Object beginTime = operLog.getParams().get("beginTime");
-            Object endTime = operLog.getParams().get("endTime");
-            if (beginTime != null && !beginTime.toString().isEmpty()) {
-                wrapper.ge(SysOperLog::getOperTime, beginTime);
-            }
-            if (endTime != null && !endTime.toString().isEmpty()) {
-                wrapper.le(SysOperLog::getOperTime, endTime);
-            }
+            LocalDateTime beginTime = WrapperBuilder.parseDateTime(operLog.getParams().get("beginTime"));
+            LocalDateTime endTime = WrapperBuilder.parseDateTime(operLog.getParams().get("endTime"));
+            wrapper.ge(beginTime != null, SysOperLog::getOperTime, beginTime)
+                   .le(endTime != null, SysOperLog::getOperTime, endTime);
         }
         wrapper.orderByDesc(SysOperLog::getOperId);
         if (page != null) {

@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.charles.common.utils.DateUtils;
 import io.charles.common.utils.StringUtils;
+import io.charles.common.utils.WrapperBuilder;
 import io.charles.project.monitor.domain.SysLogininfor;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -53,13 +55,10 @@ public interface SysLogininforMapper extends BaseMapper<SysLogininfor> {
                     .like(StringUtils.isNotEmpty(logininfor.getUserName()), SysLogininfor::getUserName, logininfor.getUserName());
 
             if (logininfor.getParams() != null) {
-                if (logininfor.getParams().get("beginTime") != null && logininfor.getParams().get("endTime") != null) {
-                    wrapper.between(SysLogininfor::getLoginTime, logininfor.getParams().get("beginTime"), logininfor.getParams().get("endTime"));
-                } else if (logininfor.getParams().get("beginTime") != null) {
-                    wrapper.ge(SysLogininfor::getLoginTime, logininfor.getParams().get("beginTime"));
-                } else if (logininfor.getParams().get("endTime") != null) {
-                    wrapper.le(SysLogininfor::getLoginTime, logininfor.getParams().get("endTime"));
-                }
+                LocalDateTime beginTime = WrapperBuilder.parseDateTime(logininfor.getParams().get("beginTime"));
+                LocalDateTime endTime = WrapperBuilder.parseDateTime(logininfor.getParams().get("endTime"));
+                wrapper.ge(beginTime != null, SysLogininfor::getLoginTime, beginTime)
+                       .le(endTime != null, SysLogininfor::getLoginTime, endTime);
             }
         }
         wrapper.orderByDesc(SysLogininfor::getInfoId);

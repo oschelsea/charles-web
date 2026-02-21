@@ -72,8 +72,8 @@
 			 LEFT JOIN gen_table_column c ON t.table_id = c.table_id
 		where t.table_name = #{tableName} order by c.sort
 	</select>
-    <!-- sqlite3配置 -->
-    <select id="selectDbTableList" resultMap="GenTableResult">
+    <!-- SQLite 查询数据库表列表 -->
+    <select id="selectDbTableList" resultMap="GenTableResult" databaseId="sqlite">
         select tbl_name AS table_name from sqlite_master
         where type='table' AND tbl_name != 'sqlite_sequence' AND tbl_name != 'flyway_schema_history'
         AND tbl_name NOT LIKE 'qrtz_%' AND tbl_name NOT LIKE 'gen_%'
@@ -84,11 +84,41 @@
         </if>
     </select>
 
-    <select id="selectDbTableListByNames" resultMap="GenTableResult">
+    <!-- PostgreSQL 查询数据库表列表 -->
+    <select id="selectDbTableList" resultMap="GenTableResult" databaseId="postgresql">
+        SELECT table_name, obj_description((table_schema || '.' || table_name)::regclass, 'pg_class') AS table_comment
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_type = 'BASE TABLE'
+        AND table_name != 'flyway_schema_history'
+        AND table_name NOT LIKE 'qrtz_%'
+        AND table_name NOT LIKE 'gen_%'
+        AND table_name NOT IN (SELECT table_name FROM gen_table)
+        <if test="genTable.tableName != null and genTable.tableName != ''">
+            <bind name="table_name_like" value="'%' + genTable.tableName + '%'"/>
+            AND lower(table_name) LIKE lower(#{table_name_like})
+        </if>
+        ORDER BY table_name
+    </select>
+
+    <!-- SQLite 根据表名查询数据库表 -->
+    <select id="selectDbTableListByNames" resultMap="GenTableResult" databaseId="sqlite">
         select tbl_name AS table_name from sqlite_master
         where type='table' AND tbl_name != 'sqlite_sequence' AND tbl_name != 'flyway_schema_history'
         AND tbl_name NOT LIKE 'qrtz_%' AND tbl_name NOT LIKE 'gen_%'
         AND tbl_name in
+        <foreach collection="array" item="name" open="(" separator="," close=")">
+            #{name}
+        </foreach>
+    </select>
+
+    <!-- PostgreSQL 根据表名查询数据库表 -->
+    <select id="selectDbTableListByNames" resultMap="GenTableResult" databaseId="postgresql">
+        SELECT table_name, obj_description((table_schema || '.' || table_name)::regclass, 'pg_class') AS table_comment
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_type = 'BASE TABLE'
+        AND table_name IN
         <foreach collection="array" item="name" open="(" separator="," close=")">
             #{name}
         </foreach>

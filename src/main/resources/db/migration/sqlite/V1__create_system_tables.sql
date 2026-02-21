@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS "gen_table" (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "gen_table_column" (
   "column_id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  "table_id" text(64),
+  "table_id" integer,
   "column_name" text(200),
   "column_comment" text(500),
   "column_type" text(100),

@@ -10,7 +10,9 @@ import io.charles.project.system.domain.SysDept;
 import io.charles.project.system.domain.SysRole;
 import io.charles.project.system.domain.SysUser;
 import io.charles.project.system.domain.SysUserRole;
+import io.charles.common.utils.WrapperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,14 +45,10 @@ public interface SysRoleMapper extends MPJBaseMapper<SysRole> {
                 .likeIfExists(SysRole::getRoleKey, role.getRoleKey());
 
         if (role.getParams() != null) {
-            String beginTime = (String) role.getParams().get("beginTime");
-            String endTime = (String) role.getParams().get("endTime");
-            if (beginTime != null) {
-                wrapper.ge(SysRole::getCreateTime, beginTime);
-            }
-            if (endTime != null) {
-                wrapper.le(SysRole::getCreateTime, endTime);
-            }
+            LocalDateTime beginTime = WrapperBuilder.parseDateTime(role.getParams().get("beginTime"));
+            LocalDateTime endTime = WrapperBuilder.parseDateTime(role.getParams().get("endTime"));
+            wrapper.ge(beginTime != null, SysRole::getCreateTime, beginTime)
+                   .le(endTime != null, SysRole::getCreateTime, endTime);
         }
 
         wrapper.orderByAsc(SysRole::getRoleSort);

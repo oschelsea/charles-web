@@ -5,7 +5,7 @@
 -- Table structure for gen_table
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS gen_table (
-  table_id BIGBIGSERIAL PRIMARY KEY,
+  table_id BIGSERIAL PRIMARY KEY,
   table_name VARCHAR(200),
   table_comment VARCHAR(500),
   sub_table_name VARCHAR(64),
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS gen_table (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS gen_table_column (
   column_id BIGSERIAL PRIMARY KEY,
-  table_id VARCHAR(64),
+  table_id BIGINT,
   column_name VARCHAR(200),
   column_comment VARCHAR(500),
   column_type VARCHAR(100),
@@ -328,7 +328,7 @@ CREATE TABLE IF NOT EXISTS sys_logininfor (
   os VARCHAR(50),
   status CHAR(1) DEFAULT '0',
   msg VARCHAR(255),
-  login_time TIMESTAMP
+  login_time VARCHAR(24)
 );
 
 -- ----------------------------
@@ -462,7 +462,7 @@ CREATE TABLE IF NOT EXISTS sys_user (
   status CHAR(1) DEFAULT '0',
   del_flag CHAR(1) DEFAULT '0',
   login_ip VARCHAR(128),
-  login_date TIMESTAMP,
+  login_date VARCHAR(24),
   create_by VARCHAR(64),
   create_time TIMESTAMP,
   update_by VARCHAR(64),

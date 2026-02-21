@@ -42,7 +42,7 @@ class SysDeptMapperTest {
         dept.setParentId(100L);
         dept.setAncestors("0,100");
         dept.setDeptName("测试部门");
-        dept.setOrderNum("99");
+        dept.setOrderNum(99);
         dept.setLeader("张三");
         dept.setPhone("13800000001");
         dept.setEmail("test@test.com");
@@ -161,7 +161,7 @@ class SysDeptMapperTest {
         io.charles.project.system.domain.SysRole role = new io.charles.project.system.domain.SysRole();
         role.setRoleName("Dept Role");
         role.setRoleKey("dept_role_" + System.currentTimeMillis());
-        role.setRoleSort("1");
+        role.setRoleSort(1);
         role.setStatus("0");
         sysRoleMapper.insertRole(role);
         Long roleId = role.getRoleId();
@@ -190,7 +190,7 @@ class SysDeptMapperTest {
         child.setParentId(testDeptId);
         child.setAncestors("0,100," + testDeptId);
         child.setDeptName("Child Dept");
-        child.setOrderNum("1");
+        child.setOrderNum(1);
         child.setStatus("0");
         sysDeptMapper.insertDept(child);
         Long childId = child.getDeptId();
@@ -215,7 +215,7 @@ class SysDeptMapperTest {
         dept.setParentId(testDeptId);
         dept.setAncestors("0,100," + testDeptId);
         dept.setDeptName("Status Test Dept");
-        dept.setOrderNum("1");
+        dept.setOrderNum(1);
         dept.setStatus("1");
         sysDeptMapper.insertDept(dept);
         Long deptId = dept.getDeptId();

@@ -45,7 +45,7 @@ class SysMenuMapperTest {
         SysMenu menu = new SysMenu();
         menu.setMenuName("测试菜单");
         menu.setParentId(0L);
-        menu.setOrderNum("99");
+        menu.setOrderNum(99);
         menu.setPath("test");
         menu.setComponent("test/index");
         menu.setIsFrame("1");
@@ -153,7 +153,7 @@ class SysMenuMapperTest {
         SysRole role = new SysRole();
         role.setRoleName("Menu Role");
         role.setRoleKey("menu_role_" + System.currentTimeMillis());
-        role.setRoleSort("1");
+        role.setRoleSort(1);
         role.setStatus("0");
         sysRoleMapper.insertRole(role);
         Long roleId = role.getRoleId();
@@ -200,7 +200,7 @@ class SysMenuMapperTest {
         SysRole role = new SysRole();
         role.setRoleName("Perm Role");
         role.setRoleKey("perm_role_" + System.currentTimeMillis());
-        role.setRoleSort("1");
+        role.setRoleSort(1);
         role.setStatus("0");
         sysRoleMapper.insertRole(role);
         Long roleId = role.getRoleId();
@@ -248,7 +248,7 @@ class SysMenuMapperTest {
         SysRole role = new SysRole();
         role.setRoleName("Tree Role");
         role.setRoleKey("tree_role_" + System.currentTimeMillis());
-        role.setRoleSort("1");
+        role.setRoleSort(1);
         role.setStatus("0");
         sysRoleMapper.insertRole(role);
         Long roleId = role.getRoleId();
@@ -282,7 +282,7 @@ class SysMenuMapperTest {
         SysRole role = new SysRole();
         role.setRoleName("List Role");
         role.setRoleKey("list_role_" + System.currentTimeMillis());
-        role.setRoleSort("1");
+        role.setRoleSort(1);
         role.setStatus("0");
         sysRoleMapper.insertRole(role);
         Long roleId = role.getRoleId();

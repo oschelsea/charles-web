@@ -3,13 +3,14 @@ package io.charles.project.system.domain;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.framework.aspectj.lang.annotation.Excel;
+import io.charles.framework.config.typehandler.BooleanToIntTypeHandler;
 import io.charles.framework.aspectj.lang.annotation.Excel.ColumnType;
 import io.charles.framework.web.domain.BaseEntity;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 /**
  * 角色表 sys_role
@@ -48,8 +49,8 @@ public class SysRole extends BaseEntity {
      * 角色排序
      */
     @Excel(name = "角色排序")
-    @NotBlank(message = "显示顺序不能为空")
-    private String roleSort;
+    @NotNull(message = "显示顺序不能为空")
+    private Integer roleSort;
 
     /**
      * 数据范围（1：所有数据权限；2：自定义数据权限；3：本部门数据权限；4：本部门及以下数据权限；5：仅本人数据权限）
@@ -60,11 +61,13 @@ public class SysRole extends BaseEntity {
     /**
      * 菜单树选择项是否关联显示（ 0：父子不互相关联显示 1：父子互相关联显示）
      */
+    @TableField(typeHandler = BooleanToIntTypeHandler.class)
     private boolean menuCheckStrictly;
 
     /**
      * 部门树选择项是否关联显示（0：父子不互相关联显示 1：父子互相关联显示 ）
      */
+    @TableField(typeHandler = BooleanToIntTypeHandler.class)
     private boolean deptCheckStrictly;
 
     /**

@@ -3,12 +3,13 @@ package io.charles.project.system.domain;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.charles.framework.web.domain.BaseEntity;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,8 +49,8 @@ public class SysDept extends BaseEntity {
     /**
      * 显示顺序
      */
-    @NotBlank(message = "显示顺序不能为空")
-    private String orderNum;
+    @NotNull(message = "显示顺序不能为空")
+    private Integer orderNum;
 
     /**
      * 负责人

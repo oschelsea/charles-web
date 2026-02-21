@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.charles.common.utils.StringUtils;
+import io.charles.common.utils.WrapperBuilder;
 import io.charles.project.tool.gen.domain.GenTable;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -107,14 +109,10 @@ public interface GenTableMapper extends BaseMapper<GenTable> {
                 .like(StringUtils.isNotEmpty(genTable.getTableComment()), GenTable::getTableComment, genTable.getTableComment());
 
         if (genTable.getParams() != null) {
-            Object beginTime = genTable.getParams().get("beginTime");
-            Object endTime = genTable.getParams().get("endTime");
-            if (beginTime != null && !beginTime.toString().isEmpty()) {
-                wrapper.ge(GenTable::getCreateTime, beginTime);
-            }
-            if (endTime != null && !endTime.toString().isEmpty()) {
-                wrapper.le(GenTable::getCreateTime, endTime);
-            }
+            LocalDateTime beginTime = WrapperBuilder.parseDateTime(genTable.getParams().get("beginTime"));
+            LocalDateTime endTime = WrapperBuilder.parseDateTime(genTable.getParams().get("endTime"));
+            wrapper.ge(beginTime != null, GenTable::getCreateTime, beginTime)
+                   .le(endTime != null, GenTable::getCreateTime, endTime);
         }
 
         if (page != null) {

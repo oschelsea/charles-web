@@ -213,7 +213,7 @@ class SysUserMapperTest {
         SysRole role = new SysRole();
         role.setRoleName("Alloc Role");
         role.setRoleKey("alloc_role_" + System.currentTimeMillis());
-        role.setRoleSort("1");
+        role.setRoleSort(1);
         role.setStatus("0");
         sysRoleMapper.insertRole(role);
         Long roleId = role.getRoleId();
@@ -248,7 +248,7 @@ class SysUserMapperTest {
         SysRole role = new SysRole();
         role.setRoleName("Unalloc Role");
         role.setRoleKey("unalloc_role_" + System.currentTimeMillis());
-        role.setRoleSort("2");
+        role.setRoleSort(2);
         role.setStatus("0");
         sysRoleMapper.insertRole(role);
         Long roleId = role.getRoleId();
@@ -325,7 +325,7 @@ class SysUserMapperTest {
         SysDept dept = new SysDept();
         dept.setDeptName("Test Dept " + System.currentTimeMillis());
         dept.setParentId(100L); // 假设100是存在的父ID
-        dept.setOrderNum("1");
+        dept.setOrderNum(1);
         dept.setStatus("0");
         sysDeptMapper.insertDept(dept);
         Long deptId = dept.getDeptId();

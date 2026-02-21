@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * LocalDateTime TypeHandler
- * Support SQLite TEXT and LocalDateTime conversion
+ * LocalDateTime 类型处理器
+ * 兼容 SQLite（TEXT） 和 PostgreSQL（TIMESTAMP） 的 LocalDateTime 读写
  *
  * @author charles
  */
@@ -21,9 +21,30 @@ public class LocalDateTimeTypeHandler extends BaseTypeHandler<LocalDateTime> {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    /** 缓存是否为 SQLite 数据库，避免每次调用 getMetaData() */
+    private static volatile Boolean isSqlite;
+
+    private static boolean isSqlite(PreparedStatement ps) throws SQLException {
+        if (isSqlite == null) {
+            synchronized (LocalDateTimeTypeHandler.class) {
+                if (isSqlite == null) {
+                    String dbProductName = ps.getConnection().getMetaData().getDatabaseProductName();
+                    isSqlite = "SQLite".equalsIgnoreCase(dbProductName);
+                }
+            }
+        }
+        return isSqlite;
+    }
+
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, LocalDateTime parameter, JdbcType jdbcType) throws SQLException {
-        ps.setString(i, parameter.format(FORMATTER));
+        if (isSqlite(ps)) {
+            // SQLite 使用 TEXT 类型存储时间
+            ps.setString(i, parameter.format(FORMATTER));
+        } else {
+            // PostgreSQL 等使用 TIMESTAMP 类型
+            ps.setTimestamp(i, Timestamp.valueOf(parameter));
+        }
     }
 
     @Override

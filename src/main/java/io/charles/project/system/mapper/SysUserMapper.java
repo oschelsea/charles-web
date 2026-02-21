@@ -11,7 +11,9 @@ import io.charles.project.system.domain.SysDept;
 import io.charles.project.system.domain.SysRole;
 import io.charles.project.system.domain.SysUser;
 import io.charles.project.system.domain.SysUserRole;
+import io.charles.common.utils.WrapperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -48,12 +50,10 @@ public interface SysUserMapper extends MPJBaseMapper<SysUser> {
                                                 .or().like(SysDept::getAncestors, "%," + user.getDeptId() + "%")
                                 ));
         if (user.getParams() != null) {
-            if (user.getParams().get("beginTime") != null) {
-                wrapper.ge(SysUser::getCreateTime, user.getParams().get("beginTime"));
-            }
-            if (user.getParams().get("endTime") != null) {
-                wrapper.le(SysUser::getCreateTime, user.getParams().get("endTime"));
-            }
+            LocalDateTime beginTime = WrapperBuilder.parseDateTime(user.getParams().get("beginTime"));
+            LocalDateTime endTime = WrapperBuilder.parseDateTime(user.getParams().get("endTime"));
+            wrapper.ge(beginTime != null, SysUser::getCreateTime, beginTime)
+                   .le(endTime != null, SysUser::getCreateTime, endTime);
         }
         if (page != null) {
             selectJoinPage(page, wrapper);

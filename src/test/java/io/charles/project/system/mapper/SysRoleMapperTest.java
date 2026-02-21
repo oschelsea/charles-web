@@ -41,7 +41,7 @@ class SysRoleMapperTest {
         SysRole role = new SysRole();
         role.setRoleName("测试角色" + System.currentTimeMillis());
         role.setRoleKey("test_role_" + System.currentTimeMillis());
-        role.setRoleSort("99");
+        role.setRoleSort(99);
         role.setDataScope("1");
         role.setStatus("0");
 
@@ -115,7 +115,7 @@ class SysRoleMapperTest {
         SysRole role1 = new SysRole();
         role1.setRoleName("批量测试角色1_" + System.currentTimeMillis());
         role1.setRoleKey("batch_test1_" + System.currentTimeMillis());
-        role1.setRoleSort("98");
+        role1.setRoleSort(98);
         role1.setDataScope("1");
         role1.setStatus("0");
         sysRoleMapper.insertRole(role1);
@@ -123,7 +123,7 @@ class SysRoleMapperTest {
         SysRole role2 = new SysRole();
         role2.setRoleName("批量测试角色2_" + System.currentTimeMillis());
         role2.setRoleKey("batch_test2_" + System.currentTimeMillis());
-        role2.setRoleSort("97");
+        role2.setRoleSort(97);
         role2.setDataScope("1");
         role2.setStatus("0");
         sysRoleMapper.insertRole(role2);
@@ -159,7 +159,7 @@ class SysRoleMapperTest {
         SysRole role = new SysRole();
         role.setRoleName("测试权限角色_" + System.currentTimeMillis());
         role.setRoleKey("test_role_perm_" + System.currentTimeMillis());
-        role.setRoleSort("1");
+        role.setRoleSort(1);
         role.setDataScope("1");
         role.setStatus("0");
         sysRoleMapper.insertRole(role);
@@ -193,7 +193,7 @@ class SysRoleMapperTest {
         SysRole role = new SysRole();
         role.setRoleName("测试列表角色_" + System.currentTimeMillis());
         role.setRoleKey("test_role_list_" + System.currentTimeMillis());
-        role.setRoleSort("2");
+        role.setRoleSort(2);
         role.setDataScope("1");
         role.setStatus("0");
         sysRoleMapper.insertRole(role);
@@ -230,7 +230,7 @@ class SysRoleMapperTest {
         SysRole role = new SysRole();
         role.setRoleName("测试用户名角色_" + System.currentTimeMillis());
         role.setRoleKey("test_role_name_" + System.currentTimeMillis());
-        role.setRoleSort("3");
+        role.setRoleSort(3);
         role.setDataScope("1");
         role.setStatus("0");
         sysRoleMapper.insertRole(role);
@@ -258,7 +258,7 @@ class SysRoleMapperTest {
         SysRole role = new SysRole();
         role.setRoleName(roleName);
         role.setRoleKey("unique_name_" + System.currentTimeMillis());
-        role.setRoleSort("4");
+        role.setRoleSort(4);
         role.setDataScope("1");
         role.setStatus("0");
         sysRoleMapper.insertRole(role);
@@ -281,7 +281,7 @@ class SysRoleMapperTest {
         SysRole role = new SysRole();
         role.setRoleName("唯一权限测试_" + System.currentTimeMillis());
         role.setRoleKey(roleKey);
-        role.setRoleSort("5");
+        role.setRoleSort(5);
         role.setDataScope("1");
         role.setStatus("0");
         sysRoleMapper.insertRole(role);

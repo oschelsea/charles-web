@@ -7,6 +7,8 @@ import io.charles.framework.aspectj.lang.annotation.Excel;
 import io.charles.framework.aspectj.lang.annotation.Excel.ColumnType;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * 操作日志记录表 oper_log
  *
@@ -124,5 +126,6 @@ public class SysOperLog implements java.io.Serializable {
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Excel(name = "操作时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
-    private String operTime;
+    @TableField(typeHandler = io.charles.framework.config.typehandler.LocalDateTimeTypeHandler.class)
+    private LocalDateTime operTime;
 }

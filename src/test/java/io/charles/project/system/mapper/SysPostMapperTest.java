@@ -46,7 +46,7 @@ class SysPostMapperTest {
         SysPost post = new SysPost();
         post.setPostCode("post_code_" + System.currentTimeMillis());
         post.setPostName("Post Name");
-        post.setPostSort("1");
+        post.setPostSort(1);
         post.setStatus("0");
         sysPostMapper.insertPost(post);
         Long postId = post.getPostId();
@@ -61,7 +61,7 @@ class SysPostMapperTest {
         List<Integer> postIds = sysPostMapper.selectPostListByUserId(userId);
         assertFalse(postIds.isEmpty());
         assertTrue(postIds.contains(postId.intValue()));
-        
+
         // Clean up handled by test transaction rollback if configured, or manual cleanup (skipping for simplicity in this context as per user rule 3)
     }
 
@@ -79,7 +79,7 @@ class SysPostMapperTest {
         SysPost post = new SysPost();
         post.setPostCode("post_code_name_" + System.currentTimeMillis());
         post.setPostName("Post Name for Name Test");
-        post.setPostSort("2");
+        post.setPostSort(2);
         post.setStatus("0");
         sysPostMapper.insertPost(post);
         Long postId = post.getPostId();
@@ -103,7 +103,7 @@ class SysPostMapperTest {
         SysPost post = new SysPost();
         post.setPostCode("test_code_" + System.currentTimeMillis());
         post.setPostName("测试岗位");
-        post.setPostSort("99");
+        post.setPostSort(99);
         post.setStatus("0");
         int result = sysPostMapper.insertPost(post);
         assertEquals(1, result);
@@ -177,14 +177,14 @@ class SysPostMapperTest {
         SysPost p1 = new SysPost();
         p1.setPostCode("batch1_" + System.currentTimeMillis());
         p1.setPostName("批量1");
-        p1.setPostSort("1");
+        p1.setPostSort(1);
         p1.setStatus("0");
         sysPostMapper.insertPost(p1);
 
         SysPost p2 = new SysPost();
         p2.setPostCode("batch2_" + System.currentTimeMillis());
         p2.setPostName("批量2");
-        p2.setPostSort("2");
+        p2.setPostSort(2);
         p2.setStatus("0");
         sysPostMapper.insertPost(p2);
 
