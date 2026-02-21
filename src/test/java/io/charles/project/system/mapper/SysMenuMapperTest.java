@@ -1,7 +1,10 @@
 package io.charles.project.system.mapper;
 
 import io.charles.project.system.domain.*;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -48,8 +51,8 @@ class SysMenuMapperTest {
         menu.setOrderNum(99);
         menu.setPath("test");
         menu.setComponent("test/index");
-        menu.setIsFrame("1");
-        menu.setIsCache("0");
+        menu.setIsFrame(1);
+        menu.setIsCache(0);
         menu.setMenuType("C");
         menu.setVisible("0");
         menu.setStatus("0");

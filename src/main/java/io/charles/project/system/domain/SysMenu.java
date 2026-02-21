@@ -73,12 +73,12 @@ public class SysMenu extends BaseEntity {
     /**
      * 是否为外链（0是 1否）
      */
-    private String isFrame;
+    private Integer isFrame;
 
     /**
      * 是否缓存（0缓存 1不缓存）
      */
-    private String isCache;
+    private Integer isCache;
 
     /**
      * 类型（M目录 C菜单 F按钮）

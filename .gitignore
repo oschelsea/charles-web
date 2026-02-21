@@ -43,3 +43,4 @@ nbdist/
 !*/build/*.xml
 data/
 /src/main/resources/static/manager/
+config/application.yml

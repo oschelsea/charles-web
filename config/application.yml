@@ -1,8 +1,0 @@
-logging:
-  level:
-    "io.charles.project.system.mapper": debug
-app:
-  database:
-    type: postgresql
-APP_DB_USERNAME: postgres
-APP_DB_PASSWORD: postgres

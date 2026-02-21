@@ -426,3 +426,21 @@ UPDATE sys_menu SET status = '1' WHERE menu_id IN ( 11616, 11618, 11638, 11700, 
 DELETE FROM sys_menu WHERE menu_id IN (110, 111, 112, 114);
 -- 禁用外链菜单
 UPDATE sys_menu SET status = '1' WHERE menu_id IN ( 4, 7, 8 );
+
+-- ----------------------------
+-- 重置所有 BIGSERIAL 序列值
+-- 因为上面的 INSERT 语句使用了显式 ID，PG 的序列计数器不会自动更新
+-- 必须手动将序列值重置为表中当前最大 ID，否则后续 INSERT 会产生主键冲突
+-- ----------------------------
+SELECT setval('sys_config_config_id_seq', (SELECT COALESCE(MAX(config_id), 1) FROM sys_config));
+SELECT setval('sys_dept_dept_id_seq', (SELECT COALESCE(MAX(dept_id), 1) FROM sys_dept));
+SELECT setval('sys_dict_data_dict_code_seq', (SELECT COALESCE(MAX(dict_code), 1) FROM sys_dict_data));
+SELECT setval('sys_dict_type_dict_id_seq', (SELECT COALESCE(MAX(dict_id), 1) FROM sys_dict_type));
+SELECT setval('sys_job_log_job_log_id_seq', (SELECT COALESCE(MAX(job_log_id), 1) FROM sys_job_log));
+SELECT setval('sys_logininfor_info_id_seq', (SELECT COALESCE(MAX(info_id), 1) FROM sys_logininfor));
+SELECT setval('sys_menu_menu_id_seq', (SELECT COALESCE(MAX(menu_id), 1) FROM sys_menu));
+SELECT setval('sys_notice_notice_id_seq', (SELECT COALESCE(MAX(notice_id), 1) FROM sys_notice));
+SELECT setval('sys_oper_log_oper_id_seq', (SELECT COALESCE(MAX(oper_id), 1) FROM sys_oper_log));
+SELECT setval('sys_post_post_id_seq', (SELECT COALESCE(MAX(post_id), 1) FROM sys_post));
+SELECT setval('sys_role_role_id_seq', (SELECT COALESCE(MAX(role_id), 1) FROM sys_role));
+SELECT setval('sys_user_user_id_seq', (SELECT COALESCE(MAX(user_id), 1) FROM sys_user));
