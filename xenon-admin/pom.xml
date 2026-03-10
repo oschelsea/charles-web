@@ -242,6 +242,10 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <skip>false</skip>
+                    <mainClass>io.charles.WebApplication</mainClass>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
