@@ -1,0 +1,392 @@
+<script setup lang="ts">
+import { ref, onMounted, computed, h } from 'vue';
+import {
+  NCard,
+  NDataTable,
+  NButton,
+  NSpace,
+  NInput,
+  NInputNumber,
+  NModal,
+  NForm,
+  NFormItem,
+  NSelect,
+  NSwitch,
+  NTag,
+  NEmpty,
+  useMessage,
+  useDialog
+} from 'naive-ui';
+import type { DataTableColumns, SelectOption } from 'naive-ui';
+import { useWorkspaceStore } from '@/store/modules/xenon/workspace';
+import { dataStoreApi, dataStoreTypes, dataStoreFieldConfigs, type DataStore, type DataStoreType, type FieldConfig } from '@/service/api/xenon/datastore';
+
+const message = useMessage();
+const dialog = useDialog();
+const workspaceStore = useWorkspaceStore();
+
+const loading = ref(false);
+const dataStores = ref<DataStore[]>([]);
+const selectedWorkspace = ref<string>('');
+
+const showModal = ref(false);
+const isEditing = ref(false);
+const editingStore = ref<Partial<DataStore>>({
+  name: '',
+  description: '',
+  type: 'SHAPEFILE',
+  enabled: true,
+  connectionParams: {}
+});
+
+// Data store type options
+const typeOptions = computed<SelectOption[]>(() => 
+  Object.entries(dataStoreTypes).map(([value, meta]) => ({
+    label: `${meta.icon} ${meta.label}`,
+    value
+  }))
+);
+
+// 工作空间选项
+const workspaceOptions = computed<SelectOption[]>(() =>
+  workspaceStore.workspaces.map(ws => ({
+    label: ws.name,
+    value: ws.name
+  }))
+);
+
+// 根据工作空间过滤数据存储
+const filteredDataStores = computed(() => {
+  if (!selectedWorkspace.value) {
+    return dataStores.value; // 未选择工作空间时显示全部
+  }
+  return dataStores.value.filter(ds => ds.workspaceName === selectedWorkspace.value);
+});
+
+// Current field configs based on selected type
+const currentFields = computed<FieldConfig[]>(() => {
+  const type = editingStore.value.type as DataStoreType;
+  return type ? dataStoreFieldConfigs[type] || [] : [];
+});
+
+// Handle type change - reset connectionParams with default values
+function handleTypeChange(type: DataStoreType) {
+  const fields = dataStoreFieldConfigs[type] || [];
+  const defaultParams: Record<string, unknown> = {};
+  
+  fields.forEach(field => {
+    if (field.defaultValue !== undefined) {
+      defaultParams[field.key] = field.defaultValue;
+    }
+  });
+  
+  editingStore.value.connectionParams = defaultParams;
+}
+
+const columns: DataTableColumns<DataStore> = [
+  {
+    title: '名称',
+    key: 'name',
+    render(row) {
+      return h('span', { style: { fontWeight: '600' } }, row.name);
+    }
+  },
+  {
+    title: '工作空间',
+    key: 'workspaceName',
+    width: 120,
+    render(row) {
+      return h(NTag, { type: 'default', size: 'small' }, { default: () => row.workspaceName || '-' });
+    }
+  },
+  {
+    title: '类型',
+    key: 'type',
+    width: 150,
+    render(row) {
+      const meta = dataStoreTypes[row.type];
+      return h(NTag, { 
+        type: meta?.isVector ? 'info' : 'warning',
+        round: true
+      }, { default: () => `${meta?.icon || ''} ${meta?.label || row.type}` });
+    }
+  },
+  {
+    title: '描述',
+    key: 'description',
+    ellipsis: { tooltip: true }
+  },
+  {
+    title: '状态',
+    key: 'enabled',
+    width: 80,
+    render(row) {
+      return h('span', {
+        style: {
+          display: 'inline-block',
+          width: '10px',
+          height: '10px',
+          borderRadius: '50%',
+          backgroundColor: row.enabled ? '#18a058' : '#d03050'
+        }
+      });
+    }
+  },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 150,
+    render(row) {
+      return h(NSpace, {}, {
+        default: () => [
+          h(NButton, {
+            size: 'small',
+            quaternary: true,
+            onClick: () => handleEdit(row)
+          }, { default: () => '编辑' }),
+          h(NButton, {
+            size: 'small',
+            quaternary: true,
+            type: 'error',
+            onClick: () => handleDelete(row)
+          }, { default: () => '删除' })
+        ]
+      });
+    }
+  }
+];
+
+onMounted(async () => {
+  await workspaceStore.fetchWorkspaces();
+  await loadDataStores();
+});
+
+async function loadDataStores() {
+  loading.value = true;
+  try {
+    const res = await dataStoreApi.getAll();
+    dataStores.value = res?.data || [];
+  } catch (error) {
+    message.error('加载数据存储失败');
+    dataStores.value = [];
+  } finally {
+    loading.value = false;
+  }
+}
+
+function handleCreate() {
+  isEditing.value = false;
+  editingStore.value = {
+    name: '',
+    description: '',
+    type: 'SHAPEFILE',
+    enabled: true,
+    connectionParams: {}
+  };
+  showModal.value = true;
+}
+
+function handleEdit(store: DataStore) {
+  isEditing.value = true;
+  editingStore.value = { 
+    ...store, 
+    connectionParams: store.connectionParams || {} 
+  };
+  showModal.value = true;
+}
+
+function handleDelete(store: DataStore) {
+  const wsName = store.workspaceName || selectedWorkspace.value;
+  dialog.warning({
+    title: '确认删除',
+    content: `确定要删除数据存储 "${store.name}" 吗？相关的图层也会被删除。`,
+    positiveText: '删除',
+    negativeText: '取消',
+    onPositiveClick: async () => {
+      try {
+        await dataStoreApi.delete(wsName, store.name);
+        await loadDataStores();
+        message.success('删除成功');
+      } catch {
+        message.error('删除失败');
+      }
+    }
+  });
+}
+
+function validateName(name?: string, typeName = '资源') {
+  if (!name || !name.trim()) return `${typeName}名称不能为空`;
+  if (!/^[a-zA-Z0-9_-]+$/.test(name)) return `${typeName}名称只能包含字母、数字、下划线和连字符`;
+  return null;
+}
+
+async function handleSubmit() {
+  try {
+    const wsName = editingStore.value.workspaceName || selectedWorkspace.value;
+    if (!wsName) {
+      message.error('请选择工作空间');
+      return;
+    }
+    
+    const error = validateName(editingStore.value.name, '数据存储');
+    if (error) {
+      message.error(error);
+      return;
+    }
+    
+    if (isEditing.value) {
+      await dataStoreApi.update(
+        wsName,
+        editingStore.value.name!,
+        editingStore.value
+      );
+      message.success('更新成功');
+    } else {
+      await dataStoreApi.create(wsName, editingStore.value);
+      message.success('创建成功');
+    }
+    showModal.value = false;
+    await loadDataStores();
+  } catch {
+    message.error('操作失败');
+  }
+}
+</script>
+
+<template>
+  <div class="p-4">
+    <NSpace vertical :size="16">
+      <NCard title="数据存储" :bordered="false" size="small" class="sm:flex-1-hidden card-wrapper">
+        <template #header-extra>
+          <NSpace align="center" justify="end">
+            <NSelect
+              v-model:value="selectedWorkspace"
+              :options="workspaceOptions"
+              placeholder="选择工作空间"
+              style="width: 200px"
+              clearable
+            />
+            <NButton type="primary" @click="handleCreate">
+              <template #icon>
+                <div class="i-mdi-plus"></div>
+              </template>
+              添加数据存储
+            </NButton>
+          </NSpace>
+        </template>
+
+        <NDataTable
+          v-if="filteredDataStores.length > 0"
+          :columns="columns"
+          :data="filteredDataStores"
+          :loading="loading"
+          :pagination="{ pageSize: 15 }"
+          :bordered="false"
+          striped
+          class="sm:h-full"
+        />
+        <NEmpty v-else description="暂无数据存储" />
+      </NCard>
+    </NSpace>
+
+    <!-- Create/Edit Modal -->
+    <NModal
+      v-model:show="showModal"
+      preset="dialog"
+      :title="isEditing ? '编辑数据存储' : '添加数据存储'"
+      :positive-text="isEditing ? '保存' : '创建'"
+      negative-text="取消"
+      style="width: 600px"
+      @positive-click="handleSubmit"
+    >
+      <NForm
+        :model="editingStore"
+        label-placement="left"
+        label-width="100"
+        require-mark-placement="right-hanging"
+      >
+        <NFormItem label="名称" path="name" required>
+          <NInput
+            v-model:value="editingStore.name"
+            placeholder="输入数据存储名称"
+            :disabled="isEditing"
+          />
+        </NFormItem>
+        <NFormItem label="工作空间" path="workspaceName" required>
+          <NSelect
+            v-model:value="editingStore.workspaceName"
+            :options="workspaceOptions"
+            placeholder="选择工作空间"
+            :disabled="isEditing"
+          />
+        </NFormItem>
+        <NFormItem label="类型" path="type" required>
+          <NSelect
+            v-model:value="editingStore.type"
+            :options="typeOptions"
+            placeholder="选择数据类型"
+            :disabled="isEditing"
+            @update:value="handleTypeChange"
+          />
+        </NFormItem>
+        
+        <!-- Dynamic connection parameters based on type -->
+        <template v-if="currentFields.length > 0">
+          <div class="section-divider">连接参数</div>
+          <NFormItem
+            v-for="field in currentFields"
+            :key="field.key"
+            :label="field.label"
+            :path="`connectionParams.${field.key}`"
+            :required="field.required"
+          >
+            <NInput
+              v-if="field.type === 'text'"
+              v-model:value="(editingStore.connectionParams as Record<string, any>)[field.key]"
+              :placeholder="field.placeholder"
+            />
+            <NInput
+              v-else-if="field.type === 'password'"
+              v-model:value="(editingStore.connectionParams as Record<string, any>)[field.key]"
+              type="password"
+              show-password-on="click"
+              :placeholder="field.placeholder"
+            />
+            <NInputNumber
+              v-else-if="field.type === 'number'"
+              v-model:value="(editingStore.connectionParams as Record<string, any>)[field.key]"
+              :placeholder="field.placeholder"
+              style="width: 100%"
+            />
+          </NFormItem>
+        </template>
+        
+        <NFormItem label="描述" path="description">
+          <NInput
+            v-model:value="editingStore.description"
+            type="textarea"
+            placeholder="输入描述信息"
+          />
+        </NFormItem>
+        <NFormItem label="启用" path="enabled">
+          <NSwitch v-model:value="editingStore.enabled" />
+        </NFormItem>
+      </NForm>
+    </NModal>
+  </div>
+</template>
+
+<style scoped>
+.card-wrapper {
+  height: calc(100vh - 120px);
+}
+
+.section-divider {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--n-text-color-3);
+  margin: 16px 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--n-border-color);
+}
+</style>

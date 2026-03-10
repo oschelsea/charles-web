@@ -54,6 +54,13 @@ declare module "@elegant-router/types" {
     "tool": "/tool";
     "tool_gen": "/tool/gen";
     "user-center": "/user-center";
+    "xenon": "/xenon";
+    "xenon_datastore": "/xenon/datastore";
+    "xenon_layer": "/xenon/layer";
+    "xenon_preview": "/xenon/preview";
+    "xenon_preview3d": "/xenon/preview3d";
+    "xenon_style": "/xenon/style";
+    "xenon_workspace": "/xenon/workspace";
   };
 
   /**
@@ -102,6 +109,7 @@ declare module "@elegant-router/types" {
     | "system"
     | "tool"
     | "user-center"
+    | "xenon"
   >;
 
   /**
@@ -148,6 +156,12 @@ declare module "@elegant-router/types" {
     | "system_tenant"
     | "system_user"
     | "tool_gen"
+    | "xenon_datastore"
+    | "xenon_layer"
+    | "xenon_preview"
+    | "xenon_preview3d"
+    | "xenon_style"
+    | "xenon_workspace"
   >;
 
   /**

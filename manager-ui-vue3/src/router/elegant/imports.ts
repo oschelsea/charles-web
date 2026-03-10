@@ -44,4 +44,10 @@ export const views: Record<LastLevelRouteKey, RouteComponent | (() => Promise<Ro
   system_tenant: () => import("@/views/system/tenant/index.vue"),
   system_user: () => import("@/views/system/user/index.vue"),
   tool_gen: () => import("@/views/tool/gen/index.vue"),
+  xenon_datastore: () => import("@/views/xenon/datastore/index.vue"),
+  xenon_layer: () => import("@/views/xenon/layer/index.vue"),
+  xenon_preview: () => import("@/views/xenon/preview/index.vue"),
+  xenon_preview3d: () => import("@/views/xenon/preview3d/index.vue"),
+  xenon_style: () => import("@/views/xenon/style/index.vue"),
+  xenon_workspace: () => import("@/views/xenon/workspace/index.vue"),
 };

@@ -199,7 +199,14 @@ const routeMap: RouteMap = {
   "system_user": "/system/user",
   "tool": "/tool",
   "tool_gen": "/tool/gen",
-  "user-center": "/user-center"
+  "user-center": "/user-center",
+  "xenon": "/xenon",
+  "xenon_datastore": "/xenon/datastore",
+  "xenon_layer": "/xenon/layer",
+  "xenon_preview": "/xenon/preview",
+  "xenon_preview3d": "/xenon/preview3d",
+  "xenon_style": "/xenon/style",
+  "xenon_workspace": "/xenon/workspace"
 };
 
 /**

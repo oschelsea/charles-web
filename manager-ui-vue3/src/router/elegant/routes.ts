@@ -342,5 +342,70 @@ export const generatedRoutes: GeneratedRoute[] = [
       icon: 'material-symbols:account-circle-full',
       hideInMenu: true
     }
+  },
+  {
+    name: 'xenon',
+    path: '/xenon',
+    component: 'layout.base',
+    meta: {
+      title: 'xenon',
+      i18nKey: 'route.xenon'
+    },
+    children: [
+      {
+        name: 'xenon_datastore',
+        path: '/xenon/datastore',
+        component: 'view.xenon_datastore',
+        meta: {
+          title: 'xenon_datastore',
+          i18nKey: 'route.xenon_datastore'
+        }
+      },
+      {
+        name: 'xenon_layer',
+        path: '/xenon/layer',
+        component: 'view.xenon_layer',
+        meta: {
+          title: 'xenon_layer',
+          i18nKey: 'route.xenon_layer'
+        }
+      },
+      {
+        name: 'xenon_preview',
+        path: '/xenon/preview',
+        component: 'view.xenon_preview',
+        meta: {
+          title: 'xenon_preview',
+          i18nKey: 'route.xenon_preview'
+        }
+      },
+      {
+        name: 'xenon_preview3d',
+        path: '/xenon/preview3d',
+        component: 'view.xenon_preview3d',
+        meta: {
+          title: 'xenon_preview3d',
+          i18nKey: 'route.xenon_preview3d'
+        }
+      },
+      {
+        name: 'xenon_style',
+        path: '/xenon/style',
+        component: 'view.xenon_style',
+        meta: {
+          title: 'xenon_style',
+          i18nKey: 'route.xenon_style'
+        }
+      },
+      {
+        name: 'xenon_workspace',
+        path: '/xenon/workspace',
+        component: 'view.xenon_workspace',
+        meta: {
+          title: 'xenon_workspace',
+          i18nKey: 'route.xenon_workspace'
+        }
+      }
+    ]
   }
 ];

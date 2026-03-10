@@ -7,6 +7,7 @@ import { setupUnocss } from './unocss';
 import { setupUnplugin } from './unplugin';
 import { setupHtmlPlugin } from './html';
 import { setupDevtoolsPlugin } from './devtools';
+import cesium from 'vite-plugin-cesium';
 
 export function setupVitePlugins(viteEnv: Env.ImportMeta, buildTime: string) {
   const plugins: PluginOption = [
@@ -17,7 +18,8 @@ export function setupVitePlugins(viteEnv: Env.ImportMeta, buildTime: string) {
     setupUnocss(viteEnv),
     ...setupUnplugin(viteEnv),
     progress(),
-    setupHtmlPlugin(buildTime)
+    setupHtmlPlugin(buildTime),
+    cesium()
   ];
 
   return plugins;
