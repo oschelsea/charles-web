@@ -2,8 +2,7 @@ package ${packageName}.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import io.charles.common.utils.StringUtils;
+import com.xenon.common.utils.StringUtils;
 #if($table.sub)
 import java.util.Arrays;
 import org.springframework.transaction.annotation.Transactional;

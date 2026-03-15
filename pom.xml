@@ -35,49 +35,62 @@
         <jts.version>1.19.0</jts.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <springdoc.version>2.3.0</springdoc.version>
+        <mybatis-plus.version>3.5.16</mybatis-plus.version>
+        <mybatis-plus-join.version>1.5.6</mybatis-plus-join.version>
     </properties>
 
     <modules>
         <module>xenon-admin</module>
-        <module>xenon-core</module>
-        <module>xenon-geotools</module>
-        <module>xenon-ows</module>
-        <module>xenon-rest</module>
-        <module>xenon-tile</module>
-        <module>xenon-3d</module>
+        <module>xenon-common</module>
+        <module>xenon-system</module>
+        <module>xenon-geo</module>
     </modules>
+
+    <dependencies>
+        <!-- lombok-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
     <dependencyManagement>
         <dependencies>
             <!-- internal modules -->
             <dependency>
                 <groupId>com.xenon</groupId>
-                <artifactId>xenon-core</artifactId>
+                <artifactId>xenon-system</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.xenon</groupId>
-                <artifactId>xenon-geotools</artifactId>
+                <artifactId>xenon-module-geo-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.xenon</groupId>
-                <artifactId>xenon-ows</artifactId>
+                <artifactId>xenon-module-geo-tools</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.xenon</groupId>
-                <artifactId>xenon-rest</artifactId>
+                <artifactId>xenon-module-geo-ows</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.xenon</groupId>
-                <artifactId>xenon-tile</artifactId>
+                <artifactId>xenon-module-geo-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.xenon</groupId>
-                <artifactId>xenon-3d</artifactId>
+                <artifactId>xenon-module-geo-tile</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.xenon</groupId>
+                <artifactId>xenon-module-geo-3d</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -90,12 +103,12 @@
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-                <version>3.5.16</version>
+                <version>${mybatis-plus.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-jsqlparser</artifactId>
-                <version>3.5.16</version>
+                <version>${mybatis-plus.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mybatis</groupId>
@@ -110,15 +123,15 @@
             <dependency>
                 <groupId>com.github.yulichang</groupId>
                 <artifactId>mybatis-plus-join-boot-starter</artifactId>
-                <version>1.5.6</version>
+                <version>${mybatis-plus-join.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.xerial</groupId>
                 <artifactId>sqlite-jdbc</artifactId>
                 <version>3.45.1.0</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-core</artifactId>
@@ -290,7 +303,7 @@
                 <artifactId>mapstruct</artifactId>
                 <version>${mapstruct.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>

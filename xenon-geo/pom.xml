@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.xenon</groupId>
+        <artifactId>xenon</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>xenon-geo</artifactId>
+    <packaging>pom</packaging>
+    <name>Xenon Module Geo</name>
+    <description>Geographic information module - GIS data processing and services</description>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <modules>
+        <module>xenon-geo-core</module>
+        <module>xenon-geo-tools</module>
+        <module>xenon-geo-ows</module>
+        <module>xenon-geo-rest</module>
+        <module>xenon-geo-3d</module>
+        <module>xenon-geo-tile</module>
+    </modules>
+
+</project>

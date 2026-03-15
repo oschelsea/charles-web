@@ -1,14 +1,14 @@
 package ${packageName}.controller;
 
-import io.charles.common.utils.poi.ExcelUtil;
-import io.charles.framework.web.controller.BaseController;
-import io.charles.framework.web.domain.R;
+import com.xenon.common.utils.poi.ExcelUtil;
+import com.xenon.framework.web.controller.BaseController;
+import com.xenon.common.core.domain.R;
 #if($table.crud || $table.sub)
-import io.charles.framework.web.page.TableDataInfo;
+import com.xenon.framework.web.page.TableDataInfo;
 #elseif($table.tree)
 #end
-import io.charles.framework.aspectj.lang.annotation.Log;
-import io.charles.framework.aspectj.lang.enums.BusinessType;
+import com.xenon.common.annotation.Log;
+import com.xenon.common.enums.BusinessType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

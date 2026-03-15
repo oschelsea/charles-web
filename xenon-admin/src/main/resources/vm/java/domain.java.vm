@@ -6,12 +6,10 @@ import ${import};
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import io.charles.framework.aspectj.lang.annotation.Excel;
+import com.xenon.common.annotation.Excel;
 #if($table.crud || $table.sub)
 import com.baomidou.mybatisplus.annotation.TableField;
-import io.charles.framework.web.domain.BaseEntity;
 #elseif($table.tree)
-import io.charles.framework.web.domain.TreeEntity;
 #end
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

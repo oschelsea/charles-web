@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>xenon-admin</artifactId>
+    <name>Xenon Admin</name>
+    <description>Application entry point - Spring Boot main application</description>
 
     <dependencies>
         <!-- SpringBoot 核心包 -->
@@ -208,11 +210,16 @@
         <!-- Xenon integration -->
         <dependency>
             <groupId>com.xenon</groupId>
-            <artifactId>xenon-rest</artifactId>
+            <artifactId>xenon-system</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.xenon</groupId>
-            <artifactId>xenon-3d</artifactId>
+            <artifactId>xenon-module-geo-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.xenon</groupId>
+            <artifactId>xenon-module-geo-3d</artifactId>
         </dependency>
     </dependencies>
 
@@ -244,7 +251,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <skip>false</skip>
-                    <mainClass>io.charles.WebApplication</mainClass>
+                    <mainClass>com.xenon.WebApplication</mainClass>
                 </configuration>
                 <executions>
                     <execution>

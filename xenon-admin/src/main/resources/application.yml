@@ -127,13 +127,13 @@ token:
 # MyBatis Plus配置
 mybatis-plus:
   # 搜索指定包别名
-  typeAliasesPackage: io.charles.**.domain
+  typeAliasesPackage: com.xenon.**.domain
   # 配置mapper的扫描，找到所有的mapper.xml映射文件
   mapperLocations: classpath*:mybatis/**/*Mapper.xml,classpath*:mapper/**/*.xml
   # 加载全局的配置文件
   configLocation: classpath:mybatis/mybatis-config.xml
   # 注册全局 TypeHandler（处理 LocalDateTime 多数据库兼容）
-  typeHandlersPackage: io.charles.framework.config.typehandler
+  typeHandlersPackage: com.xenon.common.config.typehandler
   # 全局配置
   global-config:
     db-config:
@@ -154,7 +154,7 @@ gen:
   # 作者
   author: charles
   # 默认生成包路径 system 需改成自己的模块名称 如 system monitor tool
-  packageName: io.charles.project.system
+  packageName: com.xenon.system
   # 自动去除表前缀，默认是true
   autoRemovePre: false
   # 表前缀（生成类名不会包含表前缀，多个用逗号分隔）
