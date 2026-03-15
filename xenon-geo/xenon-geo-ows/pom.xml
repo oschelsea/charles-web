@@ -20,11 +20,11 @@
         <!-- Internal Modules -->
         <dependency>
             <groupId>com.xenon</groupId>
-            <artifactId>xenon-module-geo-core</artifactId>
+            <artifactId>xenon-geo-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.xenon</groupId>
-            <artifactId>xenon-module-geo-tools</artifactId>
+            <artifactId>xenon-geo-tools</artifactId>
         </dependency>
 
         <!-- Spring Boot Web -->

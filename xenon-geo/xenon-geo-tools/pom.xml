@@ -20,7 +20,7 @@
         <!-- Internal Modules -->
         <dependency>
             <groupId>com.xenon</groupId>
-            <artifactId>xenon-module-geo-core</artifactId>
+            <artifactId>xenon-geo-core</artifactId>
         </dependency>
 
         <!-- Spring Boot -->

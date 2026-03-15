@@ -215,11 +215,11 @@
         </dependency>
         <dependency>
             <groupId>com.xenon</groupId>
-            <artifactId>xenon-module-geo-rest</artifactId>
+            <artifactId>xenon-geo-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>com.xenon</groupId>
-            <artifactId>xenon-module-geo-3d</artifactId>
+            <artifactId>xenon-geo-3d</artifactId>
         </dependency>
     </dependencies>
 

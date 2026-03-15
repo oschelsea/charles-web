@@ -65,32 +65,32 @@
             </dependency>
             <dependency>
                 <groupId>com.xenon</groupId>
-                <artifactId>xenon-module-geo-core</artifactId>
+                <artifactId>xenon-geo-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.xenon</groupId>
-                <artifactId>xenon-module-geo-tools</artifactId>
+                <artifactId>xenon-geo-tools</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.xenon</groupId>
-                <artifactId>xenon-module-geo-ows</artifactId>
+                <artifactId>xenon-geo-ows</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.xenon</groupId>
-                <artifactId>xenon-module-geo-rest</artifactId>
+                <artifactId>xenon-geo-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.xenon</groupId>
-                <artifactId>xenon-module-geo-tile</artifactId>
+                <artifactId>xenon-geo-tile</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.xenon</groupId>
-                <artifactId>xenon-module-geo-3d</artifactId>
+                <artifactId>xenon-geo-3d</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

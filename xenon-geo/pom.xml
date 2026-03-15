@@ -11,7 +11,7 @@
 
     <artifactId>xenon-geo</artifactId>
     <packaging>pom</packaging>
-    <name>Xenon Module Geo</name>
+    <name>Xenon Geo</name>
     <description>Geographic information module - GIS data processing and services</description>
 
     <properties>
