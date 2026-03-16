@@ -1,25 +1,34 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, h } from 'vue';
+import { computed, h, onMounted, ref } from 'vue';
 import {
+  NButton,
   NCard,
   NDataTable,
-  NButton,
-  NSpace,
-  NInput,
-  NInputNumber,
-  NModal,
+  NEmpty,
   NForm,
   NFormItem,
+  NInput,
+  NInputGroup,
+  NInputNumber,
+  NModal,
   NSelect,
+  NSpace,
   NSwitch,
   NTag,
-  NEmpty,
-  useMessage,
-  useDialog
+  useDialog,
+  useMessage
 } from 'naive-ui';
 import type { DataTableColumns, SelectOption } from 'naive-ui';
+import {
+  type DataStore,
+  type DataStoreType,
+  type FieldConfig,
+  dataStoreApi,
+  dataStoreFieldConfigs,
+  dataStoreTypes
+} from '@/service/api/xenon/datastore';
+import { fetchDirContent, fetchRootDirs } from '@/service/api/system/file';
 import { useWorkspaceStore } from '@/store/modules/xenon/workspace';
-import { dataStoreApi, dataStoreTypes, dataStoreFieldConfigs, type DataStore, type DataStoreType, type FieldConfig } from '@/service/api/xenon/datastore';
 
 const message = useMessage();
 const dialog = useDialog();
@@ -39,8 +48,30 @@ const editingStore = ref<Partial<DataStore>>({
   connectionParams: {}
 });
 
+// 文件选择器状态
+const showFileSelector = ref(false);
+const currentFileField = ref<FieldConfig | null>(null);
+const fileSelectorFilters = computed(() =>
+  currentFileField.value?.fileFilter
+    ? [currentFileField.value.fileFilter]
+    : [{ label: '所有文件 (*.*)', value: '*.*', matchType: 'all' }]
+);
+const fileSelectorType = computed(() => currentFileField.value?.selectType || 'file');
+
+function openFileSelector(field: FieldConfig) {
+  currentFileField.value = field;
+  showFileSelector.value = true;
+}
+
+function onFileSelected(file: { path: string }) {
+  if (currentFileField.value) {
+    (editingStore.value.connectionParams as Record<string, unknown>)[currentFileField.value.key] = file.path;
+  }
+  showFileSelector.value = false;
+}
+
 // Data store type options
-const typeOptions = computed<SelectOption[]>(() => 
+const typeOptions = computed<SelectOption[]>(() =>
   Object.entries(dataStoreTypes).map(([value, meta]) => ({
     label: `${meta.icon} ${meta.label}`,
     value
@@ -73,13 +104,13 @@ const currentFields = computed<FieldConfig[]>(() => {
 function handleTypeChange(type: DataStoreType) {
   const fields = dataStoreFieldConfigs[type] || [];
   const defaultParams: Record<string, unknown> = {};
-  
+
   fields.forEach(field => {
     if (field.defaultValue !== undefined) {
       defaultParams[field.key] = field.defaultValue;
     }
   });
-  
+
   editingStore.value.connectionParams = defaultParams;
 }
 
@@ -105,10 +136,14 @@ const columns: DataTableColumns<DataStore> = [
     width: 150,
     render(row) {
       const meta = dataStoreTypes[row.type];
-      return h(NTag, { 
-        type: meta?.isVector ? 'info' : 'warning',
-        round: true
-      }, { default: () => `${meta?.icon || ''} ${meta?.label || row.type}` });
+      return h(
+        NTag,
+        {
+          type: meta?.isVector ? 'info' : 'warning',
+          round: true
+        },
+        { default: () => `${meta?.icon || ''} ${meta?.label || row.type}` }
+      );
     }
   },
   {
@@ -137,21 +172,33 @@ const columns: DataTableColumns<DataStore> = [
     key: 'actions',
     width: 150,
     render(row) {
-      return h(NSpace, {}, {
-        default: () => [
-          h(NButton, {
-            size: 'small',
-            quaternary: true,
-            onClick: () => handleEdit(row)
-          }, { default: () => '编辑' }),
-          h(NButton, {
-            size: 'small',
-            quaternary: true,
-            type: 'error',
-            onClick: () => handleDelete(row)
-          }, { default: () => '删除' })
-        ]
-      });
+      return h(
+        NSpace,
+        {},
+        {
+          default: () => [
+            h(
+              NButton,
+              {
+                size: 'small',
+                quaternary: true,
+                onClick: () => handleEdit(row)
+              },
+              { default: () => '编辑' }
+            ),
+            h(
+              NButton,
+              {
+                size: 'small',
+                quaternary: true,
+                type: 'error',
+                onClick: () => handleDelete(row)
+              },
+              { default: () => '删除' }
+            )
+          ]
+        }
+      );
     }
   }
 ];
@@ -166,7 +213,7 @@ async function loadDataStores() {
   try {
     const res = await dataStoreApi.getAll();
     dataStores.value = res?.data || [];
-  } catch (error) {
+  } catch {
     message.error('加载数据存储失败');
     dataStores.value = [];
   } finally {
@@ -188,9 +235,9 @@ function handleCreate() {
 
 function handleEdit(store: DataStore) {
   isEditing.value = true;
-  editingStore.value = { 
-    ...store, 
-    connectionParams: store.connectionParams || {} 
+  editingStore.value = {
+    ...store,
+    connectionParams: store.connectionParams || {}
   };
   showModal.value = true;
 }
@@ -227,19 +274,15 @@ async function handleSubmit() {
       message.error('请选择工作空间');
       return;
     }
-    
+
     const error = validateName(editingStore.value.name, '数据存储');
     if (error) {
       message.error(error);
       return;
     }
-    
+
     if (isEditing.value) {
-      await dataStoreApi.update(
-        wsName,
-        editingStore.value.name!,
-        editingStore.value
-      );
+      await dataStoreApi.update(wsName, editingStore.value.name!, editingStore.value);
       message.success('更新成功');
     } else {
       await dataStoreApi.create(wsName, editingStore.value);
@@ -256,14 +299,14 @@ async function handleSubmit() {
 <template>
   <div class="p-4">
     <NSpace vertical :size="16">
-      <NCard title="数据存储" :bordered="false" size="small" class="sm:flex-1-hidden card-wrapper">
+      <NCard title="数据存储" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
         <template #header-extra>
           <NSpace align="center" justify="end">
             <NSelect
               v-model:value="selectedWorkspace"
               :options="workspaceOptions"
               placeholder="选择工作空间"
-              style="width: 200px"
+              class="w-200px"
               clearable
             />
             <NButton type="primary" @click="handleCreate">
@@ -296,21 +339,12 @@ async function handleSubmit() {
       :title="isEditing ? '编辑数据存储' : '添加数据存储'"
       :positive-text="isEditing ? '保存' : '创建'"
       negative-text="取消"
-      style="width: 600px"
+      class="w-600px"
       @positive-click="handleSubmit"
     >
-      <NForm
-        :model="editingStore"
-        label-placement="left"
-        label-width="100"
-        require-mark-placement="right-hanging"
-      >
+      <NForm :model="editingStore" label-placement="left" label-width="100" require-mark-placement="right-hanging">
         <NFormItem label="名称" path="name" required>
-          <NInput
-            v-model:value="editingStore.name"
-            placeholder="输入数据存储名称"
-            :disabled="isEditing"
-          />
+          <NInput v-model:value="editingStore.name" placeholder="输入数据存储名称" :disabled="isEditing" />
         </NFormItem>
         <NFormItem label="工作空间" path="workspaceName" required>
           <NSelect
@@ -329,7 +363,7 @@ async function handleSubmit() {
             @update:value="handleTypeChange"
           />
         </NFormItem>
-        
+
         <!-- Dynamic connection parameters based on type -->
         <template v-if="currentFields.length > 0">
           <div class="section-divider">连接参数</div>
@@ -356,23 +390,37 @@ async function handleSubmit() {
               v-else-if="field.type === 'number'"
               v-model:value="(editingStore.connectionParams as Record<string, any>)[field.key]"
               :placeholder="field.placeholder"
-              style="width: 100%"
+              class="w-full"
             />
+            <NInputGroup v-else-if="field.type === 'file'">
+              <NInput
+                v-model:value="(editingStore.connectionParams as Record<string, any>)[field.key]"
+                :placeholder="field.placeholder"
+              />
+              <NButton @click="openFileSelector(field)">浏览...</NButton>
+            </NInputGroup>
           </NFormItem>
         </template>
-        
+
         <NFormItem label="描述" path="description">
-          <NInput
-            v-model:value="editingStore.description"
-            type="textarea"
-            placeholder="输入描述信息"
-          />
+          <NInput v-model:value="editingStore.description" type="textarea" placeholder="输入描述信息" />
         </NFormItem>
         <NFormItem label="启用" path="enabled">
           <NSwitch v-model:value="editingStore.enabled" />
         </NFormItem>
       </NForm>
     </NModal>
+
+    <!-- 文件选择器 -->
+    <FileSelector
+      v-model:show="showFileSelector"
+      title="选择文件"
+      :filters="fileSelectorFilters"
+      :selectable-type="fileSelectorType"
+      :fetch-root-dirs="fetchRootDirs"
+      :fetch-dir-content="fetchDirContent"
+      @ok="onFileSelected"
+    />
   </div>
 </template>
 

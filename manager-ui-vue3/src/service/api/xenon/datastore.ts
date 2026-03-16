@@ -117,6 +117,15 @@ export const dataStoreTypes: Record<DataStoreType, { label: string; icon: string
 };
 
 // Field configuration for connection parameters
+/**
+ * 文件过滤器配置
+ */
+export interface FileFilter {
+  label: string;
+  value: string;
+  matchType: 'ext' | 'exact' | 'dir' | 'all';
+}
+
 export interface FieldConfig {
     key: string;
     label: string;
@@ -124,6 +133,10 @@ export interface FieldConfig {
     required?: boolean;
     placeholder?: string;
     defaultValue?: string | number;
+    /** 文件过滤器配置（仅 type='file' 时有效） */
+    fileFilter?: FileFilter;
+    /** 选择类型：file(文件) | folder(文件夹) | mixed(混合) */
+    selectType?: 'file' | 'folder' | 'mixed';
 }
 
 // Connection parameter fields for each data store type
@@ -137,19 +150,58 @@ export const dataStoreFieldConfigs: Record<DataStoreType, FieldConfig[]> = {
         { key: 'passwd', label: '密码', type: 'password', required: true, placeholder: '密码' }
     ],
     SHAPEFILE: [
-        { key: 'url', label: '文件路径', type: 'text', required: true, placeholder: '/path/to/file.shp 或 file:///C:/data/file.shp' }
+        {
+            key: 'url',
+            label: '文件路径',
+            type: 'file',
+            required: true,
+            placeholder: '选择 .shp 文件',
+            selectType: 'file',
+            fileFilter: { label: 'Shapefile (*.shp)', value: '*.shp', matchType: 'ext' }
+        }
     ],
     GEOPACKAGE: [
-        { key: 'database', label: '文件路径', type: 'text', required: true, placeholder: '/path/to/file.gpkg' }
+        {
+            key: 'database',
+            label: '文件路径',
+            type: 'file',
+            required: true,
+            placeholder: '选择 .gpkg 文件',
+            selectType: 'file',
+            fileFilter: { label: 'GeoPackage (*.gpkg)', value: '*.gpkg', matchType: 'ext' }
+        }
     ],
     GEOJSON: [
-        { key: 'url', label: '文件路径/URL', type: 'text', required: true, placeholder: '/path/to/file.geojson 或 http://...' }
+        {
+            key: 'url',
+            label: '文件路径/URL',
+            type: 'file',
+            required: true,
+            placeholder: '选择 GeoJSON 文件或输入 URL',
+            selectType: 'file',
+            fileFilter: { label: 'GeoJSON (*.geojson, *.json)', value: '*.geojson', matchType: 'ext' }
+        }
     ],
     GEOTIFF: [
-        { key: 'url', label: '文件路径', type: 'text', required: true, placeholder: '/path/to/file.tif' }
+        {
+            key: 'url',
+            label: '文件路径',
+            type: 'file',
+            required: true,
+            placeholder: '选择 GeoTIFF 文件',
+            selectType: 'file',
+            fileFilter: { label: 'GeoTIFF (*.tif, *.tiff)', value: '*.tif', matchType: 'ext' }
+        }
     ],
     IMAGE_MOSAIC: [
-        { key: 'url', label: '目录路径', type: 'text', required: true, placeholder: '/path/to/mosaic/directory' }
+        {
+            key: 'url',
+            label: '目录路径',
+            type: 'file',
+            required: true,
+            placeholder: '选择影像目录',
+            selectType: 'folder'
+        }
     ],
     WMS: [
         { key: 'GET_CAPABILITIES_URL', label: '服务URL', type: 'text', required: true, placeholder: 'http://...?service=WMS&request=GetCapabilities' },
@@ -162,9 +214,24 @@ export const dataStoreFieldConfigs: Record<DataStoreType, FieldConfig[]> = {
         { key: 'passwd', label: '密码', type: 'password', placeholder: '可选' }
     ],
     TILES3D_CACHE: [
-        { key: 'tilesetPath', label: 'tileset.json路径', type: 'text', required: true, placeholder: '/path/to/tileset.json 或 C:\\data\\tiles\\tileset.json' }
+        {
+            key: 'tilesetPath',
+            label: 'tileset.json路径',
+            type: 'file',
+            required: true,
+            placeholder: '选择 tileset.json 文件',
+            selectType: 'file',
+            fileFilter: { label: '3D Tiles (tileset.json)', value: 'tileset.json', matchType: 'exact' }
+        }
     ],
     ARCGIS_CACHE: [
-        { key: 'path', label: '缓存目录路径', type: 'text', required: true, placeholder: '/path/to/cache (包含 conf.xml) 或 C:\\arcgiscache\\Services\\Map\\Layers' }
+        {
+            key: 'path',
+            label: '缓存目录路径',
+            type: 'file',
+            required: true,
+            placeholder: '选择 ArcGIS 缓存目录',
+            selectType: 'folder'
+        }
     ]
 };

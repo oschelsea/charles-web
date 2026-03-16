@@ -19,6 +19,17 @@ app:
     # host: 127.0.0.1
     # port: 5432
 
+# 文件浏览器配置
+file:
+  browser:
+    # 是否启用文件浏览功能
+    enabled: true
+    # 允许访问的根目录列表（为空则允许访问所有系统根目录）
+    allowed-roots:
+      - data
+      # - D:/geo-data
+      # Linux: /home/geo-data
+
 captcha:
   # 是否启用验证码校验
   enable: true
