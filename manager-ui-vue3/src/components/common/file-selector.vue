@@ -233,8 +233,8 @@ function createTreeNode(item, isRoot = false) {
 
   return {
     key: normalizePath(item.path),
-    label
-    // 不设置 isLeaf 和 children，让 NTree 通过 on-load 加载
+    label,
+    isLeaf: !item.isDir
   };
 }
 
@@ -257,6 +257,8 @@ function handleTreeLoad(node) {
         if (folders.length === 0) {
           node.isLeaf = true;
         }
+        // 触发 UI 更新
+        treeData.value = [...treeData.value];
         resolve();
       })
       .catch(err => {
@@ -576,8 +578,8 @@ function handleCancel() {
                 :on-load="handleTreeLoad"
                 :render-prefix="renderTreePrefix"
                 block-line
-                cascade
                 selectable
+                expand-on-click
                 key-field="key"
                 label-field="label"
                 children-field="children"
@@ -747,9 +749,11 @@ function handleCancel() {
   min-width: 120px;
   max-width: 400px;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
   padding: 4px 0;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .fs-splitter {
@@ -773,7 +777,7 @@ function handleCancel() {
 .fs-content-toolbar {
   display: flex;
   justify-content: flex-end;
-  padding: 6px 10px;
+  padding: 4px 8px;
   border-bottom: 1px solid #f5f5f5;
 }
 
@@ -874,9 +878,17 @@ function handleCancel() {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 8px;
-  height: 28px;
-  line-height: 28px;
-  box-sizing: border-box;
+  padding: 2px 12px !important;
+}
+/* 树节点文本不换行且显示省略号 */
+.file-selector-container .n-tree-node-content .n-tree-node-content__text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+.file-selector-container .n-tree-node-content {
+  overflow: hidden;
+  flex: 1;
 }
 </style>

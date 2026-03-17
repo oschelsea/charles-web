@@ -1,6 +1,6 @@
 const local: App.I18n.Schema = {
   system: {
-    title: 'RuoYi Plus Soybean',
+    title: 'Xenon Admin',
     updateTitle: '系统版本更新通知',
     updateContent: '检测到系统有新版本发布，是否立即刷新页面？',
     updateConfirm: '立即刷新',
@@ -459,11 +459,7 @@ const local: App.I18n.Schema = {
       projectNews: {
         title: '项目动态',
         moreNews: '更多动态',
-        desc1: 'Soybean 在2021年5月28日创建了开源项目 soybean-admin!',
-        desc2: 'Yanbowe 向 soybean-admin 提交了一个bug，多标签栏不会自适应。',
-        desc3: 'Soybean 准备为 soybean-admin 的发布做充分的准备工作!',
-        desc4: 'Soybean 正在忙于为soybean-admin写项目说明文档！',
-        desc5: 'Soybean 刚才把工作台页面随便写了一些，凑合能看了！'
+        desc1: '刚才把工作台页面随便写了一些，凑合能看了！'
       },
       creativity: '创意'
     },
@@ -1202,7 +1198,7 @@ const local: App.I18n.Schema = {
     },
     about: {
       title: '关于',
-      introduction: `RuoYi-Plus-Soybean 是一个现代化的企业级多租户管理系统，它结合了 RuoYi-Vue-Plus 的强大后端功能和 Soybean Admin 的现代化前端特性，为开发者提供了完整的企业管理解决方案。`,
+      introduction: `Xenon Admin 是一个现代化的企业级多租户管理系统，它结合了 RuoYi-Vue-Plus 的强大后端功能和 Soybean Admin 的现代化前端特性，为开发者提供了完整的企业管理解决方案。`,
       projectInfo: {
         title: '项目信息',
         version: '版本',
@@ -1269,3 +1265,4 @@ const local: App.I18n.Schema = {
 };
 
 export default local;
+

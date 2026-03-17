@@ -433,17 +433,17 @@ declare namespace App {
             apply: string;
             applySuccess: string;
             [key: string]:
-              | {
-                  name: string;
-                  desc: string;
-                }
-              | string;
+            | {
+              name: string;
+              desc: string;
+            }
+            | string;
           };
         };
         layout: {
           layoutMode: { title: string } & Record<UnionKey.ThemeLayoutMode, string> & {
-              [K in `${UnionKey.ThemeLayoutMode}_detail`]: string;
-            };
+            [K in `${UnionKey.ThemeLayoutMode}_detail`]: string;
+          };
           tab: {
             title: string;
             visible: string;
@@ -610,10 +610,6 @@ declare namespace App {
             title: string;
             moreNews: string;
             desc1: string;
-            desc2: string;
-            desc3: string;
-            desc4: string;
-            desc5: string;
           };
           creativity: string;
         };
@@ -1057,8 +1053,8 @@ declare namespace App {
 
     type GetI18nKey<T extends Record<string, unknown>, K extends keyof T = keyof T> = K extends string
       ? T[K] extends Record<string, unknown>
-        ? `${K}.${GetI18nKey<T[K]>}`
-        : K
+      ? `${K}.${GetI18nKey<T[K]>}`
+      : K
       : never;
 
     type I18nKey = GetI18nKey<Schema>;

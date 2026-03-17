@@ -59,7 +59,7 @@ export const themeSettings: App.Theme.ThemeSetting = {
   },
   watermark: {
     visible: import.meta.env.VITE_WATERMARK === 'Y',
-    text: 'RuoYi-Plus-Soybean',
+    text: 'Xenon Admin',
     enableUserName: true,
     enableTime: false,
     timeFormat: 'YYYY-MM-DD HH:mm'
@@ -102,3 +102,4 @@ export const themeSettings: App.Theme.ThemeSetting = {
  * If publish new version, use `overrideThemeSettings` to override certain theme settings
  */
 export const overrideThemeSettings: Partial<App.Theme.ThemeSetting> = {};
+

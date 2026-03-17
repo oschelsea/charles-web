@@ -347,7 +347,7 @@ const columns: NaiveUI.TableColumn<Api.Tool.GenTableColumn>[] = [
                 <NFormItemGi span="24 s:12" path="packageName">
                   <template #label>
                     <div class="flex-center">
-                      <FormTip content="生成在哪个java包下，例如 com.ruoyi.system" />
+                      <FormTip content="生成在哪个java包下，例如 com.xenon.system" />
                       <span class="pl-3px">生成包路径</span>
                     </div>
                   </template>
@@ -505,3 +505,4 @@ const columns: NaiveUI.TableColumn<Api.Tool.GenTableColumn>[] = [
   }
 }
 </style>
+

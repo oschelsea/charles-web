@@ -1,6 +1,6 @@
 const local: App.I18n.Schema = {
   system: {
-    title: 'RuoYi Plus Soybean',
+    title: 'Xenon Admin',
     updateTitle: 'System Version Update Notification',
     updateContent: 'A new version of the system has been detected. Do you want to refresh the page immediately?',
     updateConfirm: 'Refresh immediately',
@@ -463,11 +463,7 @@ const local: App.I18n.Schema = {
       projectNews: {
         title: 'Project News',
         moreNews: 'More News',
-        desc1: 'Soybean created the open source project soybean-admin on May 28, 2021!',
-        desc2: 'Yanbowe submitted a bug to soybean-admin, the multi-tab bar will not adapt.',
-        desc3: 'Soybean is ready to do sufficient preparation for the release of soybean-admin!',
-        desc4: 'Soybean is busy writing project documentation for soybean-admin!',
-        desc5: 'Soybean just wrote some of the workbench pages casually, and it was enough to see!'
+        desc1: 'just wrote some of the workbench pages casually, and it was enough to see!'
       },
       creativity: 'Creativity'
     },
@@ -1210,7 +1206,7 @@ const local: App.I18n.Schema = {
     },
     about: {
       title: 'About',
-      introduction: `RuoYi-Plus-Soybean is a modern, enterprise-level multi-tenant management system. It combines the powerful backend capabilities of RuoYi-Vue-Plus with the modern frontend features of Soybean Admin, providing developers with a complete enterprise management solution.`,
+      introduction: `Xenon Admin is a modern, enterprise-level multi-tenant management system. It combines the powerful backend capabilities of xenon-Vue-Plus with the modern frontend features of Soybean Admin, providing developers with a complete enterprise management solution.`,
       projectInfo: {
         title: 'Project Info',
         version: 'Version',
@@ -1277,3 +1273,4 @@ const local: App.I18n.Schema = {
 };
 
 export default local;
+

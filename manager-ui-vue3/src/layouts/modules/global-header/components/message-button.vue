@@ -15,9 +15,9 @@ const noticeNum = computed(() => {
   return state.value.notices.filter(notice => !notice.read).length || 0;
 });
 
-const toGitee = () => {
-  window.open('https://gitee.com/xlsea/ruoyi-plus-soybean', '_blank');
-};
+// const toGitee = () => {
+//   window.open('https://gitee.com/xlsea/ruoyi-plus-soybean', '_blank');
+// };
 </script>
 
 <template>
@@ -84,7 +84,8 @@ const toGitee = () => {
       </NScrollbar>
       <template #footer>
         <div class="flex items-center justify-end">
-          <NButton type="primary" size="small" @click="toGitee">前往 Gitee</NButton>
+          <!-- <NButton type="primary" size="small" @click="toGitee">前往 Gitee</NButton> -->
+          <NButton type="primary" size="small" @click="show = false">关闭</NButton>
         </div>
       </template>
     </NCard>

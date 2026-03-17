@@ -83,7 +83,7 @@ INSERT INTO "sys_job" VALUES (3, '系统默认（多参）', 'DEFAULT', 'ryTask.
 INSERT INTO "sys_menu" VALUES (1, '系统管理', 0, 1, 'system', NULL, 1, NULL, 'M', '0', '0', NULL, 'system', 'admin', '2021-08-26 09:00:00', NULL, NULL, '系统管理目录');
 INSERT INTO "sys_menu" VALUES (2, '系统监控', 0, 2, 'monitor', NULL, 1, NULL, 'M', '0', '0', NULL, 'monitor', 'admin', '2021-08-26 09:00:00', NULL, NULL, '系统监控目录');
 INSERT INTO "sys_menu" VALUES (3, '系统工具', 0, 3, 'tool', NULL, 1, NULL, 'M', '0', '0', NULL, 'tool', 'admin', '2021-08-26 09:00:00', NULL, NULL, '系统工具目录');
-INSERT INTO "sys_menu" VALUES (4, 'xxx官网', 0, 4, 'http://xxx.io', NULL, 2, NULL, 'M', '0', '0', NULL, 'guide', 'admin', '2021-08-26 09:00:00', NULL, NULL, 'charles官网地址');
+-- INSERT INTO "sys_menu" VALUES (4, 'xxx官网', 0, 4, 'http://xxx.io', NULL, 2, NULL, 'M', '0', '0', NULL, 'guide', 'admin', '2021-08-26 09:00:00', NULL, NULL, 'charles官网地址');
 INSERT INTO "sys_menu" VALUES (100, '用户管理', 1, 1, 'user', 'system/user/index', 1, NULL, 'C', '0', '0', 'system:user:list', 'user', 'admin', '2021-08-26 09:00:00', NULL, NULL, '用户管理菜单');
 INSERT INTO "sys_menu" VALUES (101, '角色管理', 1, 2, 'role', 'system/role/index', 1, NULL, 'C', '0', '0', 'system:role:list', 'peoples', 'admin', '2021-08-26 09:00:00', NULL, NULL, '角色管理菜单');
 INSERT INTO "sys_menu" VALUES (102, '菜单管理', 1, 3, 'menu', 'system/menu/index', 1, NULL, 'C', '0', '0', 'system:menu:list', 'tree-table', 'admin', '2021-08-26 09:00:00', NULL, NULL, '菜单管理菜单');
@@ -97,7 +97,7 @@ INSERT INTO "sys_menu" VALUES (109, '在线用户', 2, 1, 'online', 'monitor/onl
 INSERT INTO "sys_menu" VALUES (110, '定时任务', 2, 2, 'job', 'monitor/job/index', 1, NULL, 'C', '0', '0', 'monitor:job:list', 'job', 'admin', '2021-08-26 09:00:00', NULL, NULL, '定时任务菜单');
 INSERT INTO "sys_menu" VALUES (111, '数据监控', 2, 3, 'druid', 'monitor/druid/index', 1, NULL, 'C', '0', '0', 'monitor:druid:list', 'druid', 'admin', '2021-08-26 09:00:00', NULL, NULL, '数据监控菜单');
 INSERT INTO "sys_menu" VALUES (112, '服务监控', 2, 4, 'server', 'monitor/server/index', 1, NULL, 'C', '0', '0', 'monitor:server:list', 'server', 'admin', '2021-08-26 09:00:00', NULL, NULL, '服务监控菜单');
-INSERT INTO "sys_menu" VALUES (113, '缓存监控', 2, 5, 'cache', 'monitor/cache/index', 1, NULL, 'C', '1', '1', 'monitor:cache:list', 'redis', 'admin', '2021-08-26 09:00:00', 'admin', '2021-09-07 08:38:12', '缓存监控菜单');
+-- INSERT INTO "sys_menu" VALUES (113, '缓存监控', 2, 5, 'cache', 'monitor/cache/index', 1, NULL, 'C', '1', '1', 'monitor:cache:list', 'redis', 'admin', '2021-08-26 09:00:00', 'admin', '2021-09-07 08:38:12', '缓存监控菜单');
 INSERT INTO "sys_menu" VALUES (114, '表单构建', 3, 1, 'build', 'tool/build/index', 1, NULL, 'C', '0', '0', 'tool:build:list', 'build', 'admin', '2021-08-26 09:00:00', NULL, NULL, '表单构建菜单');
 INSERT INTO "sys_menu" VALUES (115, '代码生成', 3, 2, 'gen', 'tool/gen/index', 1, NULL, 'C', '0', '0', 'tool:gen:list', 'code', 'admin', '2021-08-26 09:00:00', NULL, NULL, '代码生成菜单');
 INSERT INTO "sys_menu" VALUES (116, '系统接口', 3, 3, 'swagger', 'tool/swagger/index', 1, NULL, 'C', '0', '0', 'tool:swagger:list', 'swagger', 'admin', '2021-08-26 09:00:00', NULL, NULL, '系统接口菜单');
@@ -397,27 +397,27 @@ UPDATE `sys_menu` SET `icon` = 'gg:debug', `menu_name` = 'route.demo_demo' WHERE
 UPDATE `sys_menu` SET `icon` = 'gg:debug', `menu_name` = 'route.demo_tree' WHERE `menu_id` = 1506;
 UPDATE `sys_menu` SET `path` = 'oss/config', `component` = 'system/oss-config/index', `icon` = 'hugeicons:configuration-01', `menu_name` = 'route.system_oss-config' WHERE `menu_id` = 133;
 
-INSERT INTO sys_menu (
-    menu_id, menu_name, parent_id, order_num, path, component,
-    is_frame, is_cache, menu_type, visible, status, perms, icon,
-     create_by, create_time, update_by, update_time, remark
-) VALUES (
-    9, 'route.about', 0, 99, 'about', 'about/index',
-    1, 1, 'C', '0', '0', '', 'fluent:book-information-24-regular',
-     1, datetime('now'), NULL, NULL, '关于页面'
-)
-ON CONFLICT(menu_id) DO UPDATE SET
-    update_time = datetime('now');
+-- INSERT INTO sys_menu (
+--     menu_id, menu_name, parent_id, order_num, path, component,
+--     is_frame, is_cache, menu_type, visible, status, perms, icon,
+--      create_by, create_time, update_by, update_time, remark
+-- ) VALUES (
+--     9, 'route.about', 0, 99, 'about', 'about/index',
+--     1, 1, 'C', '0', '0', '', 'fluent:book-information-24-regular',
+--      1, datetime('now'), NULL, NULL, '关于页面'
+-- )
+-- ON CONFLICT(menu_id) DO UPDATE SET
+--     update_time = datetime('now');
 
 -- IFrame 类型
 UPDATE `sys_menu` SET `component` = 'FrameView',  `is_frame` = 2, `icon` = 'bx:bxl-spring-boot', `menu_name` = 'menu.monitor_admin' WHERE `menu_id` = 117;
 UPDATE `sys_menu` SET `component` = 'FrameView',  `is_frame` = 2, `icon` = 'gridicons:scheduled', `menu_name` = 'menu.monitor_snail-job' WHERE `menu_id` = 120;
 -- 外链类型
-UPDATE `sys_menu` SET `menu_name` = 'RuoYi-Vue-Plus', `order_num` = 100, `path` = 'https://gitee.com/dromara/RuoYi-Vue-Plus', `component` = 'FrameView', `icon` = 'local-icon-gitee', `remark` = 'RuoYi-Vue-Plus 仓库地址' WHERE `menu_id` = 4;
-INSERT INTO `sys_menu` (`menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`,  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,  `create_by`, `create_time`, `update_by`, `update_time`, `remark`) VALUES (7, 'Soybean Admin', 0, 100, 'https://github.com/soybeanjs', 'FrameView',  0, 0, 'M', '0', '0', '', 'mdi:github',  1, datetime('now'), null, null, 'Soybean Admin 仓库地址') ON CONFLICT(menu_id) DO UPDATE SET
-    update_time = datetime('now');
-INSERT INTO `sys_menu` (`menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`,  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`) VALUES (8, 'RuoYi-Plus-Soybean', 0, 100, 'https://gitee.com/xlsea/ruoyi-plus-soybean', 'FrameView', 0, 0, 'M', '0', '0', '', 'local-icon-gitee',  1,datetime('now'), null, null, 'RuoYi-Plus-Soybean 仓库地址')ON CONFLICT(menu_id) DO UPDATE SET
-    update_time = datetime('now');
+-- UPDATE `sys_menu` SET `menu_name` = 'RuoYi-Vue-Plus', `order_num` = 100, `path` = 'https://gitee.com/dromara/RuoYi-Vue-Plus', `component` = 'FrameView', `icon` = 'local-icon-gitee', `remark` = 'RuoYi-Vue-Plus 仓库地址' WHERE `menu_id` = 4;
+-- INSERT INTO `sys_menu` (`menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`,  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,  `create_by`, `create_time`, `update_by`, `update_time`, `remark`) VALUES (7, 'Soybean Admin', 0, 100, 'https://github.com/soybeanjs', 'FrameView',  0, 0, 'M', '0', '0', '', 'mdi:github',  1, datetime('now'), null, null, 'Soybean Admin 仓库地址') ON CONFLICT(menu_id) DO UPDATE SET
+--     update_time = datetime('now');
+-- INSERT INTO `sys_menu` (`menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`,  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`) VALUES (8, 'RuoYi-Plus-Soybean', 0, 100, 'https://gitee.com/xlsea/ruoyi-plus-soybean', 'FrameView', 0, 0, 'M', '0', '0', '', 'local-icon-gitee',  1,datetime('now'), null, null, 'RuoYi-Plus-Soybean 仓库地址')ON CONFLICT(menu_id) DO UPDATE SET
+--     update_time = datetime('now');
 
 -- plus-ui 需要禁用的页面
 UPDATE `sys_menu` SET `status` = '1' WHERE `menu_id` IN ( '116', '130', '131', '132' );
@@ -426,4 +426,4 @@ UPDATE `sys_menu` SET `status` = '1' WHERE `menu_id` IN ( '11616', '11618', '116
 -- 删除不支持的菜单
 delete from sys_menu where menu_id in (110,111,112,114);
 -- 禁用外链菜单
-UPDATE `sys_menu` SET `status` = '1' WHERE `menu_id` IN ( '4', '7', '8' );
+-- UPDATE `sys_menu` SET `status` = '1' WHERE `menu_id` IN ( '4', '7', '8' );
