@@ -1,25 +1,24 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch, nextTick } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import {
-  NCard,
-  NSpace,
-  NSelect,
   NButton,
+  NCard,
   NCheckbox,
   NCollapse,
   NCollapseItem,
-  NTag,
-  NSpin,
+  NRadioButton,
   NRadioGroup,
-  NRadioButton
+  NSelect,
+  NSpace,
+  NSpin,
+  NTag
 } from 'naive-ui';
 import type { SelectOption } from 'naive-ui';
+import { type Layer, layerApi } from '@/service/api/xenon/layer';
+import { buildCapabilitiesUrl, buildWmtsTileUrl } from '@/service/api/xenon/wmts';
 import LeafletMap from '@/components/xenon-map/LeafletMap.vue';
-import type { WmsLayerConfig, WmtsLayerConfig, TileMatrixSetInfo } from '@/components/xenon-map/LeafletMap.vue';
-
-import { layerApi, type Layer } from '@/service/api/xenon/layer';
-import { buildWmtsTileUrl, buildCapabilitiesUrl } from '@/service/api/xenon/wmts';
+import type { TileMatrixSetInfo, WmsLayerConfig, WmtsLayerConfig } from '@/components/xenon-map/LeafletMap.vue';
 
 const route = useRoute();
 
@@ -57,7 +56,7 @@ const parsedBounds = ref<[[number, number], [number, number]] | null>(null);
 
 const wmsLayers = computed<WmsLayerConfig[]>(() => {
   if (serviceType.value !== 'WMS' || selectedLayers.value.length === 0) return [];
-  
+
   return selectedLayers.value.map(layerName => ({
     name: layerName,
     url: `${API_BASE_URL}${CONTEXT_PATH}/services/${layerName}/wms`,
@@ -70,7 +69,7 @@ const wmsLayers = computed<WmsLayerConfig[]>(() => {
 
 const wmtsLayers = computed<WmtsLayerConfig[]>(() => {
   if (serviceType.value !== 'WMTS' || selectedLayers.value.length === 0) return [];
-  
+
   return selectedLayers.value.map(layerName => ({
     name: layerName,
     url: buildWmtsTileUrl(layerName, {
@@ -89,7 +88,7 @@ const layerOptions = computed<SelectOption[]>(() =>
     .map(layer => {
       const qualifiedName = layer.workspaceName ? `${layer.workspaceName}:${layer.name}` : layer.name;
       return {
-        label: `${layer.type === 'VECTOR' ? '📐' : '🖼️'} ${layer.workspaceName ? layer.workspaceName + ':' : ''}${layer.title || layer.name}`,
+        label: `${layer.type === 'VECTOR' ? '📐' : '🖼️'} ${layer.workspaceName ? `${layer.workspaceName}:` : ''}${layer.title || layer.name}`,
         value: qualifiedName
       };
     })
@@ -99,19 +98,18 @@ onMounted(async () => {
   try {
     loading.value = true;
     const response = await layerApi.getAll();
-    const fullLayers: Layer[] = [];
-    for (const summary of response?.data?.layers || []) {
+    const summaries = response?.data?.layers || [];
+    const detailPromises = summaries.map(async summary => {
       try {
         const detail = await layerApi.getByName(summary.name);
-        const layerData = (detail?.data as any)?.layer;
-        if (layerData) {
-          fullLayers.push(layerData);
-        }
+        return (detail?.data as any)?.layer;
       } catch {
-        // Skip
+        return null;
       }
-    }
-    availableLayers.value = fullLayers;
+    });
+
+    const results = await Promise.all(detailPromises);
+    availableLayers.value = results.filter((l): l is Layer => Boolean(l));
   } catch {
     // Keep empty
   } finally {
@@ -122,7 +120,7 @@ onMounted(async () => {
   if (layerParam) {
     selectedLayers.value = [layerParam];
   }
-  
+
   const typeParam = route.query.type as string;
   if (typeParam?.toUpperCase() === 'WMTS') {
     serviceType.value = 'WMTS';
@@ -130,45 +128,53 @@ onMounted(async () => {
 });
 
 watch([selectedLayers, serviceType], async ([layers, type]) => {
-  if (type === 'WMTS' && layers.length === 1) {
-    const layerName = layers[0];
-    try {
-      const capsUrl = buildCapabilitiesUrl(layerName, wmtsBaseUrl.value);
-      const res = await fetch(capsUrl);
-      const xmlText = await res.text();
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-      
-      const tmsLink = xmlDoc.querySelector('TileMatrixSetLink TileMatrixSet');
-      if (tmsLink?.textContent) {
-        wmtsTileMatrixSet.value = tmsLink.textContent;
-        parsedTileMatrixSet.value = parseTileMatrixSet(xmlDoc, tmsLink.textContent);
-      }
-      
-      const wgs84Bbox = xmlDoc.querySelector('WGS84BoundingBox');
-      if (wgs84Bbox) {
-         const lowerCorner = wgs84Bbox.querySelector('LowerCorner')?.textContent;
-         const upperCorner = wgs84Bbox.querySelector('UpperCorner')?.textContent;
-         if (lowerCorner && upperCorner) {
-            const [minx, miny] = lowerCorner.split(/\s+/).map(Number);
-            const [maxx, maxy] = upperCorner.split(/\s+/).map(Number);
-            if (!isNaN(minx) && !isNaN(miny) && !isNaN(maxx) && !isNaN(maxy)) {
-               parsedBounds.value = [[miny, minx], [maxy, maxx]];
-               setTimeout(() => {
-                 nextTick(() => {
-                   if (mapRef.value && parsedBounds.value) {
-                     mapRef.value.fitBounds(parsedBounds.value);
-                   }
-                 });
-               }, 500);
-            }
-         }
-      }
-    } catch {
-      parsedTileMatrixSet.value = null;
-      parsedBounds.value = null;
+  if (type !== 'WMTS' || layers.length !== 1) {
+    parsedTileMatrixSet.value = null;
+    parsedBounds.value = null;
+    return;
+  }
+
+  const layerName = layers[0];
+  try {
+    const capsUrl = buildCapabilitiesUrl(layerName, wmtsBaseUrl.value);
+    const res = await fetch(capsUrl);
+    const xmlText = await res.text();
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+
+    const tmsLink = xmlDoc.querySelector('TileMatrixSetLink TileMatrixSet');
+    if (tmsLink?.textContent) {
+      wmtsTileMatrixSet.value = tmsLink.textContent;
+      parsedTileMatrixSet.value = parseTileMatrixSet(xmlDoc, tmsLink.textContent);
     }
-  } else {
+
+    const wgs84Bbox = xmlDoc.querySelector('WGS84BoundingBox');
+    if (!wgs84Bbox) return;
+
+    const lowerCorner = wgs84Bbox.querySelector('LowerCorner')?.textContent;
+    const upperCorner = wgs84Bbox.querySelector('UpperCorner')?.textContent;
+    if (!lowerCorner || !upperCorner) return;
+
+    const [minx, miny] = lowerCorner.split(/\s+/).map(Number);
+    const [maxx, maxy] = upperCorner.split(/\s+/).map(Number);
+
+    if (Number.isNaN(minx) || Number.isNaN(miny) || Number.isNaN(maxx) || Number.isNaN(maxy)) {
+      return;
+    }
+
+    parsedBounds.value = [
+      [miny, minx],
+      [maxy, maxx]
+    ];
+
+    setTimeout(() => {
+      nextTick(() => {
+        if (mapRef.value && parsedBounds.value) {
+          mapRef.value.fitBounds(parsedBounds.value);
+        }
+      });
+    }, 500);
+  } catch {
     parsedTileMatrixSet.value = null;
     parsedBounds.value = null;
   }
@@ -176,52 +182,45 @@ watch([selectedLayers, serviceType], async ([layers, type]) => {
 
 function parseTileMatrixSet(xmlDoc: Document, tileMatrixSetId: string): TileMatrixSetInfo | null {
   const tileMatrixSets = Array.from(xmlDoc.querySelectorAll('TileMatrixSet'));
-  let targetTms: Element | null = null;
-  
-  for (const tms of tileMatrixSets) {
+  const targetTms = tileMatrixSets.find(tms => {
     const identifier = tms.querySelector(':scope > Identifier, :scope > ows\\:Identifier');
-    if (identifier && identifier.textContent === tileMatrixSetId) {
-      targetTms = tms;
-      break;
-    }
-  }
-  
+    return identifier && identifier.textContent === tileMatrixSetId;
+  });
+
   if (!targetTms) return null;
-  
+
   const supportedCrsElem = targetTms.querySelector('SupportedCRS, ows\\:SupportedCRS');
   const supportedCRS = supportedCrsElem?.textContent || 'EPSG:3857';
-  
-  // Some environments don't support NodeList iteration via for...of correctly in TS
-  // so we convert it to Array
+
   const tileMatrixElems = Array.from(targetTms.querySelectorAll('TileMatrix'));
-  const tileMatrices: any[] = [];
-  
-  for (const tm of tileMatrixElems) {
-    const identifierElem = tm.querySelector('Identifier, ows\\:Identifier');
-    const scaleDenomElem = tm.querySelector('ScaleDenominator');
-    const topLeftCornerElem = tm.querySelector('TopLeftCorner');
-    const tileWidthElem = tm.querySelector('TileWidth');
-    const tileHeightElem = tm.querySelector('TileHeight');
-    const matrixWidthElem = tm.querySelector('MatrixWidth');
-    const matrixHeightElem = tm.querySelector('MatrixHeight');
-    
-    if (!identifierElem || !scaleDenomElem || !topLeftCornerElem) continue;
-    
-    const topLeftParts = topLeftCornerElem.textContent?.split(/\s+/).map(Number) || [0, 0];
-    
-    tileMatrices.push({
-      identifier: identifierElem.textContent || '0',
-      scaleDenominator: parseFloat(scaleDenomElem.textContent || '0'),
-      topLeftCorner: [topLeftParts[0] || 0, topLeftParts[1] || 0],
-      tileWidth: parseInt(tileWidthElem?.textContent || '256'),
-      tileHeight: parseInt(tileHeightElem?.textContent || '256'),
-      matrixWidth: parseInt(matrixWidthElem?.textContent || '1'),
-      matrixHeight: parseInt(matrixHeightElem?.textContent || '1')
-    });
-  }
-  
+  const tileMatrices = tileMatrixElems
+    .map(tm => {
+      const identifierElem = tm.querySelector('Identifier, ows\\:Identifier');
+      const scaleDenomElem = tm.querySelector('ScaleDenominator');
+      const topLeftCornerElem = tm.querySelector('TopLeftCorner');
+      const tileWidthElem = tm.querySelector('TileWidth');
+      const tileHeightElem = tm.querySelector('TileHeight');
+      const matrixWidthElem = tm.querySelector('MatrixWidth');
+      const matrixHeightElem = tm.querySelector('MatrixHeight');
+
+      if (!identifierElem || !scaleDenomElem || !topLeftCornerElem) return null;
+
+      const topLeftParts = topLeftCornerElem.textContent?.split(/\s+/).map(Number) || [0, 0];
+
+      return {
+        identifier: identifierElem.textContent || '0',
+        scaleDenominator: Number.parseFloat(scaleDenomElem.textContent || '0'),
+        topLeftCorner: [topLeftParts[0] || 0, topLeftParts[1] || 0],
+        tileWidth: Number.parseInt(tileWidthElem?.textContent || '256', 10),
+        tileHeight: Number.parseInt(tileHeightElem?.textContent || '256', 10),
+        matrixWidth: Number.parseInt(matrixWidthElem?.textContent || '1', 10),
+        matrixHeight: Number.parseInt(matrixHeightElem?.textContent || '1', 10)
+      };
+    })
+    .filter((m): m is any => m !== null);
+
   if (tileMatrices.length === 0) return null;
-  
+
   return {
     identifier: tileMatrixSetId,
     supportedCRS,
@@ -249,9 +248,9 @@ function handleRefreshLayers() {
 
 function handleCopyServiceUrl() {
   if (selectedLayers.value.length === 0) return;
-  
+
   let url: string;
-  
+
   if (serviceType.value === 'WMS') {
     const serviceLayer = selectedLayers.value[0];
     const baseUrl = `${wmsUrl.value}/${serviceLayer}/wms`;
@@ -275,7 +274,7 @@ function handleCopyServiceUrl() {
       format: wmtsFormat.value
     });
   }
-  
+
   navigator.clipboard.writeText(url);
 }
 
@@ -284,7 +283,7 @@ function handleCopyCapabilitiesUrl() {
 
   let url: string;
   const serviceLayer = selectedLayers.value[0];
-  
+
   if (serviceType.value === 'WMS') {
     url = `${wmsUrl.value}/${serviceLayer}/wms?SERVICE=WMS&REQUEST=GetCapabilities`;
   } else {
@@ -295,8 +294,8 @@ function handleCopyCapabilitiesUrl() {
 </script>
 
 <template>
-  <div class="p-4 h-full">
-    <div class="flex h-full gap-4 map-preview">
+  <div class="h-full p-4">
+    <div class="map-preview h-full flex gap-4">
       <div class="w-80 flex-shrink-0 overflow-y-auto">
         <NCard title="图层控制" :bordered="false" size="small">
           <NSpin :show="loading">
@@ -319,12 +318,8 @@ function handleCopyCapabilitiesUrl() {
                     max-tag-count="responsive"
                   />
                   <NSpace>
-                    <NButton size="small" @click="handleZoomToLayer">
-                      缩放到图层
-                    </NButton>
-                    <NButton size="small" @click="handleRefreshLayers">
-                      刷新
-                    </NButton>
+                    <NButton size="small" @click="handleZoomToLayer">缩放到图层</NButton>
+                    <NButton size="small" @click="handleRefreshLayers">刷新</NButton>
                   </NSpace>
                 </NSpace>
               </NCollapseItem>
@@ -340,7 +335,7 @@ function handleCopyCapabilitiesUrl() {
                         { label: '1.3.0', value: '1.3.0' },
                         { label: '1.1.1', value: '1.1.1' }
                       ]"
-                      style="width: 100px"
+                      class="w-100px"
                     />
                   </div>
                   <div class="flex items-center gap-2">
@@ -353,12 +348,10 @@ function handleCopyCapabilitiesUrl() {
                         { label: 'JPEG', value: 'image/jpeg' },
                         { label: 'GIF', value: 'image/gif' }
                       ]"
-                      style="width: 100px"
+                      class="w-100px"
                     />
                   </div>
-                  <NCheckbox v-model:checked="wmsTransparent">
-                    透明背景
-                  </NCheckbox>
+                  <NCheckbox v-model:checked="wmsTransparent">透明背景</NCheckbox>
                 </NSpace>
               </NCollapseItem>
 
@@ -373,7 +366,7 @@ function handleCopyCapabilitiesUrl() {
                         { label: 'Web Mercator (EPSG:3857)', value: 'EPSG:3857' },
                         { label: 'WGS84 (EPSG:4326)', value: 'EPSG:4326' }
                       ]"
-                      style="width: 180px"
+                      class="w-180px"
                     />
                   </div>
                   <div class="flex items-center gap-2">
@@ -385,18 +378,14 @@ function handleCopyCapabilitiesUrl() {
                         { label: 'PNG', value: 'png' },
                         { label: 'JPEG', value: 'jpg' }
                       ]"
-                      style="width: 100px"
+                      class="w-100px"
                     />
                   </div>
                 </NSpace>
               </NCollapseItem>
 
               <NCollapseItem title="底图" name="basemap">
-                <NSelect
-                  v-model:value="basemap"
-                  :options="basemapOptions"
-                  size="small"
-                />
+                <NSelect v-model:value="basemap" :options="basemapOptions" size="small" />
               </NCollapseItem>
             </NCollapse>
           </NSpin>
@@ -414,30 +403,16 @@ function handleCopyCapabilitiesUrl() {
                 <NTag type="info" round>{{ layerName }}</NTag>
               </div>
               <NSpace class="mt-2">
-                <NButton 
-                  size="small" 
-                  tertiary 
-                  @click="handleCopyServiceUrl"
-                >
-                  复制瓦片URL
-                </NButton>
-                <NButton 
-                  size="small" 
-                  tertiary 
-                  @click="handleCopyCapabilitiesUrl"
-                >
-                  复制Capabilities URL
-                </NButton>
+                <NButton size="small" tertiary @click="handleCopyServiceUrl">复制瓦片URL</NButton>
+                <NButton size="small" tertiary @click="handleCopyCapabilitiesUrl">复制Capabilities URL</NButton>
               </NSpace>
             </NSpace>
           </div>
-          <div v-else class="text-center p-4 text-[13px] text-[var(--n-text-color-3)]">
-            选择图层以查看信息
-          </div>
+          <div v-else class="p-4 text-center text-[13px] text-[var(--n-text-color-3)]">选择图层以查看信息</div>
         </NCard>
       </div>
 
-      <div class="flex-1 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-800">
+      <div class="flex-1 overflow-hidden border border-gray-200 rounded-xl shadow-sm dark:border-gray-800">
         <LeafletMap
           ref="mapRef"
           :center="[35, 117]"

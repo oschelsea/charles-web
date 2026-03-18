@@ -1,32 +1,29 @@
 <script setup lang="ts">
-import { ref, onMounted, h } from 'vue';
-import { useRouter } from 'vue-router';
+import { h, onMounted, ref } from 'vue';
 import {
+  NButton,
   NCard,
   NDataTable,
-  NButton,
-  NSpace,
-  NInput,
-  NModal,
-  NForm,
-  NFormItem,
-  NSwitch,
-  useMessage,
-  useDialog,
   NDrawer,
   NDrawerContent,
-  NTabs,
-  NTabPane,
+  NForm,
+  NFormItem,
+  NInput,
+  NModal,
+  NSpace,
   NSpin,
-  NPageHeader
+  NSwitch,
+  NTabPane,
+  NTabs,
+  useDialog,
+  useMessage
 } from 'naive-ui';
 import type { DataTableColumns } from 'naive-ui';
-import { useWorkspaceStore } from '@/store/modules/xenon/workspace';
 import type { Workspace } from '@/service/api/xenon/workspace';
-import { dataStoreApi, type DataStore, dataStoreTypes } from '@/service/api/xenon/datastore';
-import { layerApi, type Layer, layerTypes } from '@/service/api/xenon/layer';
+import { type DataStore, dataStoreApi, dataStoreTypes } from '@/service/api/xenon/datastore';
+import { type Layer, layerApi, layerTypes } from '@/service/api/xenon/layer';
+import { useWorkspaceStore } from '@/store/modules/xenon/workspace';
 
-const router = useRouter();
 const message = useMessage();
 const dialog = useDialog();
 const workspaceStore = useWorkspaceStore();
@@ -95,29 +92,33 @@ const columns: DataTableColumns<Workspace> = [
     key: 'actions',
     width: 180,
     render(row) {
-      return h(NSpace, {}, {
-        default: () => [
-          h(
-            NButton,
-            {
-              size: 'small',
-              quaternary: true,
-              onClick: () => handleEdit(row)
-            },
-            { default: () => '编辑' }
-          ),
-          h(
-            NButton,
-            {
-              size: 'small',
-              quaternary: true,
-              type: 'error',
-              onClick: () => handleDelete(row)
-            },
-            { default: () => '删除' }
-          )
-        ]
-      });
+      return h(
+        NSpace,
+        {},
+        {
+          default: () => [
+            h(
+              NButton,
+              {
+                size: 'small',
+                quaternary: true,
+                onClick: () => handleEdit(row)
+              },
+              { default: () => '编辑' }
+            ),
+            h(
+              NButton,
+              {
+                size: 'small',
+                quaternary: true,
+                type: 'error',
+                onClick: () => handleDelete(row)
+              },
+              { default: () => '删除' }
+            )
+          ]
+        }
+      );
     }
   }
 ];
@@ -171,10 +172,7 @@ function handleDelete(workspace: Workspace) {
 async function handleSubmit() {
   try {
     if (isEditing.value) {
-      await workspaceStore.updateWorkspace(
-        editingWorkspace.value.name!,
-        editingWorkspace.value
-      );
+      await workspaceStore.updateWorkspace(editingWorkspace.value.name!, editingWorkspace.value);
       message.success('更新成功');
     } else {
       await workspaceStore.createWorkspace(editingWorkspace.value);
@@ -200,19 +198,25 @@ async function loadDetailData() {
     const dsSummaries = dsRes?.data?.dataStores || [];
     const dsDetails = await Promise.all(
       dsSummaries.map(s =>
-        dataStoreApi.getByName(detailWorkspaceName.value, s.name).then(r => r.data?.dataStore).catch(() => null)
+        dataStoreApi
+          .getByName(detailWorkspaceName.value, s.name)
+          .then(r => r.data?.dataStore)
+          .catch(() => null)
       )
     );
-    datastores.value = dsDetails.filter((d): d is DataStore => !!d);
+    datastores.value = dsDetails.filter((d): d is DataStore => Boolean(d));
 
     const layerRes = await layerApi.getByWorkspace(detailWorkspaceName.value);
     const layerSummaries = layerRes?.data?.layers || [];
     const layerDetails = await Promise.all(
       layerSummaries.map(s =>
-        layerApi.getByName(s.name).then(r => r.data?.layer).catch(() => null)
+        layerApi
+          .getByName(s.name)
+          .then(r => r.data?.layer)
+          .catch(() => null)
       )
     );
-    layers.value = layerDetails.filter((l): l is Layer => !!l);
+    layers.value = layerDetails.filter((l): l is Layer => Boolean(l));
   } catch {
     message.error('加载工作空间详情失败');
   } finally {
@@ -251,21 +255,15 @@ const layerColumns: DataTableColumns<Layer> = [
   },
   { title: '标题', key: 'title' }
 ];
-
 </script>
 
 <template>
   <div class="p-4">
     <NSpace vertical :size="16">
-      <NCard title="工作空间管理" :bordered="false" size="small" class="sm:flex-1-hidden card-wrapper">
+      <NCard title="工作空间管理" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
         <template #header-extra>
           <NSpace>
-            <NInput
-              v-model:value="searchText"
-              placeholder="搜索工作空间..."
-              clearable
-              style="width: 200px"
-            />
+            <NInput v-model:value="searchText" placeholder="搜索工作空间..." clearable class="w-200px" />
             <NButton type="primary" @click="handleCreate">
               <template #icon>
                 <div class="i-mdi-plus"></div>
@@ -308,24 +306,13 @@ const layerColumns: DataTableColumns<Layer> = [
         require-mark-placement="right-hanging"
       >
         <NFormItem label="名称" path="name" required>
-          <NInput
-            v-model:value="editingWorkspace.name"
-            placeholder="输入工作空间名称"
-            :disabled="isEditing"
-          />
+          <NInput v-model:value="editingWorkspace.name" placeholder="输入工作空间名称" :disabled="isEditing" />
         </NFormItem>
         <NFormItem label="命名空间URI" path="namespaceUri">
-          <NInput
-            v-model:value="editingWorkspace.namespaceUri"
-            placeholder="http://example.com/namespace"
-          />
+          <NInput v-model:value="editingWorkspace.namespaceUri" placeholder="http://example.com/namespace" />
         </NFormItem>
         <NFormItem label="描述" path="description">
-          <NInput
-            v-model:value="editingWorkspace.description"
-            type="textarea"
-            placeholder="输入描述信息"
-          />
+          <NInput v-model:value="editingWorkspace.description" type="textarea" placeholder="输入描述信息" />
         </NFormItem>
         <NFormItem label="启用" path="enabled">
           <NSwitch v-model:value="editingWorkspace.enabled" />
