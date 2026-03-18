@@ -37,8 +37,8 @@ export interface WmtsLayerResponse {
     layer: WmtsLayerInfo;
 }
 
-// Ensure proxy path routes correctly. Use '/dev-api/xenon' matching VITE_APP_BASE_API.
-const CONTEXT_PATH = '/dev-api/xenon';
+// Ensure proxy path routes correctly. Use the environment variable to get the base API prefix.
+const CONTEXT_PATH = `${import.meta.env.VITE_APP_BASE_API || ''}/xenon`;
 
 export const wmtsApi = {
     /**

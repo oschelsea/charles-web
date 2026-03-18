@@ -29,9 +29,8 @@ const availableLayers = ref<Layer[]>([]);
 const serviceType = ref<'WMS' | 'WMTS'>('WMS');
 const selectedLayers = ref<string[]>([]);
 
-// Since this is proxied by Vite or Nginx to the backend, dev-api is usually the prefix.
-// We'll calculate base URL using the window location properties for a robust client-side approach.
-const API_BASE_URL = `${window.location.protocol}//${window.location.host}${import.meta.env.VITE_SERVICE_BASE_URL}`;
+// Use VITE_APP_BASE_API for reaching the backend via proxy.
+const API_BASE_URL = `${window.location.protocol}//${window.location.host}${import.meta.env.VITE_APP_BASE_API || ''}`;
 const CONTEXT_PATH = '/xenon';
 
 const wmsUrl = ref(`${API_BASE_URL}${CONTEXT_PATH}/services`);

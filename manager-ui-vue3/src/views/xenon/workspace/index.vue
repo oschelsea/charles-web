@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, onMounted, ref } from 'vue';
+import { computed, h, onMounted, ref } from 'vue';
 import {
   NButton,
   NCard,
@@ -18,7 +18,7 @@ import {
   useDialog,
   useMessage
 } from 'naive-ui';
-import type { DataTableColumns } from 'naive-ui';
+import type { DataTableColumns, FormInst } from 'naive-ui';
 import type { Workspace } from '@/service/api/xenon/workspace';
 import { type DataStore, dataStoreApi, dataStoreTypes } from '@/service/api/xenon/datastore';
 import { type Layer, layerApi, layerTypes } from '@/service/api/xenon/layer';
@@ -27,6 +27,7 @@ import { useWorkspaceStore } from '@/store/modules/xenon/workspace';
 const message = useMessage();
 const dialog = useDialog();
 const workspaceStore = useWorkspaceStore();
+const formRef = ref<FormInst | null>(null);
 
 const searchText = ref('');
 const showModal = ref(false);
@@ -36,6 +37,15 @@ const editingWorkspace = ref<Partial<Workspace>>({
   namespaceUri: '',
   description: '',
   enabled: true
+});
+
+// Computed filtered workspaces
+const filteredWorkspaces = computed(() => {
+  if (!searchText.value) return workspaceStore.workspaces;
+  const search = searchText.value.toLowerCase();
+  return workspaceStore.workspaces.filter(
+    ws => ws.name.toLowerCase().includes(search) || ws.description?.toLowerCase().includes(search)
+  );
 });
 
 // Detail Drawer State
@@ -171,6 +181,12 @@ function handleDelete(workspace: Workspace) {
 
 async function handleSubmit() {
   try {
+    await formRef.value?.validate();
+  } catch {
+    return false;
+  }
+
+  try {
     if (isEditing.value) {
       await workspaceStore.updateWorkspace(editingWorkspace.value.name!, editingWorkspace.value);
       message.success('更新成功');
@@ -179,8 +195,10 @@ async function handleSubmit() {
       message.success('创建成功');
     }
     showModal.value = false;
+    return true;
   } catch {
     message.error('操作失败');
+    return false;
   }
 }
 
@@ -280,7 +298,7 @@ const layerColumns: DataTableColumns<Layer> = [
         </template>
         <NDataTable
           :columns="columns"
-          :data="workspaceStore.workspaces"
+          :data="filteredWorkspaces"
           :loading="workspaceStore.loading"
           :pagination="{ pageSize: 15 }"
           :bordered="false"
@@ -300,6 +318,7 @@ const layerColumns: DataTableColumns<Layer> = [
       @positive-click="handleSubmit"
     >
       <NForm
+        ref="formRef"
         :model="editingWorkspace"
         label-placement="left"
         label-width="100px"

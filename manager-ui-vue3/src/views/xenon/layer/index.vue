@@ -73,8 +73,8 @@ const wmtsLayers = computed<WmtsLayerConfig[]>(() => {
   if (!currentDetailLayer.value) return [];
   // For the proxy, base URL is implicit, handled by interceptors.
   // However, WMTS map layers usually need full URLs in the frontend if unproxied,
-  // or proxy path + backend endpoint. We'll use the window location with /dev-api proxy prefix.
-  const baseUrl = `${window.location.protocol}//${window.location.host}${import.meta.env.VITE_SERVICE_BASE_URL}`;
+  // or proxy path + backend endpoint. We'll use the window location with the proxy prefix.
+  const baseUrl = `${window.location.protocol}//${window.location.host}${import.meta.env.VITE_APP_BASE_API || ''}`;
   return [
     {
       name: currentDetailLayer.value.name,

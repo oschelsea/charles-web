@@ -126,7 +126,7 @@ onUnmounted(() => {
 function handleLoadTileset() {
   if (!selectedTileset.value || !viewer) return;
 
-  const basePath = `${window.location.protocol}//${window.location.host}${import.meta.env.VITE_SERVICE_BASE_URL}`;
+  const basePath = `${window.location.protocol}//${window.location.host}${import.meta.env.VITE_APP_BASE_API || ''}`;
   const CONTEXT_PATH = '/xenon';
   const url = `${basePath}${CONTEXT_PATH}/services/${selectedTileset.value}/3dtiles/tileset.json`;
 
