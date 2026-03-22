@@ -150,7 +150,7 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
             // @ts-expect-error no query field
             url: JSON.parse(route.query)?.url
           };
-        } catch { }
+        } catch {}
       }
       route.component = parent && !isExternalLink ? 'view.iframe-page' : 'layout.base$view.iframe-page';
     } else if (!isLayout && !isParentLayout && !isBlankLayout) {

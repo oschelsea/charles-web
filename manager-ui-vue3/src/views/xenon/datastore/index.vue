@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h, onMounted, ref } from 'vue';
+import { computed, h, nextTick, onMounted, ref } from 'vue';
 import {
   NButton,
   NCard,
@@ -18,7 +18,7 @@ import {
   useDialog,
   useMessage
 } from 'naive-ui';
-import type { DataTableColumns, SelectOption } from 'naive-ui';
+import type { DataTableColumns, FormInst, FormRules, SelectOption } from 'naive-ui';
 import {
   type DataStore,
   type DataStoreType,
@@ -43,10 +43,41 @@ const isEditing = ref(false);
 const editingStore = ref<Partial<DataStore>>({
   name: '',
   description: '',
+  workspaceName: '',
   type: 'SHAPEFILE',
   enabled: true,
   connectionParams: {}
 });
+
+const formRef = ref<FormInst | null>(null);
+
+const rules: FormRules = {
+  name: [
+    { required: true, message: '数据存储名称不能为空', trigger: ['input', 'blur'] },
+    {
+      pattern: /^[a-zA-Z0-9_-]+$/,
+      message: '数据存储名称只能包含字母、数字、下划线和连字符',
+      trigger: ['input', 'blur']
+    }
+  ],
+  workspaceName: [{ required: true, message: '请选择工作空间', trigger: ['change', 'blur'] }],
+  type: [{ required: true, message: '请选择数据存储类型', trigger: ['change', 'blur'] }],
+  connectionParams: {
+    trigger: ['input', 'blur'],
+    validator(_rule, value) {
+      const type = editingStore.value.type as DataStoreType;
+      const fields = dataStoreFieldConfigs[type] || [];
+      const params = value as Record<string, any>;
+
+      for (const field of fields) {
+        if (field.required && (params[field.key] === undefined || params[field.key] === '')) {
+          return new Error(`${field.label}不能为空`);
+        }
+      }
+      return true;
+    }
+  }
+};
 
 // 文件选择器状态
 const showFileSelector = ref(false);
@@ -231,6 +262,9 @@ function handleCreate() {
     connectionParams: {}
   };
   showModal.value = true;
+  nextTick(() => {
+    formRef.value?.restoreValidation();
+  });
 }
 
 function handleEdit(store: DataStore) {
@@ -240,6 +274,9 @@ function handleEdit(store: DataStore) {
     connectionParams: store.connectionParams || {}
   };
   showModal.value = true;
+  nextTick(() => {
+    formRef.value?.restoreValidation();
+  });
 }
 
 function handleDelete(store: DataStore) {
@@ -261,25 +298,15 @@ function handleDelete(store: DataStore) {
   });
 }
 
-function validateName(name?: string, typeName = '资源') {
-  if (!name || !name.trim()) return `${typeName}名称不能为空`;
-  if (!/^[a-zA-Z0-9_-]+$/.test(name)) return `${typeName}名称只能包含字母、数字、下划线和连字符`;
-  return null;
-}
-
 async function handleSubmit() {
   try {
-    const wsName = editingStore.value.workspaceName || selectedWorkspace.value;
-    if (!wsName) {
-      message.error('请选择工作空间');
-      return;
-    }
+    await formRef.value?.validate();
+  } catch {
+    return false;
+  }
 
-    const error = validateName(editingStore.value.name, '数据存储');
-    if (error) {
-      message.error(error);
-      return;
-    }
+  try {
+    const wsName = editingStore.value.workspaceName!;
 
     if (isEditing.value) {
       await dataStoreApi.update(wsName, editingStore.value.name!, editingStore.value);
@@ -290,8 +317,10 @@ async function handleSubmit() {
     }
     showModal.value = false;
     await loadDataStores();
+    return true;
   } catch {
     message.error('操作失败');
+    return false;
   }
 }
 </script>
@@ -342,7 +371,14 @@ async function handleSubmit() {
       class="w-600px"
       @positive-click="handleSubmit"
     >
-      <NForm :model="editingStore" label-placement="left" label-width="100" require-mark-placement="right-hanging">
+      <NForm
+        ref="formRef"
+        :model="editingStore"
+        :rules="rules"
+        label-placement="left"
+        label-width="100"
+        require-mark-placement="right-hanging"
+      >
         <NFormItem label="名称" path="name" required>
           <NInput v-model:value="editingStore.name" placeholder="输入数据存储名称" :disabled="isEditing" />
         </NFormItem>

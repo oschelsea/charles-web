@@ -1,13 +1,12 @@
 {
+  "eslint.workingDirectories": [
+    "./manager-ui-vue3"
+  ],
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
     "source.organizeImports": "never"
   },
   "editor.formatOnSave": false,
-  // 告诉 VS Code 的内置 HTML/Vue 格式化，标签属性强制保持多行，不要擅自合并
-  //"html.format.wrapAttributes": "preserve",
-  //"html.format.wrapAttributesIndentSize": 2, // 可选：保持对齐
-  // 或者最直接的办法：彻底剥夺 Volar 格式化的权力，全权交给 eslint
   "[vue]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
     "editor.formatOnSave": false
@@ -35,19 +34,19 @@
   "i18n-ally.enabledFrameworks": ["vue"],
   "i18n-ally.editor.preferEditor": true,
   "i18n-ally.keystyle": "nested",
-  "i18n-ally.localesPaths": ["src/locales/langs"],
+  "i18n-ally.localesPaths": ["manager-ui-vue3/src/locales/langs"],
   "i18n-ally.parsers.typescript.compilerOptions": {
     "moduleResolution": "node"
   },
   "prettier.enable": false,
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "unocss.root": ["./"],
+  "typescript.tsdk": "manager-ui-vue3/node_modules/typescript/lib",
+  "unocss.root": ["./manager-ui-vue3/"],
   "vue.server.hybridMode": true,
   "files.exclude": {
-    "/docs": true
+    "manager-ui-vue3/docs": true
   },
   "search.exclude": {
-    "/docs": true,
+    "manager-ui-vue3/docs": true,
     "**/dist/**": true
   },
   "cSpell.words": ["Axios", "tinymce"]

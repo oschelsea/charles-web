@@ -74,7 +74,6 @@ onMounted(async () => {
   }
 
   try {
-    // @ts-expect-error: Cesium is not explicitly typed in this dynamic import
     const Cesium = await import('cesium');
 
     if (!cesiumContainer.value) return;
@@ -130,7 +129,6 @@ function handleLoadTileset() {
   const CONTEXT_PATH = '/xenon';
   const url = `${basePath}${CONTEXT_PATH}/services/${selectedTileset.value}/3dtiles/tileset.json`;
 
-  // @ts-expect-error: Cesium dynamic import lacks explicit type definitions
   import('cesium').then(async Cesium => {
     try {
       const tileset = await Cesium.Cesium3DTileset.fromUrl(url);
@@ -145,7 +143,6 @@ function handleLoadTileset() {
 function handleFlyTo() {
   if (!viewer) return;
 
-  // @ts-expect-error: Cesium dynamic import lacks explicit type definitions
   import('cesium').then(Cesium => {
     viewer.camera.flyTo({
       destination: Cesium.Cartesian3.fromDegrees(cameraLongitude.value, cameraLatitude.value, cameraHeight.value),

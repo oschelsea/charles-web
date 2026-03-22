@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/services")
+@RequestMapping("/xenon/services")
 @Tag(name = "3D Tiles", description = "3D Tiles Service")
 public class Tiles3DController {
 

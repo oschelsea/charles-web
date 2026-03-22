@@ -73,7 +73,10 @@ export const request = createFlatRequest(
         response.data = JSON.parse(decryptData);
       }
       // 如果没有code字段，则根据状态码判断
-      return (response.data.code === undefined && response.status < 400) || String(response.data.code) === import.meta.env.VITE_SERVICE_SUCCESS_CODE;
+      return (
+        (response.data.code === undefined && response.status < 400) ||
+        String(response.data.code) === import.meta.env.VITE_SERVICE_SUCCESS_CODE
+      );
     },
     async onBackendFail(response, instance) {
       const authStore = useAuthStore();

@@ -505,4 +505,3 @@ const columns: NaiveUI.TableColumn<Api.Tool.GenTableColumn>[] = [
   }
 }
 </style>
-

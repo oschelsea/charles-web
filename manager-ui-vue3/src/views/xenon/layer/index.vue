@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h, onMounted, ref, watch } from 'vue';
+import { computed, h, nextTick, onMounted, ref, watch } from 'vue';
 import {
   NButton,
   NCard,
@@ -21,7 +21,7 @@ import {
   useDialog,
   useMessage
 } from 'naive-ui';
-import type { DataTableColumns, SelectOption } from 'naive-ui';
+import type { DataTableColumns, FormInst, FormRules, SelectOption } from 'naive-ui';
 import {
   type Layer,
   type PublishableResource,
@@ -44,6 +44,22 @@ const searchText = ref('');
 
 const showModal = ref(false);
 const isCreating = ref(false);
+
+const formRef = ref<FormInst | null>(null);
+const rules: FormRules = {
+  name: [
+    { required: true, message: '图层名称不能为空', trigger: ['input', 'blur'] },
+    {
+      pattern: /^[a-zA-Z0-9_-]+$/,
+      message: '图层名称只能包含字母、数字、下划线和连字符',
+      trigger: ['input', 'blur']
+    }
+  ],
+  type: [{ required: true, message: '请选择图层类型', trigger: ['change', 'blur'] }],
+  workspace: [{ required: true, message: '请选择工作空间', trigger: ['change', 'blur'] }],
+  datastore: [{ required: true, message: '请选择数据存储', trigger: ['change', 'blur'] }],
+  resource: [{ required: true, message: '请选择要发布的资源', trigger: ['change', 'blur'] }]
+};
 
 const selectedWorkspace = ref<string>('');
 const selectedDataStore = ref<string>('');
@@ -179,13 +195,12 @@ watch(selectedDataStore, async newVal => {
       ];
       selectedResource.value = ds.name;
       return;
-    } else if (ds?.type === 'GEOPACKAGE') {
-      editingLayer.value.type = 'GEOPACKAGE_TILES';
     }
 
     loadingResources.value = true;
     try {
-      const response = await getPublishableResources(selectedWorkspace.value, newVal);
+      const isVector = ds ? dataStoreTypes[ds.type]?.isVector : true;
+      const response = await getPublishableResources(selectedWorkspace.value, newVal, isVector);
       publishableResources.value = response.resources || [];
     } finally {
       loadingResources.value = false;
@@ -401,12 +416,18 @@ function handleCreate() {
     queryable: true
   };
   showModal.value = true;
+  nextTick(() => {
+    formRef.value?.restoreValidation();
+  });
 }
 
 function handleEdit(layer: Layer) {
   isCreating.value = false;
   editingLayer.value = { ...layer };
   showModal.value = true;
+  nextTick(() => {
+    formRef.value?.restoreValidation();
+  });
 }
 
 function handleDelete(layer: Layer) {
@@ -428,13 +449,13 @@ function handleDelete(layer: Layer) {
   });
 }
 
-function validateName(name?: string, typeName = '图层') {
-  if (!name || !name.trim()) return `${typeName}名称不能为空`;
-  if (!/^[a-zA-Z0-9_-]+$/.test(name)) return `${typeName}名称只能包含字母、数字、下划线和连字符`;
-  return null;
-}
-
 async function handleSubmit() {
+  try {
+    await formRef.value?.validate();
+  } catch {
+    return false;
+  }
+
   try {
     if (editingLayer.value.id) {
       const qualifiedName = editingLayer.value.workspaceName
@@ -452,19 +473,15 @@ async function handleSubmit() {
         editingLayer.value.datastoreId = ds.id;
       }
 
-      const error = validateName(editingLayer.value.name, '图层');
-      if (error) {
-        message.error(error);
-        return;
-      }
-
       await layerApi.create(editingLayer.value);
       message.success('发布成功');
     }
     showModal.value = false;
     await loadLayers();
+    return true;
   } catch {
     message.error('操作失败');
+    return false;
   }
 }
 
@@ -527,10 +544,22 @@ async function loadDetailData() {
       class="w-600px"
       @positive-click="handleSubmit"
     >
-      <NForm :model="editingLayer" label-placement="left" label-width="100" require-mark-placement="right-hanging">
+      <NForm
+        ref="formRef"
+        :model="{
+          ...editingLayer,
+          workspace: selectedWorkspace,
+          datastore: selectedDataStore,
+          resource: selectedResource
+        }"
+        :rules="rules"
+        label-placement="left"
+        label-width="100"
+        require-mark-placement="right-hanging"
+      >
         <template v-if="isCreating">
           <div class="section-divider">选择数据源</div>
-          <NFormItem label="工作空间" required>
+          <NFormItem label="工作空间" path="workspace">
             <NSelect
               v-model:value="selectedWorkspace"
               :options="workspaceOptions"
@@ -538,7 +567,7 @@ async function loadDetailData() {
               filterable
             />
           </NFormItem>
-          <NFormItem label="数据存储" required>
+          <NFormItem label="数据存储" path="datastore">
             <NSpin :show="loadingDatastores" size="small">
               <NSelect
                 v-model:value="selectedDataStore"
@@ -549,7 +578,7 @@ async function loadDetailData() {
               />
             </NSpin>
           </NFormItem>
-          <NFormItem label="发布资源" required>
+          <NFormItem label="发布资源" path="resource">
             <NSpin :show="loadingResources" size="small">
               <NSelect
                 v-model:value="selectedResource"

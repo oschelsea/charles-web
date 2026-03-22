@@ -110,7 +110,7 @@ public class SecurityConfig {
                             .requestMatchers("/webjars/**").anonymous()
                             .requestMatchers("/v3/api-docs/**").anonymous()
                             .requestMatchers("/druid/**").anonymous()
-                            .requestMatchers("/audio/**", "/mqtt/**").anonymous()
+                            .requestMatchers("/audio/**", "/mqtt/**", "/xenon/services/**").anonymous()
                             // 除上面外的所有请求全部需要鉴权认证
                             .anyRequest().authenticated();
 

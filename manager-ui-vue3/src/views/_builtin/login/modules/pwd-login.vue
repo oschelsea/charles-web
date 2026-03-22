@@ -194,7 +194,8 @@ async function handleSocialLogin(type: Api.System.SocialSource) {
       </NSpace>
     </NForm>
 
-    <!-- <NDivider>
+    <!--
+ <NDivider>
       <div class="color-#858585">{{ $t('page.login.pwdLogin.otherAccountLogin') }}</div>
     </NDivider>
 
@@ -211,7 +212,8 @@ async function handleSocialLogin(type: Api.System.SocialSource) {
         </template>
         <span class="ml-6px">GitHub</span>
       </NButton>
-    </div> -->
+    </div> 
+-->
 
     <div class="mt-24px w-full text-center text-18px text-#858585">
       您还没有账户？

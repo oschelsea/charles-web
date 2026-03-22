@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 // @ts-ignore - proj4 类型定义与实际导出方式不匹配
@@ -120,7 +120,8 @@ function extractEpsgCode(crs: string): string {
 function getProj4Def(epsgCode: string): string {
   const proj4Defs: Record<string, string> = {
     '4326': '+proj=longlat +datum=WGS84 +no_defs',
-    '3857': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs',
+    '3857':
+      '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs',
     '4214': '+proj=longlat +ellps=krass +no_defs',
     '4490': '+proj=longlat +ellps=GRS80 +no_defs',
     '4610': '+proj=longlat +ellps=clrk80ign +no_defs'
@@ -142,8 +143,8 @@ function createCustomCrs(tileMatrixSet: TileMatrixSetInfo): L.CRS {
   }
 
   const sortedMatrices = [...tileMatrixSet.tileMatrices].sort((a, b) => {
-    const aLevel = typeof a.identifier === 'number' ? a.identifier : parseInt(String(a.identifier));
-    const bLevel = typeof b.identifier === 'number' ? b.identifier : parseInt(String(b.identifier));
+    const aLevel = typeof a.identifier === 'number' ? a.identifier : Number.parseInt(String(a.identifier));
+    const bLevel = typeof b.identifier === 'number' ? b.identifier : Number.parseInt(String(b.identifier));
     return aLevel - bLevel;
   });
 
@@ -157,14 +158,10 @@ function createCustomCrs(tileMatrixSet: TileMatrixSetInfo): L.CRS {
   const origin = sortedMatrices[0]?.topLeftCorner || [0, 0];
   const isGeographic = epsgCode === '4326' || epsgCode === '4214' || epsgCode === '4490';
 
-  const crs = new (L as any).Proj.CRS(
-    `EPSG:${epsgCode}`,
-    proj4Def,
-    {
-      resolutions,
-      origin: isGeographic ? [origin[1], origin[0]] : origin
-    }
-  );
+  const crs = new (L as any).Proj.CRS(`EPSG:${epsgCode}`, proj4Def, {
+    resolutions,
+    origin: isGeographic ? [origin[1], origin[0]] : origin
+  });
 
   customCrsCache.set(cacheKey, crs);
   return crs;
@@ -249,17 +246,28 @@ onUnmounted(() => {
   }
 });
 
-watch(() => props.basemap, (newBasemap) => {
-  updateBasemap(newBasemap);
-});
+watch(
+  () => props.basemap,
+  newBasemap => {
+    updateBasemap(newBasemap);
+  }
+);
 
-watch(() => props.wmsLayers, (newLayers) => {
-  updateWmsLayers(newLayers);
-}, { deep: true });
+watch(
+  () => props.wmsLayers,
+  newLayers => {
+    updateWmsLayers(newLayers);
+  },
+  { deep: true }
+);
 
-watch(() => props.wmtsLayers, (newLayers) => {
-  updateWmtsLayers(newLayers);
-}, { deep: true });
+watch(
+  () => props.wmtsLayers,
+  newLayers => {
+    updateWmtsLayers(newLayers);
+  },
+  { deep: true }
+);
 
 function initMap() {
   if (!mapContainer.value) return;
@@ -284,16 +292,18 @@ function initMap() {
     updateWmtsLayers(props.wmtsLayers);
   }
 
-  L.control.scale({
-    position: 'bottomleft',
-    metric: true,
-    imperial: false
-  }).addTo(map);
+  L.control
+    .scale({
+      position: 'bottomleft',
+      metric: true,
+      imperial: false
+    })
+    .addTo(map);
 
   addCoordinatesControl(map);
   addZoomLevelControl(map);
 
-  map.on('click', (e) => {
+  map.on('click', e => {
     emit('click', e.latlng);
   });
 
@@ -368,8 +378,8 @@ function addCustomCrsWmtsLayer(config: WmtsLayerConfig) {
   const crs = createCustomCrs(tileMatrixSet);
 
   const sortedMatrices = [...tileMatrixSet.tileMatrices].sort((a, b) => {
-    const aLevel = typeof a.identifier === 'number' ? a.identifier : parseInt(String(a.identifier));
-    const bLevel = typeof b.identifier === 'number' ? b.identifier : parseInt(String(b.identifier));
+    const aLevel = typeof a.identifier === 'number' ? a.identifier : Number.parseInt(String(a.identifier));
+    const bLevel = typeof b.identifier === 'number' ? b.identifier : Number.parseInt(String(b.identifier));
     return aLevel - bLevel;
   });
 
@@ -382,17 +392,14 @@ function addCustomCrsWmtsLayer(config: WmtsLayerConfig) {
       const z = coords.z;
       const x = coords.x;
       const y = coords.y;
-      
-      return config.url
-        .replace('{z}', String(z))
-        .replace('{x}', String(x))
-        .replace('{y}', String(y));
+
+      return config.url.replace('{z}', String(z)).replace('{x}', String(x)).replace('{y}', String(y));
     }
   });
 
   const currentCrsCode = (map.options.crs as any)?.code || 'EPSG:3857';
   const targetCrsCode = `EPSG:${extractEpsgCode(tileMatrixSet.supportedCRS)}`;
-  
+
   if (currentCrsCode !== targetCrsCode) {
     reinitMapWithCrs(crs, config, minZoom, maxZoom, tileSize);
   } else {
@@ -408,13 +415,7 @@ function addCustomCrsWmtsLayer(config: WmtsLayerConfig) {
   }
 }
 
-function reinitMapWithCrs(
-  crs: L.CRS, 
-  config: WmtsLayerConfig, 
-  minZoom: number,
-  maxZoom: number,
-  tileSize: number
-) {
+function reinitMapWithCrs(crs: L.CRS, config: WmtsLayerConfig, minZoom: number, maxZoom: number, tileSize: number) {
   if (!mapContainer.value || !config.tileMatrixSet) return;
 
   const currentCenter = map?.getCenter() || L.latLng(props.center![0], props.center![1]);
@@ -443,11 +444,8 @@ function reinitMapWithCrs(
       const z = coords.z;
       const x = coords.x;
       const y = coords.y;
-      
-      return config.url
-        .replace('{z}', String(z))
-        .replace('{x}', String(x))
-        .replace('{y}', String(y));
+
+      return config.url.replace('{z}', String(z)).replace('{x}', String(x)).replace('{y}', String(y));
     }
   });
 
@@ -461,16 +459,18 @@ function reinitMapWithCrs(
 
   wmtsLayerGroup.addLayer(wmtsLayer);
 
-  L.control.scale({
-    position: 'bottomleft',
-    metric: true,
-    imperial: false
-  }).addTo(map);
+  L.control
+    .scale({
+      position: 'bottomleft',
+      metric: true,
+      imperial: false
+    })
+    .addTo(map);
 
   addCoordinatesControl(map);
   addZoomLevelControl(map);
 
-  map.on('click', (e) => {
+  map.on('click', e => {
     emit('click', e.latlng);
   });
 
