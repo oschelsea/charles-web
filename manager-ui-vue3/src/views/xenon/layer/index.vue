@@ -24,18 +24,19 @@ import {
 import type { DataTableColumns, FormInst, FormRules, SelectOption } from 'naive-ui';
 import {
   type Layer,
+  type LayerType,
   type PublishableResource,
   getPublishableResources,
   layerApi,
   layerTypes
 } from '@/service/api/xenon/layer';
 import { type DataStore, dataStoreApi, dataStoreTypes } from '@/service/api/xenon/datastore';
-import { buildWmtsTileUrl } from '@/service/api/xenon/wmts';
 import { useWorkspaceStore } from '@/store/modules/xenon/workspace';
-import LeafletMap, { type WmtsLayerConfig } from '@/components/xenon-map/LeafletMap.vue';
+import { useRouterPush } from '@/hooks/common/router';
 
 const message = useMessage();
 const dialog = useDialog();
+const { routerPushByKey } = useRouterPush();
 const workspaceStore = useWorkspaceStore();
 
 const loading = ref(false);
@@ -84,25 +85,6 @@ const showDetail = ref(false);
 const detailLayerName = ref('');
 const loadingDetail = ref(false);
 const currentDetailLayer = ref<Layer | null>(null);
-
-const wmtsLayers = computed<WmtsLayerConfig[]>(() => {
-  if (!currentDetailLayer.value) return [];
-  // For the proxy, base URL is implicit, handled by interceptors.
-  // However, WMTS map layers usually need full URLs in the frontend if unproxied,
-  // or proxy path + backend endpoint. We'll use the window location with the proxy prefix.
-  const baseUrl = `${window.location.protocol}//${window.location.host}${import.meta.env.VITE_APP_BASE_API || ''}`;
-  return [
-    {
-      name: currentDetailLayer.value.name,
-      url: buildWmtsTileUrl(currentDetailLayer.value.name, {
-        baseUrl,
-        tileMatrixSet: 'EPSG:3857',
-        format: 'png'
-      }),
-      attribution: 'Xenon'
-    }
-  ];
-});
 
 const filteredLayers = computed(() => {
   if (!searchText.value) return layers.value;
@@ -233,6 +215,34 @@ function getLayerTypeMeta(type: string) {
   return layerTypes[type as keyof typeof layerTypes] || { label: type, icon: '❓', color: 'gray' };
 }
 
+function getQualifiedLayerName(layer: Pick<Layer, 'name' | 'workspaceName'>) {
+  return layer.workspaceName ? `${layer.workspaceName}:${layer.name}` : layer.name;
+}
+
+function isWmtsPreviewType(type: LayerType) {
+  return type === 'GEOPACKAGE_TILES' || type === 'ARCGIS_CACHE';
+}
+
+function handlePreview(layer: Layer) {
+  const qualifiedName = getQualifiedLayerName(layer);
+
+  if (layer.type === 'TILES3D') {
+    routerPushByKey('xenon_preview3d', {
+      query: {
+        layer: qualifiedName
+      }
+    }).catch(() => undefined);
+    return;
+  }
+
+  routerPushByKey('xenon_preview', {
+    query: {
+      layer: qualifiedName,
+      ...(isWmtsPreviewType(layer.type) ? { type: 'WMTS' } : {})
+    }
+  }).catch(() => undefined);
+}
+
 const columns: DataTableColumns<Layer> = [
   {
     title: '图层名称',
@@ -240,7 +250,7 @@ const columns: DataTableColumns<Layer> = [
     sorter: 'default',
     render(row) {
       const meta = layerTypes[row.type];
-      const qualifiedName = row.workspaceName ? `${row.workspaceName}:${row.name}` : row.name;
+      const qualifiedName = getQualifiedLayerName(row);
       return h(
         'div',
         {
@@ -328,7 +338,6 @@ const columns: DataTableColumns<Layer> = [
     width: 250,
     render(row) {
       const buttons: ReturnType<typeof h>[] = [];
-      const qualifiedName = row.workspaceName ? `${row.workspaceName}:${row.name}` : row.name;
 
       buttons.push(
         h(
@@ -337,9 +346,9 @@ const columns: DataTableColumns<Layer> = [
             size: 'small',
             quaternary: true,
             type: 'success',
-            onClick: () => openDetail(qualifiedName)
+            onClick: () => handlePreview(row)
           },
-          { default: () => '预览' }
+          { default: () => (row.type === 'TILES3D' ? '3D预览' : '预览') }
         )
       );
 
@@ -665,10 +674,6 @@ async function loadDetailData() {
                 <span v-else class="text-gray">-</span>
               </NDescriptionsItem>
             </NDescriptions>
-
-            <div class="h-[400px] w-full overflow-hidden border border-gray-200 rounded-md dark:border-gray-800">
-              <LeafletMap :center="[35, 110]" :zoom="4" :wmts-layers="wmtsLayers" basemap="osm" />
-            </div>
           </template>
         </NSpin>
       </NDrawerContent>

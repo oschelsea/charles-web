@@ -23,10 +23,10 @@ import java.io.IOException;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "WMTS", description = "OGC Web Map Tile Service")
+@RequestMapping("/xenon")
 public class WmtsController {
 
     private final WmtsService wmtsService;
-
 
 
     /**
@@ -68,7 +68,7 @@ public class WmtsController {
             String format
     ) throws IOException {
         log.debug("WMTS KVP 请求: request={}, layer={}", request, layer);
-        
+
         return switch (request.toUpperCase()) {
             case "GETCAPABILITIES" -> {
                 String baseUrl = wmtsService.getBaseUrl(httpRequest);
@@ -78,18 +78,18 @@ public class WmtsController {
                         .body(result);
             }
             case "GETTILE" -> {
-                byte[] tile = wmtsService.getTile(layer, style, tileMatrixSet, 
+                byte[] tile = wmtsService.getTile(layer, style, tileMatrixSet,
                         tileMatrix != null ? tileMatrix : 0,
                         tileRow != null ? tileRow : 0,
                         tileCol != null ? tileCol : 0,
                         format);
-                
+
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.parseMediaType(
                         format != null ? format : "image/png"));
                 headers.setContentLength(tile.length);
                 headers.setCacheControl("max-age=31536000");
-                
+
                 yield new ResponseEntity<>(tile, headers, HttpStatus.OK);
             }
             default -> ResponseEntity.badRequest()
@@ -111,21 +111,21 @@ public class WmtsController {
             @PathVariable String format
     ) throws IOException {
         log.debug("WMTS REST GetTile: layer={}, z={}, x={}, y={}", qualifiedLayer, z, x, y);
-        
+
         String mimeType = switch (format.toLowerCase()) {
             case "png" -> "image/png";
             case "jpg", "jpeg" -> "image/jpeg";
             case "gif" -> "image/gif";
             default -> "image/png";
         };
-        
+
         byte[] tile = wmtsService.getTile(qualifiedLayer, "default", "EPSG:3857", z, y, x, mimeType);
-        
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(mimeType));
         headers.setContentLength(tile.length);
         headers.setCacheControl("max-age=31536000");
-        
+
         return new ResponseEntity<>(tile, headers, HttpStatus.OK);
     }
 
@@ -144,21 +144,21 @@ public class WmtsController {
             @PathVariable String format
     ) throws IOException {
         log.debug("WMTS REST GetTile: layer={}, tileMatrixSet={}, z={}, x={}, y={}", qualifiedLayer, tileMatrixSet, z, x, y);
-        
+
         String mimeType = switch (format.toLowerCase()) {
             case "png" -> "image/png";
             case "jpg", "jpeg" -> "image/jpeg";
             case "gif" -> "image/gif";
             default -> "image/png";
         };
-        
+
         byte[] tile = wmtsService.getTile(qualifiedLayer, "default", tileMatrixSet, z, y, x, mimeType);
-        
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(mimeType));
         headers.setContentLength(tile.length);
         headers.setCacheControl("max-age=31536000");
-        
+
         return new ResponseEntity<>(tile, headers, HttpStatus.OK);
     }
 

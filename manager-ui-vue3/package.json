@@ -126,6 +126,12 @@
     "vue-eslint-parser": "10.2.0",
     "vue-tsc": "3.2.1"
   },
+  "pnpm": {
+    "overrides": {
+      "@cesium/engine": "22.2.0",
+      "@cesium/widgets": "14.2.0"
+    }
+  },
   "simple-git-hooks": {
     "commit-msg": "pnpm sa git-commit-verify",
     "pre-commit": "pnpm typecheck && pnpm lint && git diff --exit-code"

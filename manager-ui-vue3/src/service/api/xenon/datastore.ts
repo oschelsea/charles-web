@@ -239,11 +239,12 @@ export const dataStoreFieldConfigs: Record<DataStoreType, FieldConfig[]> = {
   ARCGIS_CACHE: [
     {
       key: 'path',
-      label: '缓存目录路径',
+      label: '缓存配置文件路径',
       type: 'file',
       required: true,
-      placeholder: '选择 ArcGIS 缓存目录',
-      selectType: 'folder'
+      placeholder: '选择 ArcGIS 缓存配置文件Conf.xml',
+      selectType: 'file',
+      fileFilter: { label: 'ArcGIS Tile(Conf.xml)', value: 'Conf.xml', matchType: 'exact' }
     }
   ]
 };

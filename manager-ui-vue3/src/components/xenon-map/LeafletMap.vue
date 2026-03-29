@@ -2,7 +2,6 @@
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-// @ts-ignore - proj4 类型定义与实际导出方式不匹配
 import proj4 from 'proj4';
 import 'proj4leaflet';
 
@@ -66,6 +65,8 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   (e: 'click', latlng: L.LatLng): void;
   (e: 'moveend', bounds: L.LatLngBounds): void;
+  (e: 'mousemove', latlng: L.LatLng): void;
+  (e: 'mouseleave'): void;
 }>();
 
 const mapContainer = ref<HTMLDivElement>();
@@ -143,8 +144,8 @@ function createCustomCrs(tileMatrixSet: TileMatrixSetInfo): L.CRS {
   }
 
   const sortedMatrices = [...tileMatrixSet.tileMatrices].sort((a, b) => {
-    const aLevel = typeof a.identifier === 'number' ? a.identifier : Number.parseInt(String(a.identifier));
-    const bLevel = typeof b.identifier === 'number' ? b.identifier : Number.parseInt(String(b.identifier));
+    const aLevel = typeof a.identifier === 'number' ? a.identifier : Number.parseInt(String(a.identifier), 10);
+    const bLevel = typeof b.identifier === 'number' ? b.identifier : Number.parseInt(String(b.identifier), 10);
     return aLevel - bLevel;
   });
 
@@ -307,6 +308,14 @@ function initMap() {
     emit('click', e.latlng);
   });
 
+  map.on('mousemove', e => {
+    emit('mousemove', e.latlng);
+  });
+
+  map.on('mouseout', () => {
+    emit('mouseleave');
+  });
+
   map.on('moveend', () => {
     if (map) {
       emit('moveend', map.getBounds());
@@ -378,8 +387,8 @@ function addCustomCrsWmtsLayer(config: WmtsLayerConfig) {
   const crs = createCustomCrs(tileMatrixSet);
 
   const sortedMatrices = [...tileMatrixSet.tileMatrices].sort((a, b) => {
-    const aLevel = typeof a.identifier === 'number' ? a.identifier : Number.parseInt(String(a.identifier));
-    const bLevel = typeof b.identifier === 'number' ? b.identifier : Number.parseInt(String(b.identifier));
+    const aLevel = typeof a.identifier === 'number' ? a.identifier : Number.parseInt(String(a.identifier), 10);
+    const bLevel = typeof b.identifier === 'number' ? b.identifier : Number.parseInt(String(b.identifier), 10);
     return aLevel - bLevel;
   });
 
@@ -401,7 +410,7 @@ function addCustomCrsWmtsLayer(config: WmtsLayerConfig) {
   const targetCrsCode = `EPSG:${extractEpsgCode(tileMatrixSet.supportedCRS)}`;
 
   if (currentCrsCode !== targetCrsCode) {
-    reinitMapWithCrs(crs, config, minZoom, maxZoom, tileSize);
+    reinitMapWithCrs({ crs, config, minZoom, maxZoom, tileSize });
   } else {
     const wmtsLayer = new (CustomTileLayer as unknown as typeof L.TileLayer)(config.url, {
       attribution: config.attribution || '',
@@ -415,7 +424,15 @@ function addCustomCrsWmtsLayer(config: WmtsLayerConfig) {
   }
 }
 
-function reinitMapWithCrs(crs: L.CRS, config: WmtsLayerConfig, minZoom: number, maxZoom: number, tileSize: number) {
+function reinitMapWithCrs(options: {
+  crs: L.CRS;
+  config: WmtsLayerConfig;
+  minZoom: number;
+  maxZoom: number;
+  tileSize: number;
+}) {
+  const { crs, config, minZoom, maxZoom, tileSize } = options;
+
   if (!mapContainer.value || !config.tileMatrixSet) return;
 
   const currentCenter = map?.getCenter() || L.latLng(props.center![0], props.center![1]);
@@ -474,6 +491,14 @@ function reinitMapWithCrs(crs: L.CRS, config: WmtsLayerConfig, minZoom: number, 
     emit('click', e.latlng);
   });
 
+  map.on('mousemove', e => {
+    emit('mousemove', e.latlng);
+  });
+
+  map.on('mouseout', () => {
+    emit('mouseleave');
+  });
+
   map.on('moveend', () => {
     if (map) {
       emit('moveend', map.getBounds());
@@ -519,29 +544,62 @@ defineExpose({
   width: 100%;
   height: 100%;
   min-height: 400px;
-  background: var(--n-color);
+  background: var(--n-body-color);
 }
 
 /* Dark theme for Leaflet controls overrides can be handled centrally */
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 1000;
+}
+
+.leaflet-left .leaflet-control-zoom {
+  margin-top: 18px;
+  margin-left: 18px;
+}
+
+.leaflet-control-zoom {
+  overflow: hidden;
+  border: 1px solid rgb(148 163 184 / 24%) !important;
+  border-radius: 18px !important;
+  background: rgb(255 255 255 / 72%);
+  box-shadow: 0 16px 36px rgb(15 23 42 / 16%);
+  backdrop-filter: blur(14px);
+}
+
 .leaflet-control-zoom a {
-  background: var(--n-card-color) !important;
+  width: 42px;
+  height: 42px;
+  line-height: 42px;
+  background: transparent !important;
   color: var(--n-text-color) !important;
-  border-color: var(--n-border-color) !important;
+  border: none !important;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.leaflet-control-zoom a + a {
+  border-top: 1px solid rgb(148 163 184 / 20%) !important;
 }
 
 .leaflet-control-zoom a:hover {
-  background: var(--n-color-hover) !important;
+  background: rgb(255 255 255 / 24%) !important;
 }
 
 .leaflet-control-scale-line {
-  background: var(--n-card-color) !important;
+  border: 1px solid rgb(148 163 184 / 24%) !important;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 66%) !important;
   color: var(--n-text-color) !important;
-  border-color: var(--n-border-color) !important;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 24px rgb(15 23 42 / 10%);
 }
 
 .leaflet-control-attribution {
-  background: var(--n-card-color) !important;
+  border-radius: 999px 0 0 0;
+  background: rgb(255 255 255 / 58%) !important;
   color: var(--n-text-color-3) !important;
+  backdrop-filter: blur(10px);
 }
 
 .leaflet-control-attribution a {
@@ -556,5 +614,23 @@ defineExpose({
 .leaflet-container {
   font-family: inherit;
   z-index: 10;
+}
+
+.dark .leaflet-control-zoom {
+  border-color: rgb(148 163 184 / 18%) !important;
+  background: rgb(17 24 39 / 72%);
+}
+
+.dark .leaflet-control-zoom a:hover {
+  background: rgb(255 255 255 / 8%) !important;
+}
+
+.dark .leaflet-control-scale-line {
+  border-color: rgb(148 163 184 / 18%) !important;
+  background: rgb(17 24 39 / 68%) !important;
+}
+
+.dark .leaflet-control-attribution {
+  background: rgb(17 24 39 / 56%) !important;
 }
 </style>

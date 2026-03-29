@@ -48,7 +48,10 @@ function resetScroll() {
           :is="Component"
           v-if="appStore.reloadFlag"
           :key="tabStore.getTabIdByRoute(route)"
-          :class="{ 'p-16px': showPadding, 'footer-var': footerVar }"
+          :class="{
+            'p-16px': showPadding && route.name !== 'xenon_preview3d' && route.name !== 'xenon_preview',
+            'footer-var': footerVar
+          }"
           class="flex-grow bg-layout transition-300"
         />
       </KeepAlive>
