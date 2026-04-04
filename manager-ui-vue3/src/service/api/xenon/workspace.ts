@@ -71,7 +71,7 @@ export const workspaceApi = {
    * Delete a workspace
    */
   delete(name: string) {
-    return request<void>({
+    return request({
       url: `/api/v1/workspaces/${name}`,
       method: 'delete'
     });

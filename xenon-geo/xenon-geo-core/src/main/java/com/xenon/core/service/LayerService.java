@@ -2,7 +2,7 @@ package com.xenon.core.service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xenon.core.entity.Layer;
-import com.xenon.core.exception.ResourceNotFoundException;
+import com.xenon.common.exception.ResourceNotFoundException;
 import com.xenon.core.mapper.LayerMapper;
 import lombok.extern.slf4j.Slf4j;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;

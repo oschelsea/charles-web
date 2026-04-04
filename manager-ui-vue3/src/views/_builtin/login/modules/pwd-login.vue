@@ -55,6 +55,7 @@ const rules = computed<Record<RuleKey, App.Global.FormRule[]>>(() => {
   return loginRules;
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function handleFetchTenantList() {
   startTenantLoading();
   const { data, error } = await fetchTenantList();
@@ -113,6 +114,7 @@ function handleLoginRember() {
     Object.assign(model, JSON.parse(decryptWithAes(loginRember, aesKey)));
   } catch (e) {
     // 解密失败时清除损坏的数据
+    // eslint-disable-next-line no-console
     console.warn('无法解析记住的登录信息:', e);
     localStg.remove('loginRember');
     remberMe.value = false;
@@ -129,6 +131,7 @@ handleLoginRember();
 
 // handleRegister();
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function handleSocialLogin(type: Api.System.SocialSource) {
   const { data, error } = await fetchSocialAuthBinding(type, model.tenantId);
   if (error) return;

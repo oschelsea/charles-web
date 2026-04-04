@@ -102,7 +102,12 @@ const layerOptions = computed<SelectOption[]>(() =>
     .filter(layer => layer.enabled && layer.type !== 'TILES3D' && layer.type !== 'TERRAIN')
     .map(layer => {
       const qualifiedName = layer.workspaceName ? `${layer.workspaceName}:${layer.name}` : layer.name;
-      const typeIcon = layer.type === 'ARCGIS_CACHE' || layer.type === 'GEOPACKAGE_TILES' ? '🗺️' : layer.type === 'VECTOR' ? '📐' : '🖼️';
+      let typeIcon = '🖼️';
+      if (layer.type === 'ARCGIS_CACHE' || layer.type === 'GEOPACKAGE_TILES') {
+        typeIcon = '🗺️';
+      } else if (layer.type === 'VECTOR') {
+        typeIcon = '📐';
+      }
       return {
         label: `${typeIcon} ${layer.workspaceName ? `${layer.workspaceName}:` : ''}${layer.title || layer.name}`,
         value: qualifiedName

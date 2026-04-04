@@ -1,4 +1,4 @@
-package com.xenon.core.exception;
+package com.xenon.common.exception;
 
 /**
  * Exception thrown when trying to create a resource that already exists.
@@ -12,6 +12,16 @@ public class ResourceAlreadyExistsException extends RuntimeException {
         super(String.format("%s already exists: %s", resourceType, resourceId));
         this.resourceType = resourceType;
         this.resourceId = resourceId;
+    }
+
+    public ResourceAlreadyExistsException(String resourceType, Long id) {
+        this(resourceType, String.valueOf(id));
+    }
+
+    public ResourceAlreadyExistsException(String message) {
+        super(message);
+        this.resourceType = null;
+        this.resourceId = null;
     }
 
     public String getResourceType() {

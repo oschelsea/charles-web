@@ -1,4 +1,4 @@
-package com.xenon.core.exception;
+package com.xenon.common.exception;
 
 /**
  * Exception thrown when a requested resource is not found.
@@ -16,6 +16,12 @@ public class ResourceNotFoundException extends RuntimeException {
 
     public ResourceNotFoundException(String resourceType, Long id) {
         this(resourceType, String.valueOf(id));
+    }
+
+    public ResourceNotFoundException(String message) {
+        super(message);
+        this.resourceType = null;
+        this.resourceId = null;
     }
 
     public String getResourceType() {

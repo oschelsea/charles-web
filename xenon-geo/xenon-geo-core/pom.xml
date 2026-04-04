@@ -17,6 +17,13 @@
     <description>Geo module core entities, mappers and services</description>
 
     <dependencies>
+        <!-- Xenon Common Core -->
+        <dependency>
+            <groupId>com.xenon</groupId>
+            <artifactId>xenon-common-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

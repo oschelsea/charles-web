@@ -72,6 +72,7 @@ async function handleSubmit() {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function handleFetchTenantList() {
   const { data, error } = await fetchTenantList();
   if (error) return;

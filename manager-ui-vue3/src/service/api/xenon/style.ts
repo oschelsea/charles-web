@@ -96,7 +96,7 @@ export const styleApi = {
    * Update style content
    */
   updateContent(styleName: string, content: string, format: StyleFormat) {
-    return request<void>({
+    return request({
       url: `/api/v1/styles/${styleName}/content`,
       method: 'put',
       data: content,
@@ -110,7 +110,7 @@ export const styleApi = {
    * Delete a style
    */
   delete(styleName: string) {
-    return request<void>({
+    return request({
       url: `/api/v1/styles/${styleName}`,
       method: 'delete'
     });

@@ -1,9 +1,9 @@
 package com.xenon.admin.security.handle;
 
+import com.xenon.common.core.domain.ErrorResponse;
 import com.xenon.common.utils.JsonUtil;
 import com.xenon.common.utils.ServletUtils;
 import com.xenon.common.utils.StringUtils;
-import com.xenon.common.core.domain.R;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -26,8 +26,16 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint, S
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e)
             throws IOException {
-        int code = HttpStatus.UNAUTHORIZED.value();
         String msg = StringUtils.format("请求访问：{}，认证失败，无法访问系统资源", request.getRequestURI());
-        ServletUtils.renderString(response, JsonUtil.toJson(R.fail(code, msg)));
+
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(java.time.LocalDateTime.now().toString())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .error("Unauthorized")
+                .message(msg)
+                .code(HttpStatus.UNAUTHORIZED.value())
+                .build();
+
+        ServletUtils.renderString(response, HttpStatus.UNAUTHORIZED.value(), JsonUtil.toJson(error));
     }
 }

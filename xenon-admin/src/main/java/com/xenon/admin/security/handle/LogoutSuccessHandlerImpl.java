@@ -4,7 +4,7 @@ import com.xenon.admin.manager.AsyncManager;
 import com.xenon.admin.manager.factory.AsyncFactory;
 import com.xenon.admin.service.TokenService;
 import com.xenon.common.constant.Constants;
-import com.xenon.common.core.domain.R;
+import com.xenon.common.core.domain.ErrorResponse;
 import com.xenon.common.utils.JsonUtil;
 import com.xenon.common.utils.ServletUtils;
 import com.xenon.common.utils.StringUtils;
@@ -32,8 +32,6 @@ public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler {
 
     /**
      * 退出处理
-     *
-     * @return
      */
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
@@ -46,6 +44,15 @@ public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler {
             // 记录用户退出日志
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(userName, Constants.LOGOUT, "退出成功"));
         }
-        ServletUtils.renderString(response, JsonUtil.toJson(R.fail(HttpStatus.OK.value(), "退出成功")));
+
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(java.time.LocalDateTime.now().toString())
+                .status(HttpStatus.OK.value())
+                .error("OK")
+                .message("退出成功")
+                .code(HttpStatus.OK.value())
+                .build();
+
+        ServletUtils.renderString(response, HttpStatus.OK.value(), JsonUtil.toJson(error));
     }
 }

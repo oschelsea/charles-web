@@ -22,7 +22,15 @@ export interface Layer {
   updatedAt?: string;
 }
 
-export type LayerType = 'VECTOR' | 'RASTER' | 'GROUP' | 'WMS' | 'TILES3D' | 'TERRAIN' | 'ARCGIS_CACHE' | 'GEOPACKAGE_TILES';
+export type LayerType =
+  | 'VECTOR'
+  | 'RASTER'
+  | 'GROUP'
+  | 'WMS'
+  | 'TILES3D'
+  | 'TERRAIN'
+  | 'ARCGIS_CACHE'
+  | 'GEOPACKAGE_TILES';
 
 export interface LayerSummary {
   name: string;

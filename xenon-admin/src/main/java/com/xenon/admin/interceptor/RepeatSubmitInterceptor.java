@@ -3,9 +3,10 @@ package com.xenon.admin.interceptor;
 import com.xenon.common.utils.JsonUtil;
 import com.xenon.common.utils.ServletUtils;
 import com.xenon.admin.interceptor.annotation.RepeatSubmit;
-import com.xenon.common.core.domain.R;
+import com.xenon.common.core.domain.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -27,8 +28,15 @@ public abstract class RepeatSubmitInterceptor implements HandlerInterceptor {
             RepeatSubmit annotation = method.getAnnotation(RepeatSubmit.class);
             if (annotation != null) {
                 if (this.isRepeatSubmit(request, annotation)) {
-                    R<Void> r = R.fail(annotation.message());
-                    ServletUtils.renderString(response, JsonUtil.toJson(r));
+                    ErrorResponse error = ErrorResponse.builder()
+                            .timestamp(java.time.LocalDateTime.now().toString())
+                            .status(HttpStatus.TOO_MANY_REQUESTS.value())
+                            .error("Too Many Requests")
+                            .message(annotation.message())
+                            .code(HttpStatus.TOO_MANY_REQUESTS.value())
+                            .build();
+
+                    ServletUtils.renderString(response, HttpStatus.TOO_MANY_REQUESTS.value(), JsonUtil.toJson(error));
                     return false;
                 }
             }

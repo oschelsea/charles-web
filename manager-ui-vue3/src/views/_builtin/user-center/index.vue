@@ -5,8 +5,6 @@ import { useLoading } from '@sa/hooks';
 import { fetchUpdateUserPassword, fetchUpdateUserProfile } from '@/service/api/system';
 import { useAuthStore } from '@/store/modules/auth';
 import { useFormRules, useNaiveForm } from '@/hooks/common/form';
-import OnlineTable from './modules/online-table.vue';
-import SocialCard from './modules/social-card.vue';
 import UserAvatar from './modules/user-avatar.vue';
 
 defineOptions({

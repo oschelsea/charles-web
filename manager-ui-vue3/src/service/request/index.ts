@@ -72,11 +72,16 @@ export const request = createFlatRequest(
         const decryptData = decryptWithAes(data, aesKey);
         response.data = JSON.parse(decryptData);
       }
-      // 如果没有code字段，则根据状态码判断
-      return (
-        (response.data.code === undefined && response.status < 400) ||
-        String(response.data.code) === import.meta.env.VITE_SERVICE_SUCCESS_CODE
-      );
+
+      // HTTP 状态码 >= 400 视为失败（由 axios 自动处理）
+      // 这里只处理 HTTP 2xx 响应
+      // 如果响应体中有 code 字段，检查是否匹配成功码
+      // 如果没有 code 字段，则视为成功（HTTP 2xx 即成功）
+      if (response.data.code === undefined) {
+        return true;
+      }
+
+      return String(response.data.code) === import.meta.env.VITE_SERVICE_SUCCESS_CODE;
     },
     async onBackendFail(response, instance) {
       const authStore = useAuthStore();
@@ -153,33 +158,108 @@ export const request = createFlatRequest(
       return null;
     },
     onError(error) {
-      // when the request is fail, you can show error message
+      const authStore = useAuthStore();
+      const httpStatus = error.response?.status;
 
-      let message = error.message;
-      let backendErrorCode = '';
+      // 处理 HTTP 错误状态码（4xx, 5xx）
+      if (httpStatus && httpStatus >= 400) {
+        handleHttpError(error, httpStatus, authStore);
+        return;
+      }
 
-      // get backend error message and code
+      // 处理后端业务错误（BACKEND_ERROR_CODE）
       if (error.code === BACKEND_ERROR_CODE) {
-        message = error.response?.data?.msg || message;
-        backendErrorCode = String(error.response?.data?.code || '');
-      }
-
-      // the error message is displayed in the modal
-      const modalLogoutCodes = import.meta.env.VITE_SERVICE_MODAL_LOGOUT_CODES?.split(',') || [];
-      if (modalLogoutCodes.includes(backendErrorCode)) {
+        handleBackendError(error);
         return;
       }
 
-      // when the token is expired, refresh token and retry request, so no need to show error message
-      const expiredTokenCodes = import.meta.env.VITE_SERVICE_EXPIRED_TOKEN_CODES?.split(',') || [];
-      if (expiredTokenCodes.includes(backendErrorCode)) {
-        return;
-      }
-
-      showErrorMsg(request.state, message);
+      showErrorMsg(request.state, error.message);
     }
   }
 );
+
+/**
+ * 处理 HTTP 错误（4xx, 5xx）
+ */
+function handleHttpError(error: any, httpStatus: number, authStore: any) {
+  const errorData = error.response?.data;
+  const message = errorData?.message || error.message;
+
+  // 401 未授权 - 跳转登录
+  if (httpStatus === 401) {
+    handleUnauthorized(message, authStore);
+    return;
+  }
+
+  // 403 禁止访问
+  if (httpStatus === 403) {
+    showErrorMsg(request.state, message || '没有权限访问该资源');
+    return;
+  }
+
+  // 429 请求过于频繁
+  if (httpStatus === 429) {
+    showErrorMsg(request.state, message || '请求过于频繁，请稍后再试');
+    return;
+  }
+
+  // 其他 HTTP 错误
+  showErrorMsg(request.state, message);
+}
+
+/**
+ * 处理 401 未授权错误
+ */
+function handleUnauthorized(message: string, authStore: any) {
+  const isLogin = Boolean(localStg.get('token'));
+
+  if (isLogin) {
+    const isExist = request.state.errMsgStack?.includes(message);
+    if (!isExist) {
+      request.state.errMsgStack = [...(request.state.errMsgStack || []), message];
+
+      window.$dialog?.warning({
+        title: '系统提示',
+        content: '登录状态已过期，请重新登录',
+        positiveText: '重新登录',
+        maskClosable: false,
+        closeOnEsc: false,
+        onPositiveClick() {
+          authStore.resetStore();
+          request.state.errMsgStack = request.state.errMsgStack.filter((msg: string) => msg !== message);
+        },
+        onClose() {
+          authStore.resetStore();
+          request.state.errMsgStack = request.state.errMsgStack.filter((msg: string) => msg !== message);
+        }
+      });
+    }
+  } else {
+    authStore.resetStore();
+  }
+}
+
+/**
+ * 处理后端业务错误
+ */
+function handleBackendError(error: any) {
+  const message = error.response?.data?.msg || error.response?.data?.message || error.message;
+  const backendErrorCode = String(error.response?.data?.code || '');
+
+  // the error message is displayed in the modal
+  const modalLogoutCodes = import.meta.env.VITE_SERVICE_MODAL_LOGOUT_CODES?.split(',') || [];
+  if (modalLogoutCodes.includes(backendErrorCode)) {
+    return;
+  }
+
+  // when the token is expired, refresh token and retry request, so no need to show error message
+  const expiredTokenCodes = import.meta.env.VITE_SERVICE_EXPIRED_TOKEN_CODES?.split(',') || [];
+  if (expiredTokenCodes.includes(backendErrorCode)) {
+    return;
+  }
+
+  showErrorMsg(request.state, message);
+}
 
 function handleRepeatSubmit(config: InternalAxiosRequestConfig) {
   // 是否需要防止数据重复提交

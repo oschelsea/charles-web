@@ -32,6 +32,7 @@ const authStore = useAuthStore();
 const themeStore = useThemeStore();
 const { isFullscreen, toggle } = useFullscreen();
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const tenantId = ref<CommonType.IdType>(authStore.userInfo?.user?.tenantId || '000000');
 </script>
 

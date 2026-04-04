@@ -49,6 +49,7 @@ const statusHeight = ref<number | null>(null);
 
 let viewer: any = null;
 let activeTileset: any = null;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let activeTerrainProvider: any = null;
 let CesiumModule: any = null;
 let removeCameraChangedListener: (() => void) | null = null;
@@ -295,6 +296,7 @@ async function loadTileset(layerName = selectedTileset.value) {
     if (layer?.type === 'TERRAIN') {
       // Load terrain
       const terrainUrl = buildTerrainUrl(layerName);
+      // eslint-disable-next-line no-console
       console.log('[Terrain] Loading from:', terrainUrl);
 
       try {
@@ -305,8 +307,10 @@ async function loadTileset(layerName = selectedTileset.value) {
         activeTerrainProvider = terrainProvider;
         hasActiveTerrain.value = true;
         selectedTileset.value = layerName;
+        // eslint-disable-next-line no-console
         console.log('[Terrain] Loaded successfully');
       } catch (terrainError: any) {
+        // eslint-disable-next-line no-console
         console.error('[Terrain] Failed to load:', terrainError);
         // Check if it's a format error
         const errorMsg = terrainError?.message || '';
@@ -325,7 +329,7 @@ async function loadTileset(layerName = selectedTileset.value) {
 
       // Try to fly to terrain bounds from metadata
       try {
-        const response = await fetch(terrainUrl + '/layer.json');
+        const response = await fetch(`${terrainUrl}/layer.json`);
         const metadata = await response.json();
         if (metadata.bounds) {
           const [west, south, east, north] = metadata.bounds;
@@ -376,7 +380,7 @@ async function handleFocusCurrentTileset() {
     if (layer?.type === 'TERRAIN') {
       const terrainUrl = buildTerrainUrl(selectedTileset.value!);
       try {
-        const response = await fetch(terrainUrl + '/layer.json');
+        const response = await fetch(`${terrainUrl}/layer.json`);
         const metadata = await response.json();
         if (metadata.bounds) {
           const [west, south, east, north] = metadata.bounds;

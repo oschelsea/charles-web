@@ -96,7 +96,7 @@ export const dataStoreApi = {
    * Delete a datastore
    */
   delete(workspaceName: string, datastoreName: string) {
-    return request<void>({
+    return request({
       url: `/api/v1/workspaces/${workspaceName}/datastores/${datastoreName}`,
       method: 'delete'
     });

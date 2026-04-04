@@ -85,15 +85,27 @@ public class ServletUtils {
     }
 
     /**
-     * 将字符串渲染到客户端
+     * 将字符串渲染到客户端（默认 200 状态码）
      *
      * @param response 渲染对象
      * @param string   待渲染的字符串
      * @return null
      */
     public static String renderString(HttpServletResponse response, String string) {
+        return renderString(response, 200, string);
+    }
+
+    /**
+     * 将字符串渲染到客户端（自定义状态码）
+     *
+     * @param response   渲染对象
+     * @param statusCode HTTP 状态码
+     * @param string     待渲染的字符串
+     * @return null
+     */
+    public static String renderString(HttpServletResponse response, int statusCode, String string) {
         try {
-            response.setStatus(200);
+            response.setStatus(statusCode);
             response.setContentType("application/json");
             response.setCharacterEncoding("utf-8");
             response.getWriter().print(string);

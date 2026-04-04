@@ -19,19 +19,18 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     error.value = null;
     try {
       const response = await workspaceApi.getAll();
-      // Fetch full details for each workspace to get id
-      const fullWorkspaces: Workspace[] = [];
-      for (const summary of response?.data?.workspaces || []) {
+      // Fetch full details for each workspace to get id (parallel)
+      const summaries = response?.data?.workspaces || [];
+      const detailPromises = summaries.map(async (summary: { name: string }) => {
         try {
           const detail = await workspaceApi.getByName(summary.name);
-          const workspaceData = (detail?.data as any)?.workspace;
-          fullWorkspaces.push(workspaceData);
+          return (detail?.data as any)?.workspace || ({ name: summary.name } as Workspace);
         } catch {
           // If detail fetch fails, use summary with just name
-          fullWorkspaces.push({ name: summary.name } as Workspace);
+          return { name: summary.name } as Workspace;
         }
-      }
-      workspaces.value = fullWorkspaces;
+      });
+      workspaces.value = await Promise.all(detailPromises);
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Failed to fetch workspaces';
       throw e;
