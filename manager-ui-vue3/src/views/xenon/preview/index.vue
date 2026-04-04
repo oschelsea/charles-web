@@ -1,19 +1,38 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { NButton, NCard, NCheckbox, NRadioButton, NRadioGroup, NSelect, NSpace, NSpin, NTag } from 'naive-ui';
+import {
+  NButton,
+  NButtonGroup,
+  NCard,
+  NCheckbox,
+  NDivider,
+  NPopover,
+  NRadioButton,
+  NRadioGroup,
+  NSelect,
+  NSpace,
+  NSpin,
+  NTag,
+  NTooltip
+} from 'naive-ui';
 import type { SelectOption } from 'naive-ui';
 import { type Layer, layerApi } from '@/service/api/xenon/layer';
 import { buildCapabilitiesUrl, buildWmtsTileUrl } from '@/service/api/xenon/wmts';
 import LeafletMap from '@/components/xenon-map/LeafletMap.vue';
 import type { TileMatrixSetInfo, WmsLayerConfig, WmtsLayerConfig } from '@/components/xenon-map/LeafletMap.vue';
+import IconLayers from '~icons/ion/layers-outline';
+import IconSettings from '~icons/ion/settings-outline';
+import IconInformation from '~icons/ion/information-circle-outline';
 
 const route = useRoute();
 
 const loading = ref(false);
 const mapRef = ref<InstanceType<typeof LeafletMap>>();
-const controlsCollapsed = ref(false);
-const infoCollapsed = ref(false);
+
+const showLayerPopover = ref(false);
+const showSettingsPopover = ref(false);
+const showInfoPopover = ref(false);
 
 const availableLayers = ref<Layer[]>([]);
 const serviceType = ref<'WMS' | 'WMTS'>('WMS');
@@ -32,7 +51,7 @@ const wmtsBaseUrl = ref(API_ORIGIN);
 const wmtsTileMatrixSet = ref('EPSG:3857');
 const wmtsFormat = ref('png');
 
-const basemap = ref<'osm' | 'satellite' | 'terrain' | 'blank'>('osm');
+const basemap = ref<'osm' | 'satellite' | 'terrain' | 'blank'>('satellite');
 const basemapOptions: SelectOption[] = [
   { label: '🗺️ OpenStreetMap', value: 'osm' },
   { label: '🛰️ Esri Satellite', value: 'satellite' },
@@ -62,6 +81,10 @@ const wmsLayers = computed<WmsLayerConfig[]>(() => {
 const wmtsLayers = computed<WmtsLayerConfig[]>(() => {
   if (serviceType.value !== 'WMTS' || selectedLayers.value.length === 0) return [];
 
+  // 必须等待 TileMatrixSet 解析完成后再加载，否则会使用错误的 CRS
+  const tileMatrixSet = parsedTileMatrixSet.value;
+  if (!tileMatrixSet) return [];
+
   return selectedLayers.value.map(layerName => ({
     name: layerName,
     url: buildWmtsTileUrl(layerName, {
@@ -70,7 +93,7 @@ const wmtsLayers = computed<WmtsLayerConfig[]>(() => {
       format: wmtsFormat.value
     }),
     attribution: 'Xenon WMTS',
-    tileMatrixSet: parsedTileMatrixSet.value || undefined
+    tileMatrixSet
   }));
 });
 
@@ -139,23 +162,7 @@ onMounted(async () => {
   }
 });
 
-watch(
-  () => [route.query.layer, route.query.type],
-  () => {
-    applyRoutePreviewQuery();
-  },
-  { immediate: true }
-);
-
-watch([selectedLayers, serviceType], async ([layers, type]) => {
-  if (type !== 'WMTS' || layers.length !== 1) {
-    parsedTileMatrixSet.value = null;
-    parsedBounds.value = null;
-    return;
-  }
-
-  const layerName = layers[0];
-
+async function parseWmtsCapabilities(layerName: string) {
   try {
     const capsUrl = buildCapabilitiesUrl(layerName, wmtsBaseUrl.value);
     const res = await fetch(capsUrl);
@@ -198,19 +205,33 @@ watch([selectedLayers, serviceType], async ([layers, type]) => {
       [miny, minx],
       [maxy, maxx]
     ];
-
-    setTimeout(() => {
-      nextTick(() => {
-        if (mapRef.value && parsedBounds.value) {
-          mapRef.value.fitBounds(parsedBounds.value);
-        }
-      });
-    }, 500);
   } catch {
     parsedTileMatrixSet.value = null;
     parsedBounds.value = null;
   }
-});
+}
+
+watch(
+  () => [route.query.layer, route.query.type],
+  () => {
+    applyRoutePreviewQuery();
+  },
+  { immediate: true }
+);
+
+watch(
+  [selectedLayers, serviceType],
+  ([layers, type]) => {
+    if (type !== 'WMTS' || layers.length !== 1) {
+      parsedTileMatrixSet.value = null;
+      parsedBounds.value = null;
+      return;
+    }
+
+    parseWmtsCapabilities(layers[0]);
+  },
+  { immediate: true }
+);
 
 function firstDescendantByLocalName(root: ParentNode | null | undefined, localName: string): Element | null {
   if (!root) return null;
@@ -361,7 +382,7 @@ function handleCopyServiceUrl() {
     url = `${baseUrl}?${params.toString()}`;
   } else {
     url = buildWmtsTileUrl(selectedLayers.value[0], {
-      baseUrl: wmtsBaseUrl.value,
+      baseUrl: API_ORIGIN,
       tileMatrixSet: wmtsTileMatrixSet.value,
       format: wmtsFormat.value
     });
@@ -379,7 +400,7 @@ function handleCopyCapabilitiesUrl() {
   if (serviceType.value === 'WMS') {
     url = `${wmsUrl.value}/${serviceLayer}/wms?SERVICE=WMS&REQUEST=GetCapabilities`;
   } else {
-    url = buildCapabilitiesUrl(serviceLayer, wmtsBaseUrl.value);
+    url = buildCapabilitiesUrl(serviceLayer, API_ORIGIN);
   }
   navigator.clipboard.writeText(url);
 }
@@ -388,187 +409,181 @@ function handleCopyCapabilitiesUrl() {
 <template>
   <div class="preview-2d">
     <NSpin :show="loading" class="viewer-spin">
-      <div class="map-stage">
-        <LeafletMap
-          ref="mapRef"
-          :center="[35, 117]"
-          :zoom="5"
-          :wms-layers="wmsLayers"
-          :wmts-layers="wmtsLayers"
-          :basemap="basemap"
-          @moveend="handleMapMoveEnd"
-          @mousemove="handleMapMouseMove"
-          @mouseleave="handleMapMouseLeave"
-        />
-      </div>
+      <LeafletMap
+        ref="mapRef"
+        :center="[35, 117]"
+        :zoom="5"
+        :wms-layers="wmsLayers"
+        :wmts-layers="wmtsLayers"
+        :basemap="basemap"
+        :initial-bounds="parsedBounds"
+        @moveend="handleMapMoveEnd"
+        @mousemove="handleMapMouseMove"
+        @mouseleave="handleMapMouseLeave"
+      />
     </NSpin>
 
     <div class="status-bar">
-      <span class="status-item">级别 {{ statusZoomText }}</span>
-      <span class="status-item">经度 {{ statusLongitudeText }}</span>
-      <span class="status-item">纬度 {{ statusLatitudeText }}</span>
+      <span>级别 {{ statusZoomText }}</span>
+      <span>经度 {{ statusLongitudeText }}</span>
+      <span>纬度 {{ statusLatitudeText }}</span>
     </div>
 
-    <div class="map-overlay">
-      <div class="floating-panel floating-panel--left" :class="{ 'floating-panel--collapsed': controlsCollapsed }">
-        <NButton
-          v-if="controlsCollapsed"
-          class="panel-handle"
-          secondary
-          strong
-          size="small"
-          round
-          @click="controlsCollapsed = false"
-        >
-          <template #icon>
-            <div class="i-mdi-tune-variant"></div>
-          </template>
-          工具
-        </NButton>
-
-        <NCard v-else class="floating-card control-card" size="small">
-          <template #header>
-            <div class="panel-heading">
-              <strong>二维地图工具条</strong>
-            </div>
-          </template>
-          <template #header-extra>
-            <NButton text size="small" @click="controlsCollapsed = true">收起</NButton>
-          </template>
-
-          <div class="section-stack">
-            <section class="section-block">
-              <div class="section-caption">图层</div>
-              <NSelect
-                v-model:value="selectedLayers"
-                :options="layerOptions"
-                placeholder="选择要显示的图层"
-                multiple
-                clearable
-                max-tag-count="responsive"
-              />
-              <div class="action-row">
-                <NButton size="small" secondary block @click="handleZoomToLayer">缩放</NButton>
-                <NButton size="small" secondary block @click="handleRefreshLayers">刷新</NButton>
-              </div>
-            </section>
-
-            <section class="section-block">
-              <div class="section-caption">服务</div>
-              <NRadioGroup v-model:value="serviceType" size="small" class="service-switch">
-                <NRadioButton value="WMS">WMS</NRadioButton>
-                <NRadioButton value="WMTS">WMTS</NRadioButton>
-              </NRadioGroup>
-            </section>
-
-            <section class="section-block">
-              <div class="section-caption">底图</div>
-              <NSelect v-model:value="basemap" :options="basemapOptions" size="small" />
-            </section>
-
-            <section class="section-block">
-              <div class="section-caption">参数</div>
-
-              <template v-if="serviceType === 'WMS'">
-                <div class="param-row">
-                  <span class="param-label">版本</span>
-                  <NSelect
-                    v-model:value="wmsVersion"
-                    size="small"
-                    :options="[
-                      { label: '1.3.0', value: '1.3.0' },
-                      { label: '1.1.1', value: '1.1.1' }
-                    ]"
-                  />
-                </div>
-                <div class="param-row">
-                  <span class="param-label">格式</span>
-                  <NSelect
-                    v-model:value="wmsFormat"
-                    size="small"
-                    :options="[
-                      { label: 'PNG', value: 'image/png' },
-                      { label: 'JPEG', value: 'image/jpeg' },
-                      { label: 'GIF', value: 'image/gif' }
-                    ]"
-                  />
-                </div>
-                <NCheckbox v-model:checked="wmsTransparent">透明背景</NCheckbox>
+    <div class="toolbar">
+      <NButtonGroup vertical>
+        <NTooltip placement="right" :disabled="showLayerPopover">
+          <template #trigger>
+            <NPopover v-model:show="showLayerPopover" trigger="click" placement="right-start" :width="300">
+              <template #trigger>
+                <NButton :type="showLayerPopover ? 'primary' : 'default'" quaternary>
+                  <template #icon>
+                    <IconLayers />
+                  </template>
+                </NButton>
               </template>
+              <NCard size="small" :bordered="false">
+                <template #header>图层控制</template>
+                <NSpace vertical>
+                  <NSelect
+                    v-model:value="selectedLayers"
+                    :options="layerOptions"
+                    placeholder="选择要显示的图层"
+                    multiple
+                    clearable
+                    max-tag-count="responsive"
+                  />
+                  <NButtonGroup>
+                    <NButton size="small" secondary @click="handleZoomToLayer">缩放</NButton>
+                    <NButton size="small" secondary @click="handleRefreshLayers">刷新</NButton>
+                  </NButtonGroup>
+                </NSpace>
+              </NCard>
+            </NPopover>
+          </template>
+          图层控制
+        </NTooltip>
 
-              <template v-else>
-                <div class="param-row">
-                  <span class="param-label">坐标系</span>
-                  <NSelect
-                    v-model:value="wmtsTileMatrixSet"
-                    size="small"
-                    :options="[
-                      { label: 'Web Mercator (EPSG:3857)', value: 'EPSG:3857' },
-                      { label: 'WGS84 (EPSG:4326)', value: 'EPSG:4326' }
-                    ]"
-                  />
-                </div>
-                <div class="param-row">
-                  <span class="param-label">格式</span>
-                  <NSelect
-                    v-model:value="wmtsFormat"
-                    size="small"
-                    :options="[
-                      { label: 'PNG', value: 'png' },
-                      { label: 'JPEG', value: 'jpg' }
-                    ]"
-                  />
-                </div>
+        <NTooltip placement="right" :disabled="showSettingsPopover">
+          <template #trigger>
+            <NPopover v-model:show="showSettingsPopover" trigger="click" placement="right-start" :width="320">
+              <template #trigger>
+                <NButton :type="showSettingsPopover ? 'primary' : 'default'" quaternary>
+                  <template #icon>
+                    <IconSettings />
+                  </template>
+                </NButton>
               </template>
-            </section>
-          </div>
-        </NCard>
-      </div>
+              <NCard size="small" :bordered="false">
+                <template #header>服务设置</template>
+                <NSpace vertical>
+                  <div>
+                    <div class="mb-1 text-xs text-gray-500">服务类型</div>
+                    <NRadioGroup v-model:value="serviceType" size="small">
+                      <NRadioButton value="WMS">WMS</NRadioButton>
+                      <NRadioButton value="WMTS">WMTS</NRadioButton>
+                    </NRadioGroup>
+                  </div>
 
-      <div class="floating-panel floating-panel--right" :class="{ 'floating-panel--collapsed': infoCollapsed }">
-        <NButton
-          v-if="infoCollapsed"
-          class="panel-handle"
-          secondary
-          strong
-          size="small"
-          round
-          @click="infoCollapsed = false"
-        >
-          <template #icon>
-            <div class="i-mdi-information-outline"></div>
-          </template>
-          信息
-        </NButton>
+                  <div>
+                    <div class="mb-1 text-xs text-gray-500">底图</div>
+                    <NSelect v-model:value="basemap" :options="basemapOptions" size="small" />
+                  </div>
 
-        <NCard v-else class="floating-card info-card" size="small">
-          <template #header>
-            <div class="panel-heading">
-              <strong>图层信息</strong>
-            </div>
-          </template>
-          <template #header-extra>
-            <NButton text size="small" @click="infoCollapsed = true">收起</NButton>
-          </template>
+                  <NDivider class="my-2" />
 
-          <NSpace vertical size="small">
-            <NTag :type="serviceType === 'WMS' ? 'info' : 'success'" round size="small">{{ serviceType }}</NTag>
-            <div class="info-row">
-              <span class="info-label">当前图层</span>
-              <strong class="info-value">{{ layerSummaryText }}</strong>
-            </div>
-            <div class="layer-tag-list">
-              <NTag v-for="layerName in selectedLayers" :key="layerName" size="small" round>
-                {{ layerName }}
-              </NTag>
-            </div>
-            <NSpace>
-              <NButton size="small" secondary @click="handleCopyServiceUrl">复制瓦片URL</NButton>
-              <NButton size="small" secondary @click="handleCopyCapabilitiesUrl">复制Capabilities URL</NButton>
-            </NSpace>
-          </NSpace>
-        </NCard>
-      </div>
+                  <template v-if="serviceType === 'WMS'">
+                    <NSpace align="center">
+                      <span class="w-10 text-xs text-gray-500">版本</span>
+                      <NSelect
+                        v-model:value="wmsVersion"
+                        size="small"
+                        :options="[
+                          { label: '1.3.0', value: '1.3.0' },
+                          { label: '1.1.1', value: '1.1.1' }
+                        ]"
+                      />
+                    </NSpace>
+                    <NSpace align="center">
+                      <span class="w-10 text-xs text-gray-500">格式</span>
+                      <NSelect
+                        v-model:value="wmsFormat"
+                        size="small"
+                        :options="[
+                          { label: 'PNG', value: 'image/png' },
+                          { label: 'JPEG', value: 'image/jpeg' }
+                        ]"
+                      />
+                    </NSpace>
+                    <NCheckbox v-model:checked="wmsTransparent">透明背景</NCheckbox>
+                  </template>
+
+                  <template v-else>
+                    <NSpace align="center">
+                      <span class="w-10 text-xs text-gray-500">坐标系</span>
+                      <NSelect
+                        v-model:value="wmtsTileMatrixSet"
+                        size="small"
+                        :options="[
+                          { label: 'EPSG:3857', value: 'EPSG:3857' },
+                          { label: 'EPSG:4326', value: 'EPSG:4326' }
+                        ]"
+                      />
+                    </NSpace>
+                    <NSpace align="center">
+                      <span class="w-10 text-xs text-gray-500">格式</span>
+                      <NSelect
+                        v-model:value="wmtsFormat"
+                        size="small"
+                        :options="[
+                          { label: 'PNG', value: 'png' },
+                          { label: 'JPEG', value: 'jpg' }
+                        ]"
+                      />
+                    </NSpace>
+                  </template>
+                </NSpace>
+              </NCard>
+            </NPopover>
+          </template>
+          服务设置
+        </NTooltip>
+
+        <NTooltip placement="right" :disabled="showInfoPopover">
+          <template #trigger>
+            <NPopover v-model:show="showInfoPopover" trigger="click" placement="right-start" :width="300">
+              <template #trigger>
+                <NButton :type="showInfoPopover ? 'primary' : 'default'" quaternary>
+                  <template #icon>
+                    <IconInformation />
+                  </template>
+                </NButton>
+              </template>
+              <NCard size="small" :bordered="false">
+                <template #header>图层信息</template>
+                <NSpace vertical>
+                  <NTag :type="serviceType === 'WMS' ? 'info' : 'success'" round size="small">
+                    {{ serviceType }}
+                  </NTag>
+                  <NSpace justify="space-between">
+                    <span class="text-xs text-gray-500">当前图层</span>
+                    <strong>{{ layerSummaryText }}</strong>
+                  </NSpace>
+                  <NSpace v-if="selectedLayers.length > 0" wrap>
+                    <NTag v-for="layerName in selectedLayers" :key="layerName" size="small" round>
+                      {{ layerName }}
+                    </NTag>
+                  </NSpace>
+                  <NSpace>
+                    <NButton size="small" secondary @click="handleCopyServiceUrl">复制瓦片URL</NButton>
+                    <NButton size="small" secondary @click="handleCopyCapabilitiesUrl">复制Capabilities</NButton>
+                  </NSpace>
+                </NSpace>
+              </NCard>
+            </NPopover>
+          </template>
+          图层信息
+        </NTooltip>
+      </NButtonGroup>
     </div>
   </div>
 </template>
@@ -580,167 +595,56 @@ function handleCopyCapabilitiesUrl() {
   min-height: 620px;
   overflow: hidden;
   background: var(--layout-bg-color);
-  isolation: isolate;
 }
 
-.viewer-spin,
-.viewer-spin :deep(.n-spin-content) {
+.viewer-spin {
   position: absolute;
   inset: 0;
-  height: 100%;
-  width: 100%;
-  z-index: 0;
 }
 
-.map-stage {
-  min-height: 100%;
+.viewer-spin :deep(.n-spin-content) {
   height: 100%;
-  width: 100%;
+}
+
+.toolbar {
+  position: absolute;
+  top: 220px;
+  left: 24px;
+  z-index: 10;
+  padding: 6px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 85%);
+  border: 1px solid rgb(0 0 0 / 10%);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+}
+
+:root.dark .toolbar {
+  background: rgb(30 30 30 / 85%);
+  border-color: rgb(255 255 255 / 10%);
+}
+
+.toolbar :deep(.n-button) {
+  color: var(--n-text-color);
+}
+
+.toolbar :deep(.n-button:hover) {
+  background: var(--n-button-color-hover);
 }
 
 .status-bar {
   position: absolute;
   bottom: 10px;
   left: 50%;
-  z-index: 4;
+  z-index: 100;
   transform: translateX(-50%);
   display: flex;
   gap: 14px;
-  align-items: center;
-  justify-content: center;
-  max-width: calc(100% - 40px);
-  border: 1px solid var(--n-border-color);
   border-radius: 999px;
   background: var(--n-card-color);
-  box-shadow: 0 8px 20px rgb(15 23 42 / 10%);
-  padding: 8px 14px;
-  color: #111827;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+  padding: 8px 16px;
   font-size: 12px;
-  line-height: 1.4;
   pointer-events: none;
-}
-
-.status-item {
-  white-space: nowrap;
-  color: #111827;
-}
-
-.map-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  padding: 24px;
-  pointer-events: none;
-}
-
-.floating-panel {
-  position: absolute;
-  pointer-events: auto;
-}
-
-.floating-panel--left {
-  top: 124px;
-  left: 24px;
-  width: min(308px, calc(100% - 48px));
-}
-
-.floating-panel--right {
-  top: 78px;
-  right: 24px;
-  width: min(292px, calc(100% - 48px));
-}
-
-.floating-panel--left.floating-panel--collapsed {
-  top: 120px;
-  left: 16px;
-  width: auto;
-}
-
-.floating-panel--right.floating-panel--collapsed {
-  top: 120px;
-  right: 16px;
-  width: auto;
-}
-
-.floating-card {
-  box-shadow: 0 12px 28px rgb(15 23 42 / 10%);
-}
-
-.panel-handle {
-  box-shadow: 0 8px 18px rgb(15 23 42 / 10%);
-}
-
-.control-card,
-.info-card {
-  width: 100%;
-}
-
-.section-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.section-block {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.section-caption {
-  font-size: 12px;
-  font-weight: 600;
-  color: inherit;
-}
-
-.service-switch {
-  width: 100%;
-}
-
-.action-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.panel-heading strong {
-  font-size: 14px;
-}
-
-.param-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.param-label {
-  width: 44px;
-  flex-shrink: 0;
-  font-size: 13px;
-  color: inherit;
-}
-
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.info-label {
-  font-size: 12px;
-  color: inherit;
-}
-
-.info-value {
-  text-align: right;
-  color: var(--n-text-color);
-}
-
-.layer-tag-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
 }
 
 .preview-2d :deep(.leaflet-control-coordinates),
@@ -751,50 +655,17 @@ function handleCopyCapabilitiesUrl() {
 @media (width <= 768px) {
   .preview-2d {
     min-height: calc(100vh - var(--soy-header-height) - var(--soy-tab-height) - var(--calc-footer-height, 0px));
-    height: auto;
   }
 
-  .map-overlay {
-    padding: 16px;
+  .toolbar {
+    top: 16px;
+    left: 16px;
   }
 
   .status-bar {
     bottom: 12px;
-    width: calc(100% - 32px);
-    max-width: none;
-    gap: 10px;
-    justify-content: center;
-    padding: 8px 12px;
-  }
-
-  .floating-panel--left,
-  .floating-panel--right {
-    right: 16px;
-    left: 16px;
-    width: auto;
-    max-width: none;
-  }
-
-  .floating-panel--right {
-    top: auto;
-    bottom: 20px;
-  }
-
-  .floating-panel--left.floating-panel--collapsed,
-  .floating-panel--right.floating-panel--collapsed {
-    top: auto;
-    bottom: 74px;
-    width: auto;
-  }
-
-  .floating-panel--left.floating-panel--collapsed {
-    left: 16px;
-    right: auto;
-  }
-
-  .floating-panel--right.floating-panel--collapsed {
-    right: 16px;
-    left: auto;
+    padding: 6px 12px;
+    font-size: 11px;
   }
 }
 </style>

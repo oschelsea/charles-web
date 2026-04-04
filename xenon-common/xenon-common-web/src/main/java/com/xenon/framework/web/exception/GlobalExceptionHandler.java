@@ -1,9 +1,10 @@
 package com.xenon.framework.web.exception;
 
+import com.xenon.common.core.domain.R;
 import com.xenon.common.exception.DemoModeException;
 import com.xenon.common.exception.ServiceException;
+import com.xenon.common.exception.user.UserException;
 import com.xenon.common.utils.StringUtils;
-import com.xenon.common.core.domain.R;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +65,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public R<Void> handleRuntimeException(RuntimeException e, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
-        log.error("请求地址'{}',发生未知异常.", requestURI, e);
+        if (!(e instanceof UserException)) {
+            log.error("请求地址'{}',发生未知异常.", requestURI, e);
+        }
         return R.fail(e.getMessage());
     }
 

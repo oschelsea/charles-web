@@ -52,6 +52,7 @@ interface Props {
   wmsLayers?: WmsLayerConfig[];
   wmtsLayers?: WmtsLayerConfig[];
   basemap?: 'osm' | 'satellite' | 'terrain' | 'blank';
+  initialBounds?: [[number, number], [number, number]] | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -59,7 +60,8 @@ const props = withDefaults(defineProps<Props>(), {
   zoom: 5,
   wmsLayers: () => [],
   wmtsLayers: () => [],
-  basemap: 'osm'
+  basemap: 'satellite',
+  initialBounds: null
 });
 
 const emit = defineEmits<{
@@ -163,6 +165,9 @@ function createCustomCrs(tileMatrixSet: TileMatrixSetInfo): L.CRS {
     resolutions,
     origin: isGeographic ? [origin[1], origin[0]] : origin
   });
+
+  // 确保 CRS 对象有 code 属性，用于后续比较
+  (crs as any).code = `EPSG:${epsgCode}`;
 
   customCrsCache.set(cacheKey, crs);
   return crs;
@@ -453,6 +458,9 @@ function reinitMapWithCrs(options: {
     attributionControl: true
   });
 
+  // 添加底图
+  updateBasemap(props.basemap);
+
   wmsLayerGroup = L.layerGroup().addTo(map);
   wmtsLayerGroup = L.layerGroup().addTo(map);
 
@@ -475,6 +483,13 @@ function reinitMapWithCrs(options: {
   });
 
   wmtsLayerGroup.addLayer(wmtsLayer);
+
+  // 如果有初始范围，定位到该范围（延迟执行以确保图层已渲染）
+  if (props.initialBounds) {
+    setTimeout(() => {
+      map?.fitBounds(props.initialBounds!);
+    }, 100);
+  }
 
   L.control
     .scale({
@@ -510,8 +525,10 @@ function setView(center: [number, number], zoom: number) {
   map?.setView(center, zoom);
 }
 
-function fitBounds(bounds: [[number, number], [number, number]]) {
-  map?.fitBounds(bounds);
+function fitBounds(bounds: [[number, number], [number, number]]): boolean {
+  if (!map) return false;
+  map.fitBounds(bounds);
+  return true;
 }
 
 function getCenter(): L.LatLng | undefined {
@@ -526,12 +543,17 @@ function getBounds(): L.LatLngBounds | undefined {
   return map?.getBounds();
 }
 
+function isReady(): boolean {
+  return map !== null;
+}
+
 defineExpose({
   setView,
   fitBounds,
   getCenter,
   getZoom,
-  getBounds
+  getBounds,
+  isReady
 });
 </script>
 

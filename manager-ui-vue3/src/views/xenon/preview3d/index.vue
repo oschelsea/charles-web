@@ -3,19 +3,25 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import {
   NButton,
+  NButtonGroup,
   NCard,
-  NCollapse,
-  NCollapseItem,
+  NDescriptions,
+  NDescriptionsItem,
   NEmpty,
   NInputNumber,
+  NPopover,
   NSelect,
   NSpace,
   NSpin,
+  NTooltip,
   useMessage
 } from 'naive-ui';
 import type { SelectOption } from 'naive-ui';
 import type { Layer, LayerSummary } from '@/service/api/xenon/layer';
 import { layerApi } from '@/service/api/xenon/layer';
+import IconLayers from '~icons/ion/layers-outline';
+import IconCamera from '~icons/ion/camera-outline';
+import IconInformation from '~icons/ion/information-circle-outline';
 
 const route = useRoute();
 const message = useMessage();
@@ -23,8 +29,10 @@ const message = useMessage();
 const loading = ref(true);
 const tilesetLoading = ref(false);
 const cesiumContainer = ref<HTMLDivElement | null>(null);
-const controlsCollapsed = ref(Boolean(route.query.layer));
-const infoCollapsed = ref(true);
+
+const showLayerPopover = ref(false);
+const showCameraPopover = ref(false);
+const showInfoPopover = ref(false);
 
 const availableLayers = ref<Layer[]>([]);
 const selectedTileset = ref<string | null>(null);
@@ -344,303 +352,188 @@ onUnmounted(() => {
       <div ref="cesiumContainer" class="cesium-container">
         <NEmpty v-if="!loading && !viewer" description="Cesium 未加载">
           <template #extra>
-            <p class="empty-tip">请安装 Cesium: pnpm add cesium</p>
+            <p class="text-xs text-gray-400">请安装 Cesium: pnpm add cesium</p>
           </template>
         </NEmpty>
       </div>
     </NSpin>
 
-    <div class="map-tint"></div>
-
-    <div class="map-overlay">
-      <div class="floating-panel floating-panel--left">
-        <NButton
-          v-if="controlsCollapsed"
-          class="panel-pill"
-          type="primary"
-          strong
-          secondary
-          round
-          @click="controlsCollapsed = false"
-        >
-          打开控制台
-        </NButton>
-
-        <NCard v-else class="floating-card control-card" :bordered="false" size="small">
-          <template #header>
-            <div class="panel-heading">
-              <strong>地图工作台</strong>
-            </div>
-          </template>
-          <template #header-extra>
-            <NButton text size="small" @click="controlsCollapsed = true">收起</NButton>
-          </template>
-
-          <NCollapse :default-expanded-names="['tileset']" arrow-placement="right">
-            <NCollapseItem title="图层控制" name="tileset">
-              <NSpace vertical>
-                <NSelect
-                  v-model:value="selectedTileset"
-                  :options="tilesetOptions"
-                  placeholder="选择 3D Tiles 图层"
-                  clearable
-                />
-                <NSpace>
-                  <NButton
-                    type="primary"
-                    :disabled="!selectedTileset"
-                    :loading="tilesetLoading"
-                    @click="handleLoadTileset"
-                  >
-                    加载图层
-                  </NButton>
-                  <NButton :disabled="!hasActiveTileset" @click="handleFocusCurrentTileset">重新聚焦</NButton>
+    <div class="toolbar">
+      <NButtonGroup vertical>
+        <NTooltip placement="right" :disabled="showLayerPopover">
+          <template #trigger>
+            <NPopover v-model:show="showLayerPopover" trigger="click" placement="right-start" :width="300">
+              <template #trigger>
+                <NButton :type="showLayerPopover ? 'primary' : 'default'" quaternary>
+                  <template #icon>
+                    <IconLayers />
+                  </template>
+                </NButton>
+              </template>
+              <NCard size="small" :bordered="false">
+                <template #header>图层控制</template>
+                <NSpace vertical>
+                  <NSelect
+                    v-model:value="selectedTileset"
+                    :options="tilesetOptions"
+                    placeholder="选择 3D Tiles 图层"
+                    clearable
+                  />
+                  <NButtonGroup>
+                    <NButton
+                      type="primary"
+                      :disabled="!selectedTileset"
+                      :loading="tilesetLoading"
+                      @click="handleLoadTileset"
+                    >
+                      加载
+                    </NButton>
+                    <NButton :disabled="!hasActiveTileset" @click="handleFocusCurrentTileset">聚焦</NButton>
+                  </NButtonGroup>
                 </NSpace>
-              </NSpace>
-            </NCollapseItem>
+              </NCard>
+            </NPopover>
+          </template>
+          图层控制
+        </NTooltip>
 
-            <NCollapseItem title="相机控制" name="camera">
-              <NSpace vertical size="small">
-                <div class="param-row">
-                  <span class="param-label">经度</span>
-                  <NInputNumber v-model:value="cameraLongitude" :min="-180" :max="180" :step="0.1" size="small" />
-                </div>
-                <div class="param-row">
-                  <span class="param-label">纬度</span>
-                  <NInputNumber v-model:value="cameraLatitude" :min="-90" :max="90" :step="0.1" size="small" />
-                </div>
-                <div class="param-row">
-                  <span class="param-label">高度</span>
-                  <NInputNumber v-model:value="cameraHeight" :min="100" :max="10000000" :step="1000" size="small" />
-                </div>
-                <NSpace>
-                  <NButton size="small" @click="handleFlyTo">飞行至</NButton>
-                  <NButton size="small" @click="handleResetView">重置</NButton>
+        <NTooltip placement="right" :disabled="showCameraPopover">
+          <template #trigger>
+            <NPopover v-model:show="showCameraPopover" trigger="click" placement="right-start" :width="280">
+              <template #trigger>
+                <NButton :type="showCameraPopover ? 'primary' : 'default'" quaternary>
+                  <template #icon>
+                    <IconCamera />
+                  </template>
+                </NButton>
+              </template>
+              <NCard size="small" :bordered="false">
+                <template #header>相机控制</template>
+                <NSpace vertical>
+                  <NSpace align="center">
+                    <span class="w-8 text-xs text-gray-500">经度</span>
+                    <NInputNumber v-model:value="cameraLongitude" :min="-180" :max="180" :step="0.1" size="small" />
+                  </NSpace>
+                  <NSpace align="center">
+                    <span class="w-8 text-xs text-gray-500">纬度</span>
+                    <NInputNumber v-model:value="cameraLatitude" :min="-90" :max="90" :step="0.1" size="small" />
+                  </NSpace>
+                  <NSpace align="center">
+                    <span class="w-8 text-xs text-gray-500">高度</span>
+                    <NInputNumber v-model:value="cameraHeight" :min="100" :max="10000000" :step="1000" size="small" />
+                  </NSpace>
+                  <NButtonGroup>
+                    <NButton size="small" @click="handleFlyTo">飞行至</NButton>
+                    <NButton size="small" @click="handleResetView">重置</NButton>
+                  </NButtonGroup>
                 </NSpace>
-              </NSpace>
-            </NCollapseItem>
-          </NCollapse>
-        </NCard>
-      </div>
+              </NCard>
+            </NPopover>
+          </template>
+          相机控制
+        </NTooltip>
 
-      <div class="floating-panel floating-panel--right">
-        <NButton v-if="infoCollapsed" class="panel-pill panel-pill--muted" round @click="infoCollapsed = false">
+        <NTooltip placement="right" :disabled="showInfoPopover">
+          <template #trigger>
+            <NPopover v-model:show="showInfoPopover" trigger="click" placement="right-start" :width="340">
+              <template #trigger>
+                <NButton :type="showInfoPopover ? 'primary' : 'default'" quaternary>
+                  <template #icon>
+                    <IconInformation />
+                  </template>
+                </NButton>
+              </template>
+              <NCard size="small" :bordered="false">
+                <template #header>图层信息</template>
+                <NDescriptions label-placement="left" :column="1" size="small">
+                  <NDescriptionsItem label="当前图层">
+                    {{ selectedLayerInfo?.title || selectedTileset || '未加载' }}
+                  </NDescriptionsItem>
+                  <NDescriptionsItem label="图层名称">
+                    {{ selectedTileset || '--' }}
+                  </NDescriptionsItem>
+                  <NDescriptionsItem label="工作空间">
+                    {{ selectedLayerInfo?.workspaceName || '--' }}
+                  </NDescriptionsItem>
+                  <NDescriptionsItem label="图层类型">
+                    {{ selectedLayerInfo?.type || '--' }}
+                  </NDescriptionsItem>
+                </NDescriptions>
+                <div class="mt-2">
+                  <div class="mb-1 text-xs text-gray-500">Tileset URL</div>
+                  <code class="break-all text-xs">{{ currentTilesetEndpoint }}</code>
+                </div>
+              </NCard>
+            </NPopover>
+          </template>
           图层信息
-        </NButton>
-
-        <NCard v-else class="floating-card info-card" :bordered="false" size="small">
-          <template #header>
-            <div class="panel-heading">
-              <strong>图层信息</strong>
-            </div>
-          </template>
-          <template #header-extra>
-            <NButton text size="small" @click="infoCollapsed = true">收起</NButton>
-          </template>
-
-          <div class="info-stack">
-            <div class="info-row">
-              <span class="info-label">当前图层</span>
-              <strong class="info-value">{{ selectedLayerInfo?.title || selectedTileset || '未加载' }}</strong>
-            </div>
-            <div class="info-row">
-              <span class="info-label">图层名称</span>
-              <span class="info-value">{{ selectedTileset || '--' }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">工作空间</span>
-              <span class="info-value">{{ selectedLayerInfo?.workspaceName || '--' }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">图层类型</span>
-              <span class="info-value">{{ selectedLayerInfo?.type || '--' }}</span>
-            </div>
-            <div class="info-block">
-              <span class="info-label">Tileset URL</span>
-              <code>{{ currentTilesetEndpoint }}</code>
-            </div>
-            <div class="info-block">
-              <span class="info-label">服务约定</span>
-              <code>/services/{workspace}:{layer}/3dtiles/tileset.json</code>
-              <code>/services/{workspace}:{layer}/3dtiles/*.b3dm</code>
-              <code>/services/{workspace}:{layer}/3dtiles/*.pnts</code>
-            </div>
-          </div>
-        </NCard>
-      </div>
+        </NTooltip>
+      </NButtonGroup>
     </div>
 
     <div class="status-bar">
-      <span class="status-item">经度 {{ statusLongitudeText }}</span>
-      <span class="status-item">纬度 {{ statusLatitudeText }}</span>
-      <span class="status-item">高度 {{ statusHeightText }}</span>
+      <span>经度 {{ statusLongitudeText }}</span>
+      <span>纬度 {{ statusLatitudeText }}</span>
+      <span>高度 {{ statusHeightText }}</span>
     </div>
   </div>
 </template>
 
 <style scoped>
 .preview-3d {
-  --overlay-accent-color: var(--n-primary-color);
-  --overlay-text-color: #1f2937;
-  --overlay-muted-color: #6b7280;
-  --overlay-base-bg: rgb(var(--layout-bg-color));
-  --overlay-border-color: rgb(148 163 184 / 45%);
-  --overlay-panel-bg: rgb(255 255 255 / 92%);
-  --overlay-pill-bg: rgb(255 255 255 / 58%);
-  --overlay-status-bg: rgb(255 255 255 / 20%);
-  --overlay-code-bg: rgb(255 255 255 / 70%);
-  --overlay-code-color: #0f172a;
   position: relative;
   height: calc(100vh - var(--soy-header-height) - var(--soy-tab-height) - var(--calc-footer-height, 0px));
   min-height: 620px;
   overflow: hidden;
   background: var(--layout-bg-color);
-  isolation: isolate;
 }
 
-:global(.dark) .preview-3d {
-  --overlay-text-color: #e5e7eb;
-  --overlay-muted-color: #9ca3af;
-  --overlay-border-color: rgb(148 163 184 / 28%);
-  --overlay-panel-bg: rgb(17 24 39 / 90%);
-  --overlay-pill-bg: rgb(17 24 39 / 86%);
-  --overlay-status-bg: rgb(2 6 23 / 26%);
-  --overlay-code-bg: rgb(2 6 23 / 52%);
-  --overlay-code-color: #cbd5e1;
-}
-
-.viewer-spin,
-.viewer-spin :deep(.n-spin-content) {
+.viewer-spin {
   position: absolute;
   inset: 0;
+}
+
+.viewer-spin :deep(.n-spin-content) {
   height: 100%;
-  width: 100%;
 }
 
 .cesium-container {
   display: flex;
-  min-height: 100%;
   height: 100%;
-  width: 100%;
   align-items: center;
   justify-content: center;
-  background:
-    radial-gradient(circle at top, rgb(47 104 191 / 22%), transparent 34%),
-    linear-gradient(180deg, #081120 0%, #050c16 100%);
+  background: linear-gradient(180deg, #081120 0%, #050c16 100%);
 }
 
 .cesium-container :deep(.cesium-viewer),
-.cesium-container :deep(.cesium-viewer-cesiumWidgetContainer),
-.cesium-container :deep(.cesium-widget),
 .cesium-container :deep(canvas) {
   height: 100%;
   width: 100%;
 }
 
-.map-tint {
+.toolbar {
   position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(
-      circle at top left,
-      color-mix(in srgb, var(--overlay-accent-color) 14%, transparent),
-      transparent 24%
-    ),
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--n-color) 6%, transparent) 0%,
-      transparent 26%,
-      color-mix(in srgb, var(--n-color) 18%, transparent) 100%
-    );
-  pointer-events: none;
-}
-
-.map-overlay {
-  position: absolute;
-  inset: 0;
-  padding: 24px;
-  pointer-events: none;
-}
-
-.floating-panel {
-  position: absolute;
-  pointer-events: auto;
-}
-
-.floating-panel--left {
-  top: 24px;
+  top: 220px;
   left: 24px;
-  width: min(340px, calc(100% - 48px));
+  z-index: 10;
+  padding: 6px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 85%);
+  border: 1px solid rgb(0 0 0 / 10%);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
 }
 
-.floating-panel--right {
-  top: 24px;
-  right: 24px;
-  width: min(320px, calc(100% - 48px));
+:root.dark .toolbar {
+  background: rgb(30 30 30 / 85%);
+  border-color: rgb(255 255 255 / 10%);
 }
 
-:deep(.floating-card) {
-  border: 1px solid var(--overlay-border-color);
-  background-color: var(--overlay-panel-bg);
-  color: var(--overlay-text-color);
-  box-shadow: 0 18px 48px rgb(15 23 42 / 18%);
+.toolbar :deep(.n-button) {
+  color: var(--n-text-color);
 }
 
-:deep(.floating-card.n-card) {
-  background-color: var(--overlay-panel-bg) !important;
-}
-
-:deep(.floating-card .n-card-header) {
-  padding-bottom: 10px;
-  color: var(--overlay-text-color);
-}
-
-:deep(.floating-card .n-card__content) {
-  padding-top: 4px;
-  color: var(--overlay-text-color);
-}
-
-:deep(.floating-card .n-collapse-item__header-main),
-:deep(.floating-card .n-collapse-item-arrow),
-:deep(.floating-card .n-base-selection-label),
-:deep(.floating-card .n-input-number .n-input__input-el) {
-  color: var(--overlay-text-color);
-}
-
-.control-card {
-  width: 100%;
-}
-
-.info-card {
-  width: 100%;
-}
-
-.panel-heading {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.panel-heading strong {
-  color: var(--overlay-text-color);
-  font-size: 14px;
-}
-
-:deep(.panel-pill) {
-  border: 1px solid var(--overlay-border-color);
-  background-color: var(--overlay-pill-bg) !important;
-  color: var(--overlay-text-color);
-  box-shadow: 0 10px 24px rgb(0 0 0 / 24%);
-}
-
-:deep(.panel-pill .n-button__content) {
-  color: var(--overlay-text-color) !important;
-  font-weight: 600;
-}
-
-:deep(.panel-pill--muted) {
-  background-color: var(--overlay-pill-bg) !important;
-  border-color: var(--overlay-border-color);
+.toolbar :deep(.n-button:hover) {
+  background: var(--n-button-color-hover);
 }
 
 .status-bar {
@@ -651,132 +544,27 @@ onUnmounted(() => {
   transform: translateX(-50%);
   display: flex;
   gap: 14px;
-  justify-content: center;
-  width: auto;
-  max-width: calc(100% - 40px);
-  border: none;
   border-radius: 999px;
-  background: var(--overlay-status-bg);
-  padding: 10px 14px;
-  color: var(--overlay-text-color);
+  background: rgb(0 0 0 / 40%);
+  padding: 8px 14px;
+  color: #fff;
   font-size: 11px;
-  line-height: 1.4;
   pointer-events: none;
-}
-
-.status-item {
-  white-space: nowrap;
-}
-
-.param-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.param-label {
-  width: 50px;
-  font-size: 13px;
-  color: var(--overlay-muted-color);
-}
-
-.info-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.info-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.info-label {
-  color: var(--overlay-muted-color);
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.info-value {
-  text-align: right;
-  color: var(--overlay-text-color);
-  word-break: break-word;
-}
-
-.info-block {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.info-block code {
-  display: block;
-  overflow-wrap: anywhere;
-  border: 1px solid var(--overlay-border-color);
-  border-radius: 10px;
-  background: var(--overlay-code-bg);
-  padding: 8px 10px;
-  color: var(--overlay-code-color);
-  font-family: 'Fira Code', monospace;
-  font-size: 11px;
-}
-
-.empty-tip {
-  color: var(--overlay-muted-color);
-  font-size: 12px;
 }
 
 @media (width <= 768px) {
   .preview-3d {
     min-height: calc(100vh - var(--soy-header-height) - var(--soy-tab-height) - var(--calc-footer-height, 0px));
-    height: auto;
   }
 
-  .map-overlay {
-    padding: 16px;
-  }
-
-  .floating-panel--left,
-  .floating-panel--right {
-    right: 16px;
+  .toolbar {
+    top: 16px;
     left: 16px;
-    width: auto;
-    max-width: none;
-  }
-
-  .floating-panel--right {
-    top: auto;
-    bottom: 96px;
-  }
-
-  .control-card,
-  .info-card {
-    width: 100%;
   }
 
   .status-bar {
-    bottom: calc(var(--soy-footer-height, 0px) + 6px);
-    width: calc(100% - 24px);
-    justify-content: flex-start;
-    border-radius: 18px;
-    padding: 10px 12px;
+    padding: 6px 12px;
+    font-size: 10px;
   }
-}
-</style>
-
-<style>
-html.dark .preview-3d,
-body.dark .preview-3d,
-.dark .preview-3d {
-  --overlay-text-color: #e5e7eb;
-  --overlay-muted-color: #9ca3af;
-  --overlay-border-color: rgb(148 163 184 / 28%);
-  --overlay-panel-bg: rgb(17 24 39 / 90%);
-  --overlay-pill-bg: rgb(17 24 39 / 56%);
-  --overlay-status-bg: rgb(2 6 23 / 26%);
-  --overlay-code-bg: rgb(2 6 23 / 52%);
-  --overlay-code-color: #cbd5e1;
 }
 </style>
