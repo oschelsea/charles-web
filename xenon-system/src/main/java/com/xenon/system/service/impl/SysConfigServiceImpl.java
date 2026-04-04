@@ -1,12 +1,13 @@
 package com.xenon.system.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.xenon.common.cache.ICacheService;
 import com.xenon.common.constant.Constants;
 import com.xenon.common.constant.UserConstants;
 import com.xenon.common.core.text.Convert;
 import com.xenon.common.exception.ServiceException;
 import com.xenon.common.utils.StringUtils;
-import com.xenon.common.cache.ICacheService;
+import com.xenon.system.config.CaptchaProperties;
 import com.xenon.system.domain.SysConfig;
 import com.xenon.system.mapper.SysConfigMapper;
 import com.xenon.system.service.ISysConfigService;
@@ -28,6 +29,7 @@ import java.util.List;
 public class SysConfigServiceImpl implements ISysConfigService {
     private final SysConfigMapper configMapper;
     private final ICacheService cacheCache;
+    private final CaptchaProperties captchaProperties;
 
     /**
      * 项目启动时，初始化参数到缓存
@@ -79,13 +81,10 @@ public class SysConfigServiceImpl implements ISysConfigService {
      */
     @Override
     public boolean selectCaptchaOnOff() {
-        String captchaOnOff = selectConfigByKey("sys.account.captchaOnOff");
-        if (StringUtils.isEmpty(captchaOnOff)) {
-            return true;
-        }
-        return Convert.toBool(captchaOnOff);
+        return captchaProperties.isEnable();
     }
 
+    @Override
     public List<SysConfig> selectConfigList(SysConfig config) {
         return selectConfigList(null, config);
     }

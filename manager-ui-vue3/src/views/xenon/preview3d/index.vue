@@ -37,6 +37,7 @@ const showInfoPopover = ref(false);
 const availableLayers = ref<Layer[]>([]);
 const selectedTileset = ref<string | null>(null);
 const hasActiveTileset = ref(false);
+const hasActiveTerrain = ref(false);
 
 const cameraLongitude = ref(117);
 const cameraLatitude = ref(35);
@@ -48,16 +49,20 @@ const statusHeight = ref<number | null>(null);
 
 let viewer: any = null;
 let activeTileset: any = null;
+let activeTerrainProvider: any = null;
+let CesiumModule: any = null;
 let removeCameraChangedListener: (() => void) | null = null;
 
 const tilesetOptions = computed<SelectOption[]>(() =>
   availableLayers.value
-    .filter(layer => layer.type === 'TILES3D')
+    .filter(layer => layer.type === 'TILES3D' || layer.type === 'TERRAIN')
     .map(layer => {
       const qualifiedName = layer.workspaceName ? `${layer.workspaceName}:${layer.name}` : layer.name;
+      const icon = layer.type === 'TERRAIN' ? '🏔️' : '🏗️';
       return {
-        label: `🏗️ ${layer.workspaceName ? `${layer.workspaceName}:` : ''}${layer.title || layer.name}`,
-        value: qualifiedName
+        label: `${icon} ${layer.workspaceName ? `${layer.workspaceName}:` : ''}${layer.title || layer.name}`,
+        value: qualifiedName,
+        type: layer.type
       };
     })
 );
@@ -65,14 +70,22 @@ const tilesetOptions = computed<SelectOption[]>(() =>
 const statusLongitudeText = computed(() => formatCoordinate(statusLongitude.value));
 const statusLatitudeText = computed(() => formatCoordinate(statusLatitude.value));
 const statusHeightText = computed(() => formatHeight(statusHeight.value));
+
 const selectedLayerInfo = computed(() => {
   if (!selectedTileset.value) return null;
 
   return availableLayers.value.find(layer => getQualifiedLayerName(layer) === selectedTileset.value) ?? null;
 });
-const currentTilesetEndpoint = computed(() =>
-  selectedTileset.value ? buildTilesetUrl(selectedTileset.value) : '/services/{workspace}:{layer}/3dtiles/tileset.json'
-);
+
+const currentTilesetEndpoint = computed(() => {
+  if (!selectedTileset.value) return '/services/{workspace}:{layer}/terrain/layer.json';
+
+  const layer = availableLayers.value.find(l => getQualifiedLayerName(l) === selectedTileset.value);
+  if (layer?.type === 'TERRAIN') {
+    return buildTerrainUrl(selectedTileset.value);
+  }
+  return buildTilesetUrl(selectedTileset.value);
+});
 
 function formatCoordinate(value: number | null) {
   return value === null || value === undefined ? '--' : value.toFixed(6);
@@ -93,18 +106,27 @@ function buildTilesetUrl(layerName: string) {
   return `${baseUrl}${contextPath}/services/${layerName}/3dtiles/tileset.json`;
 }
 
+function buildTerrainUrl(layerName: string) {
+  const contextPath = import.meta.env.VITE_CONTEXT_PATH || '/xenon';
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+  // CesiumTerrainProvider.fromUrl will automatically append /layer.json
+  return `${baseUrl}${contextPath}/services/${layerName}/terrain`;
+}
+
 function resolveRouteLayer(layerParam?: string) {
   if (!layerParam) return null;
 
   const exactMatch = availableLayers.value.find(
-    layer => layer.type === 'TILES3D' && getQualifiedLayerName(layer) === layerParam
+    layer => (layer.type === 'TILES3D' || layer.type === 'TERRAIN') && getQualifiedLayerName(layer) === layerParam
   );
   if (exactMatch) {
     return getQualifiedLayerName(exactMatch);
   }
 
   const layerName = layerParam.includes(':') ? layerParam.split(':').pop() : layerParam;
-  const fallbackMatch = availableLayers.value.find(layer => layer.type === 'TILES3D' && layer.name === layerName);
+  const fallbackMatch = availableLayers.value.find(
+    layer => (layer.type === 'TILES3D' || layer.type === 'TERRAIN') && layer.name === layerName
+  );
 
   return fallbackMatch ? getQualifiedLayerName(fallbackMatch) : null;
 }
@@ -119,6 +141,17 @@ function clearActiveTileset() {
 
   activeTileset = null;
   hasActiveTileset.value = false;
+}
+
+async function clearActiveTerrain() {
+  if (!viewer) return;
+
+  // Reset to default ellipsoid terrain
+  if (CesiumModule) {
+    viewer.terrainProvider = new CesiumModule.EllipsoidTerrainProvider();
+  }
+  activeTerrainProvider = null;
+  hasActiveTerrain.value = false;
 }
 
 function updateViewStatus(Cesium: any) {
@@ -205,6 +238,7 @@ async function loadLayers() {
 
 async function initViewer() {
   const Cesium = await import('cesium');
+  CesiumModule = Cesium;
 
   if (!cesiumContainer.value) return;
 
@@ -226,6 +260,11 @@ async function initViewer() {
     shouldAnimate: true
   });
 
+  // Ensure camera controls are enabled
+  viewer.scene.screenSpaceCameraController.enableRotate = true;
+  viewer.scene.screenSpaceCameraController.enableTilt = true;
+  viewer.scene.screenSpaceCameraController.enableLook = true;
+
   viewer.camera.setView({
     destination: Cesium.Cartesian3.fromDegrees(cameraLongitude.value, cameraLatitude.value, cameraHeight.value)
   });
@@ -240,27 +279,83 @@ async function initViewer() {
 }
 
 async function loadTileset(layerName = selectedTileset.value) {
-  if (!layerName || !viewer) return;
+  if (!layerName || !viewer || !CesiumModule) return;
 
   tilesetLoading.value = true;
 
   try {
-    const Cesium = await import('cesium');
-    const url = buildTilesetUrl(layerName);
+    const Cesium = CesiumModule;
+
+    // Find layer type
+    const layer = availableLayers.value.find(l => getQualifiedLayerName(l) === layerName);
 
     clearActiveTileset();
+    await clearActiveTerrain();
 
-    const tileset = await Cesium.Cesium3DTileset.fromUrl(url);
-    activeTileset = viewer.scene.primitives.add(tileset);
-    activeTileset.xenonLayerName = layerName;
-    hasActiveTileset.value = true;
-    selectedTileset.value = layerName;
+    if (layer?.type === 'TERRAIN') {
+      // Load terrain
+      const terrainUrl = buildTerrainUrl(layerName);
+      console.log('[Terrain] Loading from:', terrainUrl);
 
-    focusTileset(Cesium, tileset);
-    updateViewStatus(Cesium);
+      try {
+        const terrainProvider = await Cesium.CesiumTerrainProvider.fromUrl(terrainUrl, {
+          requestVertexNormals: true
+        });
+        viewer.terrainProvider = terrainProvider;
+        activeTerrainProvider = terrainProvider;
+        hasActiveTerrain.value = true;
+        selectedTileset.value = layerName;
+        console.log('[Terrain] Loaded successfully');
+      } catch (terrainError: any) {
+        console.error('[Terrain] Failed to load:', terrainError);
+        // Check if it's a format error
+        const errorMsg = terrainError?.message || '';
+        if (errorMsg.includes('Invalid typed array length') || errorMsg.includes('Failed to obtain terrain tile')) {
+          message.error('地形数据格式错误。请检查地形瓦片是否符合 Quantized Mesh 标准。');
+        } else {
+          message.error(`地形加载失败: ${errorMsg}`);
+        }
+        throw terrainError;
+      }
+
+      // Ensure camera controls are enabled after terrain load
+      viewer.scene.screenSpaceCameraController.enableRotate = true;
+      viewer.scene.screenSpaceCameraController.enableTilt = true;
+      viewer.scene.screenSpaceCameraController.enableLook = true;
+
+      // Try to fly to terrain bounds from metadata
+      try {
+        const response = await fetch(terrainUrl + '/layer.json');
+        const metadata = await response.json();
+        if (metadata.bounds) {
+          const [west, south, east, north] = metadata.bounds;
+          viewer.camera.flyTo({
+            destination: Cesium.Rectangle.fromDegrees(west, south, east, north),
+            duration: 1.5
+          });
+        }
+      } catch {
+        // Ignore metadata errors
+      }
+
+      updateViewStatus(Cesium);
+    } else {
+      // Load 3D Tileset (existing code)
+      const url = buildTilesetUrl(layerName);
+
+      const tileset = await Cesium.Cesium3DTileset.fromUrl(url);
+      activeTileset = viewer.scene.primitives.add(tileset);
+      activeTileset.xenonLayerName = layerName;
+      hasActiveTileset.value = true;
+      selectedTileset.value = layerName;
+
+      focusTileset(Cesium, tileset);
+      updateViewStatus(Cesium);
+    }
   } catch (error: any) {
     clearActiveTileset();
-    message.error(`加载 Tileset 失败: ${error?.message || error}`);
+    await clearActiveTerrain();
+    message.error(`加载失败: ${error?.message || error}`);
   } finally {
     tilesetLoading.value = false;
   }
@@ -271,25 +366,43 @@ async function handleLoadTileset() {
 }
 
 async function handleFocusCurrentTileset() {
-  if (!viewer || !activeTileset) return;
+  if (!viewer || !CesiumModule) return;
 
-  const Cesium = await import('cesium');
+  if (activeTileset) {
+    focusTileset(CesiumModule, activeTileset);
+  } else if (hasActiveTerrain.value) {
+    // For terrain, fly to the terrain bounds if we have a local layer selected
+    const layer = availableLayers.value.find(l => getQualifiedLayerName(l) === selectedTileset.value);
+    if (layer?.type === 'TERRAIN') {
+      const terrainUrl = buildTerrainUrl(selectedTileset.value!);
+      try {
+        const response = await fetch(terrainUrl + '/layer.json');
+        const metadata = await response.json();
+        if (metadata.bounds) {
+          const [west, south, east, north] = metadata.bounds;
+          viewer.camera.flyTo({
+            destination: CesiumModule.Rectangle.fromDegrees(west, south, east, north),
+            duration: 1.5
+          });
+        }
+      } catch {
+        // Ignore
+      }
+    }
+  }
 
-  focusTileset(Cesium, activeTileset);
-  updateViewStatus(Cesium);
+  updateViewStatus(CesiumModule);
 }
 
 async function handleFlyTo() {
-  if (!viewer) return;
-
-  const Cesium = await import('cesium');
+  if (!viewer || !CesiumModule) return;
 
   viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(cameraLongitude.value, cameraLatitude.value, cameraHeight.value),
+    destination: CesiumModule.Cartesian3.fromDegrees(cameraLongitude.value, cameraLatitude.value, cameraHeight.value),
     duration: 2
   });
 
-  updateViewStatus(Cesium);
+  updateViewStatus(CesiumModule);
 }
 
 function handleResetView() {
@@ -338,6 +451,7 @@ onUnmounted(() => {
   removeCameraChangedListener?.();
   removeCameraChangedListener = null;
   clearActiveTileset();
+  clearActiveTerrain();
 
   if (viewer) {
     viewer.destroy();
@@ -376,7 +490,7 @@ onUnmounted(() => {
                   <NSelect
                     v-model:value="selectedTileset"
                     :options="tilesetOptions"
-                    placeholder="选择 3D Tiles 图层"
+                    placeholder="选择 3D Tiles 或地形图层"
                     clearable
                   />
                   <NButtonGroup>
@@ -388,7 +502,9 @@ onUnmounted(() => {
                     >
                       加载
                     </NButton>
-                    <NButton :disabled="!hasActiveTileset" @click="handleFocusCurrentTileset">聚焦</NButton>
+                    <NButton :disabled="!hasActiveTileset && !hasActiveTerrain" @click="handleFocusCurrentTileset">
+                      聚焦
+                    </NButton>
                   </NButtonGroup>
                 </NSpace>
               </NCard>
@@ -456,11 +572,13 @@ onUnmounted(() => {
                     {{ selectedLayerInfo?.workspaceName || '--' }}
                   </NDescriptionsItem>
                   <NDescriptionsItem label="图层类型">
-                    {{ selectedLayerInfo?.type || '--' }}
+                    {{ selectedLayerInfo?.type === 'TERRAIN' ? '地形' : selectedLayerInfo?.type || '--' }}
                   </NDescriptionsItem>
                 </NDescriptions>
                 <div class="mt-2">
-                  <div class="mb-1 text-xs text-gray-500">Tileset URL</div>
+                  <div class="mb-1 text-xs text-gray-500">
+                    {{ selectedLayerInfo?.type === 'TERRAIN' ? 'Terrain URL' : 'Tileset URL' }}
+                  </div>
                   <code class="break-all text-xs">{{ currentTilesetEndpoint }}</code>
                 </div>
               </NCard>

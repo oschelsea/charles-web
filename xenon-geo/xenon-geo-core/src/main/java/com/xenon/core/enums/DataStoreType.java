@@ -14,6 +14,7 @@ public enum DataStoreType {
     WMS("WMS", "Web Map Service (Cascading)", false),
     WFS("WFS", "Web Feature Service (Cascading)", true),
     TILES3D_CACHE("3DTiles", "3D Tiles Cache Data", false),
+    TERRAIN_CACHE("Terrain", "Cesium Quantized Mesh Terrain Cache", false),
     ARCGIS_CACHE("ArcGISCache", "ArcGIS Server Cache", false);
 
     private final String name;

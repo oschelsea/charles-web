@@ -3,6 +3,7 @@ import { computed, h, nextTick, onMounted, ref } from 'vue';
 import {
   NButton,
   NCard,
+  NCheckbox,
   NDataTable,
   NEmpty,
   NForm,
@@ -94,9 +95,24 @@ function openFileSelector(field: FieldConfig) {
   showFileSelector.value = true;
 }
 
-function onFileSelected(file: { path: string }) {
+async function onFileSelected(file: { path: string }) {
   if (currentFileField.value) {
-    (editingStore.value.connectionParams as Record<string, unknown>)[currentFileField.value.key] = file.path;
+    const key = currentFileField.value.key;
+    (editingStore.value.connectionParams as Record<string, unknown>)[key] = file.path;
+
+    // Auto-fetch terrain meta info when layer.json is selected for TERRAIN_CACHE
+    if (key === 'layerJsonPath' && editingStore.value.type === 'TERRAIN_CACHE') {
+      try {
+        const metaInfo = await dataStoreApi.getTerrainMeta(file.path);
+        if (metaInfo) {
+          const { zipped } = metaInfo as any;
+          // Auto-fill zipped field
+          (editingStore.value.connectionParams as Record<string, unknown>).zipped = zipped ?? false;
+        }
+      } catch {
+        // Ignore errors - meta.json might not exist
+      }
+    }
   }
   showFileSelector.value = false;
 }
@@ -428,6 +444,15 @@ async function handleSubmit() {
               :placeholder="field.placeholder"
               class="w-full"
             />
+            <NCheckbox
+              v-else-if="field.type === 'checkbox'"
+              :checked="
+                (editingStore.connectionParams as Record<string, any>)[field.key] ?? field.defaultValue ?? false
+              "
+              @update:checked="(editingStore.connectionParams as Record<string, any>)[field.key] = $event"
+            >
+              {{ field.placeholder || '启用' }}
+            </NCheckbox>
             <NInputGroup v-else-if="field.type === 'file'">
               <NInput
                 v-model:value="(editingStore.connectionParams as Record<string, any>)[field.key]"

@@ -6,7 +6,7 @@ import com.xenon.common.constant.Constants;
 import com.xenon.common.enums.CaptchaType;
 import com.xenon.common.utils.StringUtils;
 import com.xenon.common.cache.ICacheService;
-import com.xenon.admin.config.properties.CaptchaProperties;
+import com.xenon.system.config.CaptchaProperties;
 import com.xenon.common.core.domain.R;
 import com.xenon.system.service.ISysConfigService;
 import jakarta.servlet.http.HttpServletResponse;

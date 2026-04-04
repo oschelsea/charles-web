@@ -22,7 +22,7 @@ export interface Layer {
   updatedAt?: string;
 }
 
-export type LayerType = 'VECTOR' | 'RASTER' | 'GROUP' | 'WMS' | 'TILES3D' | 'ARCGIS_CACHE' | 'GEOPACKAGE_TILES';
+export type LayerType = 'VECTOR' | 'RASTER' | 'GROUP' | 'WMS' | 'TILES3D' | 'TERRAIN' | 'ARCGIS_CACHE' | 'GEOPACKAGE_TILES';
 
 export interface LayerSummary {
   name: string;
@@ -108,6 +108,7 @@ export const layerTypes: Record<LayerType, { label: string; icon: string; color:
   GROUP: { label: '图层组', icon: '📁', color: '#f093fb' },
   WMS: { label: 'WMS级联', icon: '🌐', color: '#f5576c' },
   TILES3D: { label: '3DTiles', icon: '🏗️', color: '#00d4aa' },
+  TERRAIN: { label: '地形', icon: '🏔️', color: '#8b4513' },
   ARCGIS_CACHE: { label: 'ArcGIS Cache', icon: '🗺️', color: '#ff9f43' },
   GEOPACKAGE_TILES: { label: 'GeoPackage瓦片', icon: '📦', color: '#00b894' }
 };
@@ -116,7 +117,7 @@ export const layerTypes: Record<LayerType, { label: string; icon: string; color:
 export interface PublishableResource {
   name: string; // Resource name (table name / file name)
   nativeName: string; // Native name in the data source
-  type: 'vector' | 'raster' | 'tiles3d' | 'arcgiscache';
+  type: 'vector' | 'raster' | 'tiles3d' | 'terrain' | 'arcgiscache';
   title?: string;
 }
 

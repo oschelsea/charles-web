@@ -10,6 +10,7 @@ public enum LayerType {
     GROUP("Group", "Layer group"),
     WMS("WMS", "Cascading WMS layer"),
     TILES3D("3DTiles", "3D Tiles layer"),
+    TERRAIN("Terrain", "Cesium Terrain layer"),
     ARCGIS_CACHE("ArcGISCache", "ArcGIS Server Cache Layer"),
     GEOPACKAGE_TILES("GeoPackageTiles", "GeoPackage Tile Layer");
 

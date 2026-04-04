@@ -7,7 +7,7 @@ import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.captcha.generator.CodeGenerator;
 import cn.hutool.core.util.ReflectUtil;
 import com.xenon.common.enums.CaptchaType;
-import com.xenon.admin.config.properties.CaptchaProperties;
+import com.xenon.system.config.CaptchaProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

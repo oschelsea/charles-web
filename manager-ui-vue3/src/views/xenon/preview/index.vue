@@ -99,15 +99,39 @@ const wmtsLayers = computed<WmtsLayerConfig[]>(() => {
 
 const layerOptions = computed<SelectOption[]>(() =>
   availableLayers.value
-    .filter(layer => layer.enabled && layer.type !== 'TILES3D')
+    .filter(layer => layer.enabled && layer.type !== 'TILES3D' && layer.type !== 'TERRAIN')
     .map(layer => {
       const qualifiedName = layer.workspaceName ? `${layer.workspaceName}:${layer.name}` : layer.name;
+      const typeIcon = layer.type === 'ARCGIS_CACHE' || layer.type === 'GEOPACKAGE_TILES' ? '🗺️' : layer.type === 'VECTOR' ? '📐' : '🖼️';
       return {
-        label: `${layer.type === 'VECTOR' ? '📐' : '🖼️'} ${layer.workspaceName ? `${layer.workspaceName}:` : ''}${layer.title || layer.name}`,
+        label: `${typeIcon} ${layer.workspaceName ? `${layer.workspaceName}:` : ''}${layer.title || layer.name}`,
         value: qualifiedName
       };
     })
 );
+
+// 根据图层类型自动推断服务类型
+function inferServiceTypeFromLayer(layerName: string): 'WMS' | 'WMTS' | null {
+  const layer = availableLayers.value.find(l => {
+    const qualifiedName = l.workspaceName ? `${l.workspaceName}:${l.name}` : l.name;
+    return qualifiedName === layerName;
+  });
+
+  if (!layer) return null;
+
+  // 瓦片类图层默认使用 WMTS
+  if (layer.type === 'ARCGIS_CACHE' || layer.type === 'GEOPACKAGE_TILES') {
+    return 'WMTS';
+  }
+
+  // WMS 级联图层使用 WMS
+  if (layer.type === 'WMS') {
+    return 'WMS';
+  }
+
+  // 其他类型默认使用 WMS
+  return 'WMS';
+}
 
 const layerSummaryText = computed(() => {
   if (selectedLayers.value.length === 0) return '未选择';
@@ -218,6 +242,17 @@ watch(
   },
   { immediate: true }
 );
+
+// 监听图层选择变化，自动切换服务类型
+watch(selectedLayers, (layers, prevLayers) => {
+  // 只在选择新图层时自动切换，避免影响 URL 参数和手动切换
+  if (layers.length === 1 && layers[0] !== prevLayers?.[0]) {
+    const inferredType = inferServiceTypeFromLayer(layers[0]);
+    if (inferredType && inferredType !== serviceType.value) {
+      serviceType.value = inferredType;
+    }
+  }
+});
 
 watch(
   [selectedLayers, serviceType],

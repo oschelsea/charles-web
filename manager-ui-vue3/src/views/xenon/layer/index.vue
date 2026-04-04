@@ -159,9 +159,20 @@ watch(selectedDataStore, async newVal => {
 
   if (newVal && selectedWorkspace.value) {
     const ds = datastores.value.find(d => d.name === newVal);
-    if (ds?.type === 'TILES3D_CACHE' || ds?.type === 'ARCGIS_CACHE') {
-      const type = ds.type === 'TILES3D_CACHE' ? 'TILES3D' : 'ARCGIS_CACHE';
-      const resourceType = ds.type === 'TILES3D_CACHE' ? 'tiles3d' : 'arcgiscache';
+    if (ds?.type === 'TILES3D_CACHE' || ds?.type === 'TERRAIN_CACHE' || ds?.type === 'ARCGIS_CACHE') {
+      let type: LayerType;
+      let resourceType: string;
+
+      if (ds.type === 'TILES3D_CACHE') {
+        type = 'TILES3D';
+        resourceType = 'tiles3d';
+      } else if (ds.type === 'TERRAIN_CACHE') {
+        type = 'TERRAIN';
+        resourceType = 'terrain';
+      } else {
+        type = 'ARCGIS_CACHE';
+        resourceType = 'arcgiscache';
+      }
 
       editingLayer.value.name = ds.name;
       editingLayer.value.title = ds.name;
@@ -202,6 +213,8 @@ watch(selectedResource, newVal => {
         editingLayer.value.type = 'GEOPACKAGE_TILES';
       } else if ((resource.type as string) === 'tiles3d') {
         editingLayer.value.type = 'TILES3D';
+      } else if ((resource.type as string) === 'terrain') {
+        editingLayer.value.type = 'TERRAIN';
       } else if ((resource.type as string) === 'arcgiscache') {
         editingLayer.value.type = 'ARCGIS_CACHE';
       } else {
@@ -226,7 +239,7 @@ function isWmtsPreviewType(type: LayerType) {
 function handlePreview(layer: Layer) {
   const qualifiedName = getQualifiedLayerName(layer);
 
-  if (layer.type === 'TILES3D') {
+  if (layer.type === 'TILES3D' || layer.type === 'TERRAIN') {
     routerPushByKey('xenon_preview3d', {
       query: {
         layer: qualifiedName

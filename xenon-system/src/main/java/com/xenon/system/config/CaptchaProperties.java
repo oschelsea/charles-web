@@ -1,4 +1,4 @@
-package com.xenon.admin.config.properties;
+package com.xenon.system.config;
 
 import com.xenon.common.enums.CaptchaCategory;
 import com.xenon.common.enums.CaptchaType;

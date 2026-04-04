@@ -23,6 +23,7 @@ export type DataStoreType =
   | 'WMS'
   | 'WFS'
   | 'TILES3D_CACHE'
+  | 'TERRAIN_CACHE'
   | 'ARCGIS_CACHE';
 
 export interface DataStoreSummary {
@@ -99,6 +100,29 @@ export const dataStoreApi = {
       url: `/api/v1/workspaces/${workspaceName}/datastores/${datastoreName}`,
       method: 'delete'
     });
+  },
+
+  /**
+   * Get terrain metadata from meta.json
+   * Used to auto-fill zipped parameter when creating TERRAIN_CACHE datastore
+   */
+  async getTerrainMeta(layerJsonPath: string) {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    const contextPath = import.meta.env.VITE_CONTEXT_PATH || '/xenon';
+    const url = `${baseUrl}${contextPath}/services/terrain/meta?layerJsonPath=${encodeURIComponent(layerJsonPath)}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch terrain meta: ${response.status}`);
+    }
+
+    return response.json();
   }
 };
 
@@ -113,6 +137,7 @@ export const dataStoreTypes: Record<DataStoreType, { label: string; icon: string
   WMS: { label: 'WMS (Cascading)', icon: '🌐', isVector: false },
   WFS: { label: 'WFS (Cascading)', icon: '🔗', isVector: true },
   TILES3D_CACHE: { label: '3DTiles', icon: '🏗️', isVector: false },
+  TERRAIN_CACHE: { label: 'Terrain Cache', icon: '🏔️', isVector: false },
   ARCGIS_CACHE: { label: 'ArcGIS Cache', icon: '🗺️', isVector: false }
 };
 
@@ -129,10 +154,10 @@ export interface FileFilter {
 export interface FieldConfig {
   key: string;
   label: string;
-  type: 'text' | 'password' | 'number' | 'file';
+  type: 'text' | 'password' | 'number' | 'file' | 'checkbox';
   required?: boolean;
   placeholder?: string;
-  defaultValue?: string | number;
+  defaultValue?: string | number | boolean;
   /** 文件过滤器配置（仅 type='file' 时有效） */
   fileFilter?: FileFilter;
   /** 选择类型：file(文件) | folder(文件夹) | mixed(混合) */
@@ -234,6 +259,24 @@ export const dataStoreFieldConfigs: Record<DataStoreType, FieldConfig[]> = {
       placeholder: '选择 tileset.json 文件',
       selectType: 'file',
       fileFilter: { label: '3D Tiles (tileset.json)', value: 'tileset.json', matchType: 'exact' }
+    }
+  ],
+  TERRAIN_CACHE: [
+    {
+      key: 'layerJsonPath',
+      label: 'layer.json路径',
+      type: 'file',
+      required: true,
+      placeholder: '选择 layer.json 文件',
+      selectType: 'file',
+      fileFilter: { label: 'Terrain (layer.json)', value: 'layer.json', matchType: 'exact' }
+    },
+    {
+      key: 'zipped',
+      label: 'Gzip压缩',
+      type: 'checkbox',
+      defaultValue: false,
+      placeholder: '地形瓦片是否使用gzip压缩'
     }
   ],
   ARCGIS_CACHE: [

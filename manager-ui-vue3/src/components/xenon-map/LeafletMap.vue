@@ -343,6 +343,9 @@ function updateBasemap(basemapId: string) {
       maxZoom: 19,
       ...config.options
     }).addTo(map);
+
+    // 确保底图始终在最底层
+    basemapLayer.bringToBack();
   }
 }
 
