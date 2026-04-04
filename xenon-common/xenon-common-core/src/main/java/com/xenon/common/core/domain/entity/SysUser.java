@@ -8,6 +8,7 @@ import com.xenon.common.annotation.Excel.ColumnType;
 import com.xenon.common.annotation.Excel.Type;
 import com.xenon.common.annotation.Excels;
 import com.xenon.common.core.domain.BaseEntity;
+import com.xenon.common.validation.Mobile;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -66,7 +67,7 @@ public class SysUser extends BaseEntity {
      * 手机号码
      */
     @Excel(name = "手机号码")
-    @Size(min = 0, max = 11, message = "手机号码长度不能超过11个字符")
+    @Mobile
     private String phonenumber;
 
     /**

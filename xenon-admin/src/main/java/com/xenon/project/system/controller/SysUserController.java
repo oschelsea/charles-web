@@ -162,7 +162,7 @@ public class SysUserController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:user:resetPwd')")
     @Log(title = "用户管理", businessType = BusinessType.UPDATE)
     @PutMapping("/resetPwd")
-    public R<Void> resetPwd(@RequestBody SysUser user) {
+    public R<Void> resetPwd(@Validated @RequestBody SysUser user) {
         userService.checkUserAllowed(user);
         user.setPassword(SecurityUtils.encryptPassword(user.getPassword()));
         user.setUpdateBy(getUsername());
@@ -175,7 +175,7 @@ public class SysUserController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:user:edit')")
     @Log(title = "用户管理", businessType = BusinessType.UPDATE)
     @PutMapping("/changeStatus")
-    public R<Void> changeStatus(@RequestBody SysUser user) {
+    public R<Void> changeStatus(@Validated @RequestBody SysUser user) {
         userService.checkUserAllowed(user);
         user.setUpdateBy(getUsername());
         return toResult(userService.updateUserStatus(user));

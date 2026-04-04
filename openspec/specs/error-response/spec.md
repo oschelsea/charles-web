@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: HTTP Error Status Codes
 
@@ -67,6 +67,10 @@ The system SHALL provide a unified global exception handler that handles all exc
 #### Scenario: Unknown exceptions return 500
 - **WHEN** an unhandled exception is thrown
 - **THEN** the handler returns 500 status code and logs the exception
+
+#### Scenario: Constraint violation exception is handled
+- **WHEN** `ConstraintViolationException` is thrown (method-level validation failure)
+- **THEN** the handler returns 400 status code with field-level error details in the response body
 
 ---
 

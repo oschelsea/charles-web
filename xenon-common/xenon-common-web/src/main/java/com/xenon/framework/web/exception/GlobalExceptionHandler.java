@@ -4,6 +4,8 @@ import com.xenon.common.core.domain.ErrorResponse;
 import com.xenon.common.exception.*;
 import com.xenon.common.utils.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -130,6 +132,32 @@ public class GlobalExceptionHandler {
         log.warn("参数类型不匹配: {} - {}", request.getRequestURI(), e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponse.badRequest(String.format("参数 '%s' 类型不正确", e.getName())));
+    }
+
+    /**
+     * 约束违反异常 - 400（方法级校验，如路径变量、查询参数）
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(
+            ConstraintViolationException e, HttpServletRequest request) {
+        log.warn("参数约束违反: {} - {}", request.getRequestURI(), e.getMessage());
+
+        Map<String, String> details = new HashMap<>();
+        for (ConstraintViolation<?> violation : e.getConstraintViolations()) {
+            String propertyPath = violation.getPropertyPath().toString();
+            // 提取最后一个属性名（去掉方法名前缀，如 "getUser.id" -> "id"）
+            String fieldName = propertyPath.contains(".")
+                    ? propertyPath.substring(propertyPath.lastIndexOf('.') + 1)
+                    : propertyPath;
+            details.put(fieldName, violation.getMessage());
+        }
+
+        String message = e.getConstraintViolations().isEmpty()
+                ? "参数校验失败"
+                : e.getConstraintViolations().iterator().next().getMessage();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.badRequest(message, details));
     }
 
     // ==================== 业务异常 ====================

@@ -15,6 +15,7 @@ import com.xenon.framework.web.controller.BaseController;
 import com.xenon.system.service.ISysUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -65,7 +66,7 @@ public class SysProfileController extends BaseController {
      */
     @Log(title = "个人信息", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> updateProfile(@RequestBody SysUser user) {
+    public R<Void> updateProfile(@Validated @RequestBody SysUser user) {
         LoginUser loginUser = getLoginUser();
         SysUser sysUser = loginUser.getUser();
         user.setUserId(sysUser.getUserId());

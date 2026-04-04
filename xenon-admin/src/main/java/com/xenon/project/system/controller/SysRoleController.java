@@ -122,7 +122,7 @@ public class SysRoleController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PutMapping("/dataScope")
-    public R<Void> dataScope(@RequestBody SysRole role) {
+    public R<Void> dataScope(@Validated @RequestBody SysRole role) {
         roleService.checkRoleAllowed(role);
         return toResult(roleService.authDataScope(role));
     }
@@ -133,7 +133,7 @@ public class SysRoleController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PutMapping("/changeStatus")
-    public R<Void> changeStatus(@RequestBody SysRole role) {
+    public R<Void> changeStatus(@Validated @RequestBody SysRole role) {
         roleService.checkRoleAllowed(role);
         role.setUpdateBy(getUsername());
         return toResult(roleService.updateRoleStatus(role));
