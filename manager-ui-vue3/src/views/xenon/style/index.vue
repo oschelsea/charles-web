@@ -298,7 +298,7 @@ function getDefaultStyleContent(format: StyleFormat): string {
             <NInput v-model:value="searchText" placeholder="搜索样式..." clearable class="w-200px" />
             <NButton type="primary" @click="handleCreate">
               <template #icon>
-                <div class="i-mdi-plus"></div>
+                <icon-mdi-plus />
               </template>
               创建样式
             </NButton>

@@ -284,13 +284,13 @@ const layerColumns: DataTableColumns<Layer> = [
             <NInput v-model:value="searchText" placeholder="搜索工作空间..." clearable class="w-200px" />
             <NButton type="primary" @click="handleCreate">
               <template #icon>
-                <div class="i-mdi-plus"></div>
+                <icon-mdi-plus />
               </template>
               创建工作空间
             </NButton>
             <NButton @click="loadWorkspaces">
               <template #icon>
-                <div class="i-mdi-refresh"></div>
+                <icon-mdi-refresh />
               </template>
               刷新
             </NButton>

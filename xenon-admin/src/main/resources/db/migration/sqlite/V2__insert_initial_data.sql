@@ -100,7 +100,7 @@ INSERT INTO "sys_menu" VALUES (112, '服务监控', 2, 4, 'server', 'monitor/ser
 -- INSERT INTO "sys_menu" VALUES (113, '缓存监控', 2, 5, 'cache', 'monitor/cache/index', 1, NULL, 'C', '1', '1', 'monitor:cache:list', 'redis', 'admin', '2021-08-26 09:00:00', 'admin', '2021-09-07 08:38:12', '缓存监控菜单');
 INSERT INTO "sys_menu" VALUES (114, '表单构建', 3, 1, 'build', 'tool/build/index', 1, NULL, 'C', '0', '0', 'tool:build:list', 'build', 'admin', '2021-08-26 09:00:00', NULL, NULL, '表单构建菜单');
 INSERT INTO "sys_menu" VALUES (115, '代码生成', 3, 2, 'gen', 'tool/gen/index', 1, NULL, 'C', '0', '0', 'tool:gen:list', 'code', 'admin', '2021-08-26 09:00:00', NULL, NULL, '代码生成菜单');
-INSERT INTO "sys_menu" VALUES (116, '系统接口', 3, 3, 'swagger', 'tool/swagger/index', 1, NULL, 'C', '0', '0', 'tool:swagger:list', 'swagger', 'admin', '2021-08-26 09:00:00', NULL, NULL, '系统接口菜单');
+-- INSERT INTO "sys_menu" VALUES (116, '系统接口', 3, 3, 'swagger', 'tool/swagger/index', 1, NULL, 'C', '0', '0', 'tool:swagger:list', 'swagger', 'admin', '2021-08-26 09:00:00', NULL, NULL, '系统接口菜单');
 INSERT INTO "sys_menu" VALUES (500, '操作日志', 108, 1, 'operlog', 'monitor/operlog/index', 1, NULL, 'C', '0', '0', 'monitor:operlog:list', 'form', 'admin', '2021-08-26 09:00:00', NULL, NULL, '操作日志菜单');
 INSERT INTO "sys_menu" VALUES (501, '登录日志', 108, 2, 'logininfor', 'monitor/logininfor/index', 1, NULL, 'C', '0', '0', 'monitor:logininfor:list', 'logininfor', 'admin', '2021-08-26 09:00:00', NULL, NULL, '登录日志菜单');
 INSERT INTO "sys_menu" VALUES (1001, '用户查询', 100, 1, NULL, NULL, 1, NULL, 'F', '0', '0', 'system:user:query', '#', 'admin', '2021-08-26 09:00:00', NULL, NULL, NULL);
@@ -423,7 +423,7 @@ UPDATE `sys_menu` SET `component` = 'FrameView',  `is_frame` = 2, `icon` = 'grid
 UPDATE `sys_menu` SET `status` = '1' WHERE `menu_id` IN ( '116', '130', '131', '132' );
 -- 工作流需要禁用的页面
 UPDATE `sys_menu` SET `status` = '1' WHERE `menu_id` IN ( '11616', '11618', '11638', '11700', '11701' );
--- 删除不支持的菜单
-delete from sys_menu where menu_id in (110,111,112,114);
+-- 删除不支持的菜单, 删除一些外链
+delete from sys_menu where menu_id in (4,7,8,9,110,111,112,113,114,116);
 -- 禁用外链菜单
 -- UPDATE `sys_menu` SET `status` = '1' WHERE `menu_id` IN ( '4', '7', '8' );

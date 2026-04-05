@@ -535,7 +535,7 @@ async function loadDetailData() {
             <NInput v-model:value="searchText" placeholder="搜索图层..." clearable class="w-200px" />
             <NButton type="primary" @click="handleCreate">
               <template #icon>
-                <div class="i-mdi-plus"></div>
+                <icon-mdi-plus />
               </template>
               发布新图层
             </NButton>
